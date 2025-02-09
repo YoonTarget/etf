@@ -2,10 +2,7 @@ package com.newproject.etf.controller;
 
 import com.newproject.etf.service.EtfService;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/openDataApi")
@@ -18,21 +15,9 @@ public class EtfController {
         this.etfService = etfService;
     }
 
-    @GetMapping("/getETFPriceInfo")
-    public String getETFPriceInfo(Model model, @RequestParam String endPoint) {
-        model.addAttribute("resultList", etfService.list(endPoint));
-        return "etfPriceInfo";
-    }
-
-    @GetMapping("/getETNPriceInfo")
-    public String getETNPriceInfo(Model model, @RequestParam String endPoint) {
-        model.addAttribute("resultList", etfService.list(endPoint));
-        return "etnPriceInfo";
-    }
-
-    @GetMapping("/getELWPriceInfo")
-    public String getELWPriceInfo(Model model, @RequestParam String endPoint) {
-        model.addAttribute("resultList", etfService.list(endPoint));
-        return "etwPriceInfo";
+    @GetMapping("/{apiName}")
+    public String getPriceInfo(Model model, @PathVariable("apiName") String apiName) {
+        model.addAttribute("resultList", etfService.list(url, serviceKey, apiName));
+        return "priceInfo";
     }
 }

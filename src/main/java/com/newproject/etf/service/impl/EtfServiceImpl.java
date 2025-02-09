@@ -8,15 +8,18 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class EtfServiceImpl implements EtfService {
 
     private final WebClient webClient;
+    private StringBuilder sb;
 
     public EtfServiceImpl(WebClient webClient) {
         this.webClient = webClient;
     }
 
     @Override
-    public String list(String endPoint) {
+    public String list(String url, String serviceKey, String endPoint) {
+        sb = new StringBuilder(url);
+        sb.append(endPoint).append("?serviceKey=").append(serviceKey);
         return webClient.get()
-                .uri("https://apis.data.go.kr/1160100/service/GetSecuritiesProductInfoService")
+                .uri(sb.toString())
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();

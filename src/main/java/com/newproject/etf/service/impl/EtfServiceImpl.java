@@ -1,6 +1,7 @@
 package com.newproject.etf.service.impl;
 
 import com.newproject.etf.service.EtfService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -12,6 +13,7 @@ public class EtfServiceImpl implements EtfService {
     private final WebClient webClient;
     private StringBuilder sb;
 
+    @Autowired
     public EtfServiceImpl(WebClient webClient) {
         this.webClient = webClient;
     }

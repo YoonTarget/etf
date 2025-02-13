@@ -9,7 +9,7 @@
 <p>Top recommended ETF: <span th:text="${etfName}">ETF_NAME</span></p>
 
 <ul>
-    <li th:each="etf : ${etfList}">
+    <li th:each="etf : ${resultList}">
         <span th:text="${etf}">ETF</span>
     </li>
 </ul>

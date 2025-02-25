@@ -1,5 +1,7 @@
 package com.newproject.etf.service;
 
+import java.util.Map;
+
 public interface EtfService {
-    String list(String url, String serviceKey, String endPoint);
+    String list(String endPoint, Map<String, String> queryParams);
 }

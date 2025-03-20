@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's Your ETF</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<header>
+    <h1>What's Your ETF</h1>
+    <p>당신에게 딱 맞는 ETF를 찾아드립니다!</p>
+    <button id="theme-toggle">🌙 다크모드</button>
+</header>
+
+<nav>
+    <ul class="tabs">
+        <li class="tab-link active" data-tab="etf">ETF</li>
+        <li class="tab-link" data-tab="etn">ETN</li>
+        <li class="tab-link" data-tab="elw">ELW</li>
+    </ul>
+</nav>
+
+<section id="etf" class="tab-content active">
+    <h2>ETF (Exchange Traded Fund)</h2>
+    <input type="text" id="search-etf" class="search-input" placeholder="ETF 검색...">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>종목명</th>
+            <th>티커</th>
+            <th>운용사</th>
+        </tr>
+        </thead>
+        <tbody id="etf-list">
+        <tr>
+            <td>KODEX 200</td>
+            <td>069500</td>
+            <td>삼성자산운용</td>
+        </tr>
+        <tr>
+            <td>TIGER 미국나스닥100</td>
+            <td>133690</td>
+            <td>미래에셋자산운용</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<section id="etn" class="tab-content">
+    <h2>ETN (Exchange Traded Note)</h2>
+    <input type="text" id="search-etn" class="search-input" placeholder="ETN 검색...">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>종목명</th>
+            <th>티커</th>
+            <th>발행기관</th>
+        </tr>
+        </thead>
+        <tbody id="etn-list">
+        <tr>
+            <td>삼성 레버리지 원유 ETN</td>
+            <td>530031</td>
+            <td>삼성증권</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<section id="elw" class="tab-content">
+    <h2>ELW (Equity Linked Warrant)</h2>
+    <input type="text" id="search-elw" class="search-input" placeholder="ELW 검색...">
+    <table class="data-table">
+        <thead>
+        <tr>
+            <th>종목명</th>
+            <th>티커</th>
+            <th>발행기관</th>
+        </tr>
+        </thead>
+        <tbody id="elw-list">
+        <tr>
+            <td>현대차콜 ELW</td>
+            <td>58A007</td>
+            <td>신한투자증권</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<script src="/js/script.js"></script>
+
+</body>
+</html>

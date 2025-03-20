@@ -1,0 +1,106 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: #f5f5f5;
+    color: #333;
+    transition: background 0.3s, color 0.3s;
+}
+
+header {
+    background: #2c3e50;
+    color: white;
+    padding: 20px;
+}
+
+.tabs {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    background: #34495e;
+}
+
+.tabs li {
+    padding: 15px 20px;
+    cursor: pointer;
+    color: white;
+}
+
+.tabs li.active {
+    background: #1abc9c;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.search-input {
+    margin-bottom: 10px;
+    padding: 8px;
+    width: 80%;
+}
+
+.data-table {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+.data-table th, .data-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.data-table th {
+    background: #f8f9fa;
+}
+
+/* 🌙 다크모드 스타일 */
+body.dark-mode {
+    background: #1e1e1e;
+    color: #e0e0e0;
+}
+
+body.dark-mode header {
+    background: #333;
+}
+
+body.dark-mode .tabs {
+    background: #444;
+}
+
+body.dark-mode .tabs li.active {
+    background: #1abc9c;
+}
+
+body.dark-mode .data-table th {
+    background: #555;
+}
+
+body.dark-mode .data-table td {
+    background: #2c2c2c;
+}
+
+#theme-toggle {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #1abc9c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+/* 🌙 다크모드 버튼 다크 테마 스타일 */
+body.dark-mode #theme-toggle {
+    background: #ffcc00;
+    color: black;
+}

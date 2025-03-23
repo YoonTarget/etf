@@ -23,7 +23,7 @@
 </nav>
 
 <section id="etf" class="tab-content active">
-    <h2>ETF (Exchange Traded Fund)</h2>
+    <h2 class="title" data-tooltip="ETF는 특정 지수의 성과를 추종하는 상장지수펀드입니다.">ETF (Exchange Traded Fund)</h2>
     <input type="text" id="search-etf" class="search-input" placeholder="ETF 검색...">
     <table class="data-table">
         <thead>
@@ -49,7 +49,7 @@
 </section>
 
 <section id="etn" class="tab-content">
-    <h2>ETN (Exchange Traded Note)</h2>
+    <h2 class="title" data-tooltip="ETN은 증권사가 발행하는 파생결합증권으로, 특정 지수를 따라갑니다.">ETN (Exchange Traded Note)</h2>
     <input type="text" id="search-etn" class="search-input" placeholder="ETN 검색...">
     <table class="data-table">
         <thead>
@@ -70,7 +70,7 @@
 </section>
 
 <section id="elw" class="tab-content">
-    <h2>ELW (Equity Linked Warrant)</h2>
+    <h2 class="title" data-tooltip="ELW는 특정 주식이나 지수를 기초로 하는 금융상품입니다.">ELW (Equity Linked Warrant)</h2>
     <input type="text" id="search-elw" class="search-input" placeholder="ELW 검색...">
     <table class="data-table">
         <thead>
@@ -89,6 +89,8 @@
         </tbody>
     </table>
 </section>
+
+<div class="tooltip" id="tooltip"></div>
 
 <script src="/js/script.js"></script>
 

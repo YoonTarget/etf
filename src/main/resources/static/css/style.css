@@ -104,3 +104,15 @@ body.dark-mode #theme-toggle {
     background: #ffcc00;
     color: black;
 }
+
+.tooltip {
+    display: none;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    max-width: 250px;
+    z-index: 100;
+}

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/openDataApi")
 public class EtfController {
     private final EtfService etfService;
@@ -18,9 +18,9 @@ public class EtfController {
         this.etfService = etfService;
     }
 
+    @ResponseBody
     @GetMapping(value = "/{apiName}")
     public String getPriceInfo(Model model, @PathVariable("apiName") String apiName, @RequestParam Map<String, String> queryParams) {
-        model.addAttribute("resultList", etfService.list(apiName, queryParams));
-        return "etf";
+        return etfService.list(apiName, queryParams);
     }
 }

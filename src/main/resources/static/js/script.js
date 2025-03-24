@@ -60,9 +60,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function fetchTabData(target) {
-        fetch("/openDataApi/get{target}PriceInfo")
-            .then(res => res.json)
-            .then(data => renderTabData(target, data))
+        fetch(`/openDataApi/get${target}PriceInfo`)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error("서버 응답 오류");
+                }
+                return res.json(); // JSON 데이터로 변환
+            })
+            .then(data => {
+                console.log("받은 데이터:", data);
+                renderTabData(target, data); // 렌더링 함수 호출
+            })
             .catch(err => console.error("데이터 불러오기 실패:", err));
     };
 
@@ -76,7 +84,6 @@ document.addEventListener("DOMContentLoaded", function () {
             row.innerHTML = `
                 <td>${item.itmsNm}</td>
                 <td>${item.srtnCd}</td>
-                // <td>${item.운용사 || item.발행기관}</td>
             `;
             tableBody.appendChild(row);
         });

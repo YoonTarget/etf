@@ -8,6 +8,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Service
@@ -22,16 +24,17 @@ public class EtfServiceImpl implements EtfService {
 
     @Override
     public Mono<ResponseEntity<String>> list(String endPoint, Map<String, String> queryParams) {
-        String url = "https://apis.data.go.kr/1160100/service/GetSecuritiesProductInfoService/" + endPoint
-                + "?serviceKey=BBDYHxpLb5iDQfFrXs95dcZqTnYTBG%2B%2Bo6bPr0BC9bmIHnG5gB48wToN04d4DM8uRSj7m5ha1mQvRdLJ%2Fpss9Q%3D%3D"  // 직접 추가 (자동 인코딩 방지)
-                + "&numOfRows=" + queryParams.getOrDefault("numOfRows", "10")
-                + "&pageNo=" + queryParams.getOrDefault("pageNo", "1")
-                + "&resultType=json"; // JSON 응답 강제 요청
-
-        System.out.println("🚀 API 요청 URL: " + url); // 요청 URL 로그 출력
+        StringBuilder url = new StringBuilder("https://apis.data.go.kr/1160100/service/GetSecuritiesProductInfoService/")
+                .append(endPoint)
+                .append("?serviceKey=BBDYHxpLb5iDQfFrXs95dcZqTnYTBG%2B%2Bo6bPr0BC9bmIHnG5gB48wToN04d4DM8uRSj7m5ha1mQvRdLJ%2Fpss9Q%3D%3D")
+                .append("&numOfRows=").append(queryParams.getOrDefault("numOfRows", "10"))
+                .append("&pageNo=").append(queryParams.getOrDefault("pageNo", "1"))
+                .append("&basDt=").append(queryParams.getOrDefault("basDt", LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"))))
+                .append("&likeItmsNm=").append(queryParams.getOrDefault("likeItmsNm", ""))
+                .append("&resultType=json");
 
         return webClient.get()
-                .uri(url)
+                .uri(url.toString())
                 .retrieve()
                 .toEntity(String.class);
     }

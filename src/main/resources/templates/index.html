@@ -16,83 +16,49 @@
 
 <nav>
     <ul class="tabs">
-        <li class="tab-link active" data-tab="ETF">ETF</li>
-        <li class="tab-link" data-tab="ETN">ETN</li>
-        <li class="tab-link" data-tab="ELW">ELW</li>
+        <li class="tab-link active">ETF</li>
+        <li class="tab-link">ETN</li>
+        <li class="tab-link">ELW</li>
     </ul>
 </nav>
 
-<section id="ETF" class="tab-content active">
-    <h2 class="title" data-tooltip="ETF는 특정 지수의 성과를 추종하는 상장지수펀드입니다.">ETF (Exchange Traded Fund)</h2>
-    <input type="text" id="search-etf" class="search-input" placeholder="ETF 검색...">
-    <table class="data-table">
-        <thead>
-        <tr>
-            <th>종목명</th>
-            <th>티커</th>
-            <th>운용사</th>
-        </tr>
-        </thead>
-        <tbody id="ETF-list">
-        <tr>
-            <td>KODEX 200</td>
-            <td>069500</td>
-            <td>삼성자산운용</td>
-        </tr>
-        <tr>
-            <td>TIGER 미국나스닥100</td>
-            <td>133690</td>
-            <td>미래에셋자산운용</td>
-        </tr>
-        </tbody>
-    </table>
-</section>
+<h2 class="title">ETF(Exchange Traded Fund)</h2>
+<!-- 날짜 범위 선택 입력 (달력 UI 제공) -->
+<label for="start-date">시작일:</label>
+<input type="text" id="start-date" class="search-input">
 
-<section id="ETN" class="tab-content">
-    <h2 class="title" data-tooltip="ETN은 증권사가 발행하는 파생결합증권으로, 특정 지수를 따라갑니다.">ETN (Exchange Traded Note)</h2>
-    <input type="text" id="search-etn" class="search-input" placeholder="ETN 검색...">
-    <table class="data-table">
-        <thead>
-        <tr>
-            <th>종목명</th>
-            <th>티커</th>
-            <th>발행기관</th>
-        </tr>
-        </thead>
-        <tbody id="ETN-list">
-        <tr>
-            <td>삼성 레버리지 원유 ETN</td>
-            <td>530031</td>
-            <td>삼성증권</td>
-        </tr>
-        </tbody>
-    </table>
-</section>
+<br>
 
-<section id="ELW" class="tab-content">
-    <h2 class="title" data-tooltip="ELW는 특정 주식이나 지수를 기초로 하는 금융상품입니다.">ELW (Equity Linked Warrant)</h2>
-    <input type="text" id="search-elw" class="search-input" placeholder="ELW 검색...">
-    <table class="data-table">
-        <thead>
-        <tr>
-            <th>종목명</th>
-            <th>티커</th>
-            <th>발행기관</th>
-        </tr>
-        </thead>
-        <tbody id="ELW-list">
-        <tr>
-            <td>현대차콜 ELW</td>
-            <td>58A007</td>
-            <td>신한투자증권</td>
-        </tr>
-        </tbody>
-    </table>
-</section>
+<label for="end-date">종료일:</label>
+<input type="text" id="end-date" class="search-input">
+
+<!-- 검색 버튼 -->
+<!--<button id="search-btn" class="search-btn">검색</button>-->
+<input type="text" id="search-id" class="search-input" placeholder="검색...">
+<table class="data-table">
+    <thead>
+    <tr>
+        <th>기준일</th>
+        <th>종목명</th>
+        <th>종가</th>
+        <th>등락률</th>
+        <th>거래량</th>
+        <th>거래대금</th>
+        <th>시가총액</th>
+    </tr>
+    </thead>
+    <tbody id="list">
+    </tbody>
+</table>
 
 <div class="tooltip" id="tooltip"></div>
 
 <script src="/js/script.js"></script>
+
+<!-- jQuery, jQuery UI, CSS 추가 -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 </body>
 </html>

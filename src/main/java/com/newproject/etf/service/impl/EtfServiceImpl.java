@@ -29,8 +29,10 @@ public class EtfServiceImpl implements EtfService {
                 .append("?serviceKey=BBDYHxpLb5iDQfFrXs95dcZqTnYTBG%2B%2Bo6bPr0BC9bmIHnG5gB48wToN04d4DM8uRSj7m5ha1mQvRdLJ%2Fpss9Q%3D%3D")
                 .append("&numOfRows=").append(queryParams.getOrDefault("numOfRows", "10"))
                 .append("&pageNo=").append(queryParams.getOrDefault("pageNo", "1"))
-                .append("&basDt=").append(queryParams.getOrDefault("basDt", LocalDate.now().minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"))))
-                .append("&likeItmsNm=").append(queryParams.getOrDefault("likeItmsNm", ""))
+                .append("&basDt=").append(queryParams.getOrDefault("basDt", ""))
+                .append("&likeItmsNm=").append(queryParams.getOrDefault("likeItmsNm", "").toUpperCase())
+                .append("&startBasDt=").append(queryParams.getOrDefault("startBasDt", ""))
+                .append("&endBasDt=").append(queryParams.getOrDefault("endBasDt", ""))
                 .append("&resultType=json");
 
         return webClient.get()

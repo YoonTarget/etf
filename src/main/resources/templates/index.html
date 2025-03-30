@@ -23,18 +23,19 @@
 </nav>
 
 <h2 class="title">ETF(Exchange Traded Fund)</h2>
-<!-- 날짜 범위 선택 입력 (달력 UI 제공) -->
-<label for="start-date">시작일:</label>
-<input type="text" id="start-date" class="search-input">
 
-<br>
+<div class="search-container">
+    <label for="start-date">시작일:</label>
+    <input type="text" id="start-date" class="search-input">
 
-<label for="end-date">종료일:</label>
-<input type="text" id="end-date" class="search-input">
+    <label for="end-date">종료일:</label>
+    <input type="text" id="end-date" class="search-input">
 
-<!-- 검색 버튼 -->
-<!--<button id="search-btn" class="search-btn">검색</button>-->
-<input type="text" id="search-id" class="search-input" placeholder="검색...">
+    <input type="text" id="search-id" class="search-input" placeholder="검색어 입력...">
+
+    <button id="search-btn" class="search-btn">검색</button>
+</div>
+
 <table class="data-table">
     <thead>
     <tr>

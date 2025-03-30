@@ -106,16 +106,15 @@ document.addEventListener("DOMContentLoaded", function () {
         dateFormat: "yy-mm-dd" // 날짜 포맷 지정 (예: 2025-03-20)
     });
 
-    document.getElementById("search_id").addEventListener("keyup", function() {
+    document.getElementById("search-btn").addEventListener("click", function() {
         const startDate = document.getElementById("start-date").value;
         const endDate = document.getElementById("end-date").value;
         const searchValue = document.getElementById("search-id").value;
-
-        const params = {
+        const params = new URLSearchParams({
             "startBasDt" : startDate,
             "endBasDt" : endDate,
             "likeItmsNm" : searchValue
-        };
+        });
 
         fetchTabData(document.querySelector(".active").innerText, params)
     });

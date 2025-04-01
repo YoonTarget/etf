@@ -85,14 +85,24 @@ document.addEventListener("DOMContentLoaded", function () {
             item.forEach(key => {
                 console.log(key);
                 const row = document.createElement("tr");
+                let basDt = key.basDt;
+                basDt = basDt.substring(0, 4) + "-" + basDt.substring(4, 6) + "-" + basDt.substring(6);
+
+                let fltRt = key.fltRt;
+                if(fltRt.startsWith(".")) {
+                    fltRt = "0" + fltRt;
+                }
+                else if(fltRt.startsWith("-.")) {
+                    fltRt = "-0" + fltRt.substring(fltRt.indexOf("."));
+                }
                 row.innerHTML = `
-                    <td>${key.basDt}</td>
+                    <td>${basDt}</td>
                     <td>${key.itmsNm}</td>
-                    <td>${key.clpr}</td>
-                    <td>${key.fltRt}</td>
-                    <td>${key.trqu}</td>
-                    <td>${key.trPrc}</td>
-                    <td>${key.mrktTotAmt}</td>
+                    <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
+                    <td>${fltRt}%</td>
+                    <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>
+                    <td>${Number(key.trPrc)?.toLocaleString() || "0"}원</td>
+                    <td>${Number(key.mrktTotAmt)?.toLocaleString() || "0"}원</td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -119,21 +129,10 @@ document.addEventListener("DOMContentLoaded", function () {
         fetchTabData(document.querySelector(".active").innerText, params)
     });
 
-    // 🔍 검색 기능
-    // function addSearchFunctionality(inputId, tableId) {
-    //     document.getElementById(inputId).addEventListener("keyup", function () {
-    //         const searchDate = "";
-    //         const searchValue = this.value.toLowerCase();
-    //         const rows = document.querySelectorAll(`#${tableId} tr`);
-
-    //         rows.forEach(row => {
-    //             const text = row.textContent.toLowerCase();
-    //             row.style.display = text.includes(searchValue) ? "" : "none";
-    //         });
-    //     });
-    // }
-
-    // addSearchFunctionality("search-etf", "ETF-list");
-    // addSearchFunctionality("search-etn", "ETN-list");
-    // addSearchFunctionality("search-elw", "ELW-list");
+    document.getElementById("search-id").addEventListener("keydown", function(event) {
+        if(event.key === "Enter") {
+            event.preventDefault();
+            document.getElementById("search-btn").click();
+        }
+    });
 });

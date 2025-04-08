@@ -135,4 +135,9 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("search-btn").click();
         }
     });
+
+    document.querySelector(".page-btn").addEventListener("click", function() {
+        let page = this.innerText;
+        console.log(page);
+    });
 });

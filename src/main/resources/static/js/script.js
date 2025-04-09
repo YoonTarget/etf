@@ -11,8 +11,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const body = document.body;
     const title = document.querySelector(".title");
     const tooltip = document.getElementById("tooltip");
+    let pageNo = 1;
+    let numOfRows = 10;
+    let totalCount = 0;
+    let totalPages = 0;
 
-    fetchTabData(active.innerText);
+    fetchData(active.innerText);
 
     title.addEventListener("mouseenter", function(event) {
         tooltip.innerText = tooltips[document.querySelector(".active").textContent][1];
@@ -55,11 +59,12 @@ document.addEventListener("DOMContentLoaded", function () {
             title.innerText = target + tooltips[target][0];
 
             // 🚀 데이터 요청 함수 호출 (탭이 활성화된 후)
-            fetchTabData(target);
+            fetchData(target);
         });
     });
 
-    function fetchTabData(target, params) {
+    // API 호출 함수
+    function fetchData(target, params) {
         fetch(`/openDataApi/get${target}PriceInfo?${params}`)
             .then(res => {
                 if (!res.ok) {
@@ -69,17 +74,40 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(data => {
                 console.log("받은 데이터:", data);
-                renderTabData(target, data); // 렌더링 함수 호출
+                renderData(target, data); // 렌더링 함수 호출
             })
             .catch(err => console.error("데이터 불러오기 실패:", err));
     };
 
     // 🎯 데이터를 화면에 렌더링하는 함수
-    function renderTabData(target, data) {
+    function renderData(target, data) {
         const tableBody = document.getElementById("list");
         tableBody.innerHTML = ""; // 기존 데이터 초기화
 
-        const item = data?.response?.body?.items?.item;
+        const body = data?.response?.body;
+
+        pageNo = body?.pageNo;
+        numOfRows = body?.numOfRows;
+        totalCount = body?.totalCount;
+        totalPages = Math.ceil(totalCount / numOfRows);
+
+        const item = body?.items?.item;
+
+        let pagination = document.getElementById("pagination");
+
+        pagination.innerHTML = `
+            <button class="page-btn">&laquo;</button>
+        `;
+
+        for(let i = 0; i < 10; i++) {
+            pagination.innerHTML += `
+                <button class="page-btn">${pageNo + i}</button>
+            `;
+        }
+
+        pagination.innerHTML = `
+            <button class="page-btn">&raquo;</button>
+        `;
 
         if (Array.isArray(item)) {
             item.forEach(key => {
@@ -123,10 +151,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const params = new URLSearchParams({
             "startBasDt" : startDate,
             "endBasDt" : endDate,
-            "likeItmsNm" : searchValue
+            "likeItmsNm" : searchValue,
+            "pageNo" : pageNo
         });
 
-        fetchTabData(document.querySelector(".active").innerText, params)
+        fetchData(document.querySelector(".active").innerText, params)
     });
 
     document.getElementById("search-id").addEventListener("keydown", function(event) {
@@ -136,8 +165,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    document.querySelector(".page-btn").addEventListener("click", function() {
-        let page = this.innerText;
+    document.getElementById("pagination").addEventListener("click", function(event) {
+        const page = event.target.innerHTML.trim();
         console.log(page);
+
+        if(page === "«") {
+            pageNo -= 1;
+        }
+        else if(page === "»") {
+            pageNo += 1;
+        }
+        else {
+            pageNo = page;
+        }
+
+        document.getElementById("search-btn").click();
     });
 });

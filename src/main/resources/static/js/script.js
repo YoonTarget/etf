@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
         }
 
-        pagination.innerHTML = `
+        pagination.innerHTML += `
             <button class="page-btn">&raquo;</button>
         `;
 

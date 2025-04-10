@@ -11,12 +11,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const body = document.body;
     const title = document.querySelector(".title");
     const tooltip = document.getElementById("tooltip");
-    let pageNo = 1;
-    let numOfRows = 10;
-    let totalCount = 0;
-    let totalPages = 0;
+    let pageNo = 1; // 현재 페이지
+    let numOfRows = 10; // 페이지 당 노출 데이터 수
+    let totalCount = 0; // 전체 데이터 수
+    let totalPages = 0; // 전체 페이지 수
+    let startPageNo = 0; // 시작 페이지
+    let endPageNo = 0; // 마지막 페이지
+    let params = new URLSearchParams(this.location.search);
 
-    fetchData(active.innerText);
+    fetchData(active.innerText, params);
 
     title.addEventListener("mouseenter", function(event) {
         tooltip.innerText = tooltips[document.querySelector(".active").textContent][1];
@@ -85,58 +88,57 @@ document.addEventListener("DOMContentLoaded", function () {
         tableBody.innerHTML = ""; // 기존 데이터 초기화
 
         const body = data?.response?.body;
-
-        pageNo = body?.pageNo;
-        numOfRows = body?.numOfRows;
-        totalCount = body?.totalCount;
-        totalPages = Math.ceil(totalCount / numOfRows);
-
         const item = body?.items?.item;
+
+        pageNo = body?.pageNo; // ex) 1
+        numOfRows = body?.numOfRows; // ex) 10
+        totalCount = body?.totalCount; // ex) 109
+        totalPages = Math.ceil(totalCount / numOfRows); // ex) 11
 
         let pagination = document.getElementById("pagination");
 
         pagination.innerHTML = `
-            <button class="page-btn">&laquo;</button>
+            <button class="page-btn" title="첫 페이지" ${pageNo === 1 ? 'disabled' : ''}>처음</button>
+            <button class="page-btn" title="이전 페이지" ${pageNo === 1 ? 'disabled' : ''}>이전</button>
         `;
 
-        for(let i = 0; i < 10; i++) {
+        startPageNo = Math.floor((pageNo - 1) / numOfRows) * numOfRows + 1;
+        endPageNo = Math.min(startPageNo + numOfRows - 1, totalPages);
+        for(let i = startPageNo; i <= endPageNo; i++) {
             pagination.innerHTML += `
-                <button class="page-btn">${pageNo + i}</button>
+                <button class="page-btn ${i === pageNo ? 'active' : ''}">${i}</button>
             `;
         }
 
         pagination.innerHTML += `
-            <button class="page-btn">&raquo;</button>
+            <button class="page-btn" title="다음 페이지" ${pageNo === totalPages ? 'disabled' : ''}>다음</button>
+            <button class="page-btn" title="마지막 페이지" ${pageNo === totalPages ? 'disabled' : ''}>마지막</button>
         `;
 
-        if (Array.isArray(item)) {
-            item.forEach(key => {
-                console.log(key);
-                const row = document.createElement("tr");
-                let basDt = key.basDt;
-                basDt = basDt.substring(0, 4) + "-" + basDt.substring(4, 6) + "-" + basDt.substring(6);
+        item.forEach(key => {
+            console.log(key);
+            const row = document.createElement("tr");
+            let basDt = key.basDt;
+            basDt = basDt.substring(0, 4) + "-" + basDt.substring(4, 6) + "-" + basDt.substring(6);
 
-                let fltRt = key.fltRt;
-                if(fltRt.startsWith(".")) {
-                    fltRt = "0" + fltRt;
-                }
-                else if(fltRt.startsWith("-.")) {
-                    fltRt = "-0" + fltRt.substring(fltRt.indexOf("."));
-                }
-                row.innerHTML = `
-                    <td>${basDt}</td>
-                    <td>${key.itmsNm}</td>
-                    <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
-                    <td>${fltRt}%</td>
-                    <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>
-                    <td>${Number(key.trPrc)?.toLocaleString() || "0"}원</td>
-                    <td>${Number(key.mrktTotAmt)?.toLocaleString() || "0"}원</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        } else {
-            console.error("❌ 'items'가 배열이 아닙니다:", item);
-        }
+            let fltRt = key.fltRt;
+            if(fltRt.startsWith(".")) {
+                fltRt = "0" + fltRt;
+            }
+            else if(fltRt.startsWith("-.")) {
+                fltRt = "-0" + fltRt.substring(fltRt.indexOf("."));
+            }
+            row.innerHTML = `
+                <td>${basDt}</td>
+                <td>${key.itmsNm}</td>
+                <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
+                <td>${fltRt}%</td>
+                <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>
+                <td>${Number(key.trPrc)?.toLocaleString() || "0"}원</td>
+                <td>${Number(key.mrktTotAmt)?.toLocaleString() || "0"}원</td>
+            `;
+            tableBody.appendChild(row);
+        });
     }
 
     // jQuery UI Datepicker 활성화
@@ -148,7 +150,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const startDate = document.getElementById("start-date").value;
         const endDate = document.getElementById("end-date").value;
         const searchValue = document.getElementById("search-id").value;
-        const params = new URLSearchParams({
+        params = new URLSearchParams({
             "startBasDt" : startDate,
             "endBasDt" : endDate,
             "likeItmsNm" : searchValue,
@@ -166,17 +168,24 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("pagination").addEventListener("click", function(event) {
-        const page = event.target.innerHTML.trim();
-        console.log(page);
+        if(!event.target.classList.contains("page-btn")) return;
 
-        if(page === "«") {
-            pageNo -= 1;
+        const page = event.target.innerHTML.trim();
+
+        if(page === "이전") {
+            pageNo = Math.max(startPageNo - numOfRows, 1);
         }
-        else if(page === "»") {
-            pageNo += 1;
+        else if(page === "다음") {
+            pageNo = Math.min(endPageNo + numOfRows, totalPages);
+        }
+        else if(page === "처음") {
+            pageNo = 1;
+        }
+        else if(page === "마지막") {
+            pageNo = totalPages;
         }
         else {
-            pageNo = page;
+            pageNo = parseInt(page);
         }
 
         document.getElementById("search-btn").click();

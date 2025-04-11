@@ -6,7 +6,7 @@ const tooltips = {
 
 document.addEventListener("DOMContentLoaded", function () {
     const tabs = document.querySelectorAll(".tab-link");
-    const active = document.querySelector(".active");
+    let active = document.querySelector(".tab-link.active");
     const themeToggle = document.getElementById("theme-toggle");
     const body = document.body;
     const title = document.querySelector(".title");
@@ -18,11 +18,18 @@ document.addEventListener("DOMContentLoaded", function () {
     let startPageNo = 0; // 시작 페이지
     let endPageNo = 0; // 마지막 페이지
     let params = new URLSearchParams(this.location.search);
+    document.getElementById("start-date").value = params.get("startBasDt") || "";
+    document.getElementById("end-date").value = params.get("endBasDt") || "";
+    document.getElementById("search-id").value = params.get("likeItmsNm") || "";
 
-    fetchData(active.innerText, params);
+    fetchData();
+
+    document.getElementById("home-title").addEventListener("click", () => {
+        this.location.href = "/";
+    });
 
     title.addEventListener("mouseenter", function(event) {
-        tooltip.innerText = tooltips[document.querySelector(".active").textContent][1];
+        tooltip.innerText = tooltips[active.textContent][1];
         tooltip.style.display = "block";
     });
 
@@ -62,13 +69,17 @@ document.addEventListener("DOMContentLoaded", function () {
             title.innerText = target + tooltips[target][0];
 
             // 🚀 데이터 요청 함수 호출 (탭이 활성화된 후)
-            fetchData(target);
+            params.set("tab", target);
+            fetchData();
         });
     });
 
     // API 호출 함수
-    function fetchData(target, params) {
-        fetch(`/openDataApi/get${target}PriceInfo?${params}`)
+    function fetchData() {
+        const url = `${location.pathname}?${params.toString()}`;
+        history.pushState({}, "", url);
+
+        fetch(`/openDataApi/get${params.get("tab") || "ETF"}PriceInfo?${params.toString()}`)
             .then(res => {
                 if (!res.ok) {
                     throw new Error("서버 응답 오류");
@@ -77,13 +88,13 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(data => {
                 console.log("받은 데이터:", data);
-                renderData(target, data); // 렌더링 함수 호출
+                renderData(data); // 렌더링 함수 호출
             })
             .catch(err => console.error("데이터 불러오기 실패:", err));
     };
 
     // 🎯 데이터를 화면에 렌더링하는 함수
-    function renderData(target, data) {
+    function renderData(data) {
         const tableBody = document.getElementById("list");
         tableBody.innerHTML = ""; // 기존 데이터 초기화
 
@@ -121,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let basDt = key.basDt;
             basDt = basDt.substring(0, 4) + "-" + basDt.substring(4, 6) + "-" + basDt.substring(6);
 
-            let fltRt = key.fltRt;
+            let fltRt = key.fltRt || "0";
             if(fltRt.startsWith(".")) {
                 fltRt = "0" + fltRt;
             }
@@ -154,10 +165,11 @@ document.addEventListener("DOMContentLoaded", function () {
             "startBasDt" : startDate,
             "endBasDt" : endDate,
             "likeItmsNm" : searchValue,
-            "pageNo" : pageNo
+            "pageNo" : 1,
+            "tab" : active.innerText
         });
 
-        fetchData(document.querySelector(".active").innerText, params)
+        fetchData();
     });
 
     document.getElementById("search-id").addEventListener("keydown", function(event) {
@@ -188,6 +200,8 @@ document.addEventListener("DOMContentLoaded", function () {
             pageNo = parseInt(page);
         }
 
-        document.getElementById("search-btn").click();
+        params.set("pageNo", pageNo);
+
+        fetchData();
     });
 });

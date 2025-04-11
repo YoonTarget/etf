@@ -187,3 +187,11 @@ body.dark-mode #theme-toggle {
   cursor: not-allowed;
 }
 
+#home-title {
+    cursor: pointer;         /* 마우스 포인터를 손 모양으로 */
+    transition: color 0.2s;  /* 색상 변경 부드럽게 */
+  }
+  
+  #home-title:hover {
+    color: #007bff; /* 또는 네이비/파랑 등 강조 색 */
+  }

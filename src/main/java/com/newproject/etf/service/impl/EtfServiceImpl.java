@@ -4,6 +4,7 @@ import com.newproject.etf.service.EtfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -35,7 +36,7 @@ public class EtfServiceImpl implements EtfService {
 //                .append("&basDt=").append(queryParams.getOrDefault("basDt", ""))
                 .append("&likeItmsNm=").append(URLEncoder.encode(queryParams.getOrDefault("likeItmsNm", "").toUpperCase(), StandardCharsets.UTF_8))
                 .append("&beginBasDt=").append(queryParams.getOrDefault("beginBasDt", "").replace("-", ""))
-                .append("&endBasDt=").append(LocalDate.parse(queryParams.getOrDefault("endBasDt", "")).plusDays(1).format(formatter))
+                .append("&endBasDt=").append(StringUtils.hasText(queryParams.get("endBasDt")) ? LocalDate.parse(queryParams.get("endBasDt").replace("-", ""), formatter).plusDays(1).format(formatter) : "")
                 .append("&resultType=json");
 
         return webClient.get()

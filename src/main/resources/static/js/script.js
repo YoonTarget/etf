@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let startPageNo = 0; // 시작 페이지
     let endPageNo = 0; // 마지막 페이지
     let params = new URLSearchParams(this.location.search);
-    document.getElementById("start-date").value = params.get("startBasDt") || "";
+    document.getElementById("start-date").value = params.get("beginBasDt") || "";
     document.getElementById("end-date").value = params.get("endBasDt") || "";
     document.getElementById("search-id").value = params.get("likeItmsNm") || "";
 
@@ -162,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const endDate = document.getElementById("end-date").value;
         const searchValue = document.getElementById("search-id").value;
         params = new URLSearchParams({
-            "startBasDt" : startDate,
+            "beginBasDt" : startDate,
             "endBasDt" : endDate,
             "likeItmsNm" : searchValue,
             "pageNo" : 1,

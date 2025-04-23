@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     title.addEventListener("mouseenter", function(event) {
-        tooltip.innerText = tooltips[active.textContent][1];
+        tooltip.innerText = tooltips["ETF"][1];
         tooltip.style.display = "block";
     });
 

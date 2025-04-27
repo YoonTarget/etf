@@ -4,6 +4,15 @@ const tooltips = {
     "ELW": [ "(Equity Linked Warrant)", "특정 주식이나 지수를 기초로 하는 금융상품입니다." ]
 };
 
+const brands = [
+    "KODEX(삼성자산운용)",
+    "TIGER(미래에셋자산운용)",
+    "RISE(KB자산운용)",
+    "ACE(한국투자신탁운용)",
+    "SOL(신한자산운용)",
+    "PLUS(한화자산운용)"
+];
+
 document.addEventListener("DOMContentLoaded", function () {
     const tabs = document.querySelectorAll(".tab-link");
     let active = document.querySelector(".tab-link.active");
@@ -165,8 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "beginBasDt" : startDate,
             "endBasDt" : endDate,
             "likeItmsNm" : searchValue,
-            "pageNo" : 1,
-            "tab" : active.innerText
+            "pageNo" : 1
         });
 
         fetchData();

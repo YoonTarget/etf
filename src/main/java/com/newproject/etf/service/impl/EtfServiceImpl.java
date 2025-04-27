@@ -45,8 +45,6 @@ public class EtfServiceImpl implements EtfService {
                         .append(queryParams.getOrDefault("numOfRows", "10"))
                 .append("&pageNo=")
                         .append(queryParams.getOrDefault("pageNo", "1"))
-//                .append("&basDt=")
-//                      .append(queryParams.getOrDefault("basDt", ""))
                 .append("&likeItmsNm=")
                         .append(URLEncoder.encode(queryParams.getOrDefault("likeItmsNm", "").toUpperCase(), StandardCharsets.UTF_8))
                 .append("&beginBasDt=")

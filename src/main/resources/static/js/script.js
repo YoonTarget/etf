@@ -135,30 +135,34 @@ document.addEventListener("DOMContentLoaded", function () {
             <button class="page-btn" title="마지막 페이지" ${pageNo === totalPages ? 'disabled' : ''}>마지막</button>
         `;
 
-        item.forEach(key => {
-            console.log(key);
-            const row = document.createElement("tr");
-            let basDt = key.basDt;
-            basDt = basDt.substring(0, 4) + "-" + basDt.substring(4, 6) + "-" + basDt.substring(6);
-
-            let fltRt = key.fltRt || "0";
-            if(fltRt.startsWith(".")) {
-                fltRt = "0" + fltRt;
-            }
-            else if(fltRt.startsWith("-.")) {
-                fltRt = "-0" + fltRt.substring(fltRt.indexOf("."));
-            }
-            row.innerHTML = `
-                <td>${basDt}</td>
-                <td>${key.itmsNm}</td>
-                <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
-                <td>${fltRt}%</td>
-                <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>
-                <td>${Number(key.trPrc)?.toLocaleString() || "0"}원</td>
-                <td>${Number(key.mrktTotAmt)?.toLocaleString() || "0"}원</td>
-            `;
-            tableBody.appendChild(row);
-        });
+        if (item.length === 0) {
+            tableBody.innerHTML = "<tr><td colspan='7'>데이터가 없습니다.</td></tr>";
+        } else {
+            item.forEach(key => {
+                console.log(key);
+                const row = document.createElement("tr");
+                let basDt = key.basDt;
+                basDt = basDt.substring(0, 4) + "-" + basDt.substring(4, 6) + "-" + basDt.substring(6);
+    
+                let fltRt = key.fltRt || "0";
+                if(fltRt.startsWith(".")) {
+                    fltRt = "0" + fltRt;
+                }
+                else if(fltRt.startsWith("-.")) {
+                    fltRt = "-0" + fltRt.substring(fltRt.indexOf("."));
+                }
+                row.innerHTML = `
+                    <td>${basDt}</td>
+                    <td>${key.itmsNm}</td>
+                    <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
+                    <td>${fltRt}%</td>
+                    <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>
+                    <td>${Number(key.trPrc)?.toLocaleString() || "0"}원</td>
+                    <td>${Number(key.mrktTotAmt)?.toLocaleString() || "0"}원</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
     }
 
     // jQuery UI Datepicker 활성화
@@ -169,7 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("search-btn").addEventListener("click", function() {
         const startDate = document.getElementById("start-date").value;
         const endDate = document.getElementById("end-date").value;
-        const searchValue = document.getElementById("search-id").value;
+        const searchValue = document.getElementById("search-id").value.trim();
         params = new URLSearchParams({
             "beginBasDt" : startDate,
             "endBasDt" : endDate,

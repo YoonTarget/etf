@@ -145,17 +145,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 basDt = basDt.substring(0, 4) + "-" + basDt.substring(4, 6) + "-" + basDt.substring(6);
     
                 let fltRt = key.fltRt || "0";
+                let fltRtColor = "";
                 if(fltRt.startsWith(".")) {
-                    fltRt = "0" + fltRt;
+                    fltRt = "+ 0" + fltRt;
+                    fltRtColor = "color: red;";
                 }
                 else if(fltRt.startsWith("-.")) {
-                    fltRt = "-0" + fltRt.substring(fltRt.indexOf("."));
+                    fltRt = "- 0" + fltRt.substring(fltRt.indexOf("."));
+                    fltRtColor = "color: blue;";
                 }
                 row.innerHTML = `
                     <td>${basDt}</td>
-                    <td>${key.itmsNm}</td>
+                    <td><a href="" target="_blank">${key.itmsNm}</a></td>
                     <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
-                    <td>${fltRt}%</td>
+                    <td style="${fltRtColor}">${fltRt}%</td>
                     <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>
                     <td>${Number(key.trPrc)?.toLocaleString() || "0"}원</td>
                     <td>${Number(key.mrktTotAmt)?.toLocaleString() || "0"}원</td>
@@ -171,12 +174,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     document.getElementById("search-btn").addEventListener("click", function() {
-        const startDate = document.getElementById("start-date").value;
-        const endDate = document.getElementById("end-date").value;
+//        const startDate = document.getElementById("start-date").value;
+//        const endDate = document.getElementById("end-date").value;
         const searchValue = document.getElementById("search-id").value.trim();
         params = new URLSearchParams({
-            "beginBasDt" : startDate,
-            "endBasDt" : endDate,
+//            "beginBasDt" : startDate,
+//            "endBasDt" : endDate,
             "likeItmsNm" : searchValue,
             "pageNo" : 1
         });

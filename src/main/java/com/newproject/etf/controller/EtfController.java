@@ -1,5 +1,6 @@
 package com.newproject.etf.controller;
 
+import com.newproject.etf.entity.EtfEntity;
 import com.newproject.etf.service.EtfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,5 +25,12 @@ public class EtfController {
     @GetMapping(value = "/{apiName}")
     public Mono<ResponseEntity<String>> getPriceInfo(Model model, @PathVariable("apiName") String apiName, @RequestParam Map<String, String> queryParams) {
         return etfService.list(apiName, queryParams);
+    }
+
+    @PostMapping(value = "/save")
+    public void saveAllEtfData(@RequestBody List<EtfEntity> etfEntities) {
+        // 데이터 저장 로직 구현
+        // 예: etfService.saveAll(data);
+        etfService.saveAll(etfEntities);
     }
 }

@@ -56,7 +56,7 @@ public class EtfEntity {
     private BigDecimal bssIdxClpr; // 기초지수_종가
 
     @Column(name = "bas_dt")
-    private LocalDate basDt; // 기준일자
+    private String basDt; // 기준일자
 
     @Column(name = "srtn_cd", length = 6)
     private String srtnCd; // 단축코드

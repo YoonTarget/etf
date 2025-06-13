@@ -1,5 +1,7 @@
 package com.newproject.etf.service.impl;
 
+import com.newproject.etf.entity.EtfEntity;
+import com.newproject.etf.repository.EtfBatchJdbcRepository;
 import com.newproject.etf.service.EtfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,19 +16,22 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 
 @Service
 public class EtfServiceImpl implements EtfService {
 
     private final WebClient webClient;
+    private final EtfBatchJdbcRepository etfBatchJdbcRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
     @Value("${api.service-key}")
     private String serviceKey;
 
     @Autowired
-    public EtfServiceImpl(WebClient webClient) {
+    public EtfServiceImpl(WebClient webClient, EtfBatchJdbcRepository etfBatchJdbcRepository) {
         this.webClient = webClient;
+        this.etfBatchJdbcRepository = etfBatchJdbcRepository;
     }
 
     @Override
@@ -57,5 +62,10 @@ public class EtfServiceImpl implements EtfService {
                 .uri(url.toString())
                 .retrieve()
                 .toEntity(String.class);
+    }
+
+    @Override
+    public void saveAll(List<EtfEntity> entities) {
+        etfBatchJdbcRepository.saveAll(entities);
     }
 }

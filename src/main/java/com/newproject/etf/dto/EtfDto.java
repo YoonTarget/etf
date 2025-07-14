@@ -6,6 +6,8 @@ import lombok.Data;
 public class EtfDto {
     private String numOfRows = "10";
     private String pageNo = "1";
-    private String likeItmsNm = "";
-    private String basDt = "";
+    private String likeItmsNm;
+    private String basDt;
+    private String beginBasDt = "";
+    private String endBasDt;
 }

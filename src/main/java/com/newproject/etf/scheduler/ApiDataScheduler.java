@@ -1,5 +1,6 @@
 package com.newproject.etf.scheduler;
 
+import com.newproject.etf.dto.EtfDto;
 import com.newproject.etf.service.EtfService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,12 +19,8 @@ public class ApiDataScheduler {
 //    @Scheduled(cron = "0 0 0 * * ?") // 매일 자정 실행
     public void updateEtfData() {
         String endPoint = "getETFPriceInfo";
-        Map<String, String> queryParams = Map.of(
-                "numOfRows", "1000",
-                "pageNo", "1",
-                "beginBasDt", "20230101",
-                "endBasDt", "20231231"
-        );
+        EtfDto queryParams = null;
+
         etfService.list(endPoint, queryParams);
     }
 }

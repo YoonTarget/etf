@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's Your ETF</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+    <div id="header-placeholder"></div>
+
+    <main>
+        <h2 class="title">ETF(Exchange Traded Fund)</h2>
+
+        <div class="search-container">
+            <label for="start-date">시작일</label>
+            <input type="text" id="start-date" class="search-input">
+            <label for="end-date">종료일</label>
+            <input type="text" id="end-date" class="search-input">
+            <label for="search-id">검색어</label>
+            <input type="text" id="search-id" class="search-input" placeholder="검색어 입력...">
+
+            <button id="search-btn" class="search-btn">검색</button>
+        </div>
+
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>기준일</th>
+                <th>종목명</th>
+                <th>종가</th>
+                <th>등락률</th>
+                <th>거래량</th>
+                <th>거래대금</th>
+                <th>시가총액</th>
+            </tr>
+            </thead>
+            <tbody id="list">
+            </tbody>
+        </table>
+
+        <div class="tooltip" id="tooltip"></div>
+
+        <div id="pagination" class="pagination">
+        </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/load-components.js"></script>
+    <script src="/js/etf-list.js"></script>
+
+    <!-- jQuery, jQuery UI, CSS 추가 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+    <script>
+        // DOMContentLoaded 이벤트 리스너 내부 또는 외부에서 호출
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadHTML('header-placeholder', '/includes/header.html');
+            await loadHTML('footer-placeholder', '/includes/footer.html');
+            // 헤더/푸터가 로드된 후 공통 기능 초기화
+            initializeCommonFeatures();
+            // 각 페이지의 메인 로직은 해당 JS 파일에서 실행되도록 유지 (etf-list.js 또는 etf-detail.js)
+            // etf-list.js 또는 etf-detail.js 파일 내부의 DOMContentLoaded 로직은 그대로 두어도 됩니다.
+            // 다만, initializeCommonFeatures()에서 다크모드, home-title 관련 로직을 제거해야 합니다.
+        });
+    </script>
+</body>
+</html>

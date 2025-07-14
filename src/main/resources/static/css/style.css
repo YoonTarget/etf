@@ -1,23 +1,67 @@
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
-    background: #f5f5f5;
-    color: #333;
+    /* text-align: center; (헤더, 푸터 외에 전체가 중앙 정렬되는 것을 방지하기 위해 제거) */
+    background: var(--background-color); /* CSS 변수 사용 */
+    color: var(--text-color); /* CSS 변수 사용 */
     transition: background 0.3s, color 0.3s;
+
+    /* Sticky Footer를 위한 설정 시작 */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* 뷰포트 높이만큼 최소 높이 설정 */
+    margin: 0;
+    /* Sticky Footer를 위한 설정 끝 */
+}
+
+/* --- 라이트 모드 기본 변수 설정 --- */
+body {
+    --background-color: #f5f5f5;
+    --text-color: #333;
+    --header-bg-color: #2c3e50;
+    --header-text-color: white;
+    --tabs-bg-color: #34495e;
+    --tabs-active-bg-color: #1abc9c;
+    --table-header-bg: #f8f9fa;
+    --table-border-color: #ddd;
+    --footer-bg-color: #e0e0e0; /* 라이트 모드 푸터 배경색 */
+    --footer-text-color: #555; /* 라이트 모드 푸터 글자색 */
+    --common-button-bg: #1abc9c;
+    --common-button-hover-bg: #16a085;
 }
 
 header {
-    background: #2c3e50;
-    color: white;
+    background: var(--header-bg-color); /* CSS 변수 사용 */
+    color: var(--header-text-color); /* CSS 변수 사용 */
     padding: 20px;
+    text-align: center; /* 헤더 텍스트 중앙 정렬 유지 */
 }
+
+/* --- h2 태그 스타일 --- */
+h2.title { /* 기존 h2에 .title 클래스가 있으니 이를 활용 */
+    text-align: center; /* 텍스트를 중앙으로 정렬 */
+    margin-top: 30px; /* 상단 여백 (필요에 따라 조절) */
+    margin-bottom: 20px; /* 하단 여백 (필요에 따라 조절) */
+    color: var(--text-color); /* 다크모드에 맞춰 글자색 변수 사용 */
+}
+
+/* 메인 콘텐츠 영역 (Sticky Footer를 위해 필요) */
+/* etf-list.html 또는 etf-detail.html에 <main> 태그를 추가했다면 이 스타일이 적용됩니다. */
+main {
+    flex: 1; /* 남은 공간을 모두 차지하여 푸터를 하단으로 밀어냄 */
+    padding: 20px 0; /* 상하 여백 */
+    max-width: 90%; /* 너무 넓어지지 않도록 최대 너비 설정 */
+    margin: 0 auto; /* 중앙 정렬 */
+    width: 100%; /* 너비 100% 설정 */
+    box-sizing: border-box; /* 패딩 포함 너비 계산 */
+}
+
 
 .tabs {
     list-style: none;
     padding: 0;
     display: flex;
     justify-content: center;
-    background: #34495e;
+    background: var(--tabs-bg-color); /* CSS 변수 사용 */
 }
 
 .tabs li {
@@ -27,7 +71,7 @@ header {
 }
 
 .tabs li.active {
-    background: #1abc9c;
+    background: var(--tabs-active-bg-color); /* CSS 변수 사용 */
 }
 
 .tab-content {
@@ -40,64 +84,84 @@ header {
 }
 
 .data-table {
-    width: 80%;
-    margin: 0 auto;
+    width: 100%; /* 부모(main)의 100% 너비 */
+    margin: 20px auto; /* 상하 마진 추가 */
     border-collapse: collapse;
 }
 
 .data-table th, .data-table td {
-    border: 1px solid #ddd;
+    border: 1px solid var(--table-border-color); /* CSS 변수 사용 */
     padding: 10px;
 }
 
 .data-table th {
-    background: #f8f9fa;
+    background: var(--table-header-bg); /* CSS 변수 사용 */
 }
+
+/* --- 푸터 스타일 --- */
+/* JavaScript로 <div id="footer-placeholder"></div> 안에 footer.html 내용이 로드될 것이므로,
+   이 스타일은 로드된 `<footer>` 태그에 적용됩니다. */
+footer {
+    background-color: var(--footer-bg-color); /* CSS 변수 사용 */
+    color: var(--footer-text-color); /* CSS 변수 사용 */
+    padding: 20px 0; /* 상하 여백, 좌우는 없앰 */
+    text-align: center;
+    border-top: 1px solid var(--table-border-color); /* 상단 구분선 (테이블 보더와 색상 통일) */
+    margin-top: 40px; /* 메인 콘텐츠와의 간격 */
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05); /* 미묘한 그림자 효과 */
+    width: 100%; /* 푸터는 전체 너비 사용 */
+    box-sizing: border-box; /* 패딩 포함 너비 계산 */
+}
+
+footer p {
+    margin: 5px 0; /* 단락 간 간격 */
+    font-size: 0.9em; /* 글자 크기 조정 */
+}
+
 
 /* 🌙 다크모드 스타일 */
 body.dark-mode {
-    background: #1e1e1e;
-    color: #e0e0e0;
+    --background-color: #1e1e1e;
+    --text-color: #e0e0e0;
+    --header-bg-color: #333;
+    --header-text-color: #f0f0f0;
+    --tabs-bg-color: #444;
+    --tabs-active-bg-color: #1abc9c; /* 다크모드에서도 활성 탭 색상 유지 */
+    --table-header-bg: #555;
+    --table-border-color: #444;
+    --footer-bg-color: #2a2a2a; /* 다크 모드 푸터 배경색 */
+    --footer-text-color: #cccccc; /* 다크 모드 푸터 글자색 */
+    --common-button-bg: #ffcc00; /* 다크모드 버튼 색상 */
+    --common-button-hover-bg: #e6b800; /* 다크모드 버튼 호버 색상 */
 }
 
-body.dark-mode header {
-    background: #333;
-}
-
-body.dark-mode .tabs {
-    background: #444;
-}
-
-body.dark-mode .tabs li.active {
-    background: #1abc9c;
-}
-
-body.dark-mode .data-table th {
-    background: #555;
-}
-
-body.dark-mode .data-table td {
-    background: #2c2c2c;
-}
-
+/* 기존 버튼 스타일에 변수 적용 */
 #theme-toggle {
+    background: var(--common-button-bg); /* CSS 변수 사용 */
+    color: var(--header-text-color); /* 글자색도 변수로 */
     position: absolute;
     top: 15px;
     right: 15px;
     padding: 10px 20px;
     font-size: 14px;
     cursor: pointer;
-    background: #1abc9c;
-    color: white;
     border: none;
     border-radius: 5px;
 }
 
-/* 🌙 다크모드 버튼 다크 테마 스타일 */
-body.dark-mode #theme-toggle {
+/* #theme-toggle에 :hover 추가 */
+#theme-toggle:hover {
+    background: var(--common-button-hover-bg);
+    /* 색상 반전 방지: 다크모드에서도 텍스트 색상이 바뀌지 않도록 */
+    color: var(--header-text-color);
+}
+
+/* 다크모드 버튼 다크 테마 스타일 (이제 CSS 변수로 처리되므로 필요 없어질 수 있음) */
+/* body.dark-mode #theme-toggle {
     background: #ffcc00;
     color: black;
-}
+} */
+
 
 .tooltip {
     display: none;
@@ -115,9 +179,9 @@ body.dark-mode #theme-toggle {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px; /* 입력 필드 간격 */
+    gap: 10px;
     margin-bottom: 15px;
-    flex-wrap: wrap; /* 반응형: 화면이 작아지면 줄바꿈 */
+    flex-wrap: wrap;
     max-width: 80%;
     margin-left: auto;
     margin-right: auto;
@@ -130,16 +194,18 @@ body.dark-mode #theme-toggle {
 .search-input {
     padding: 8px;
     width: 150px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--table-border-color); /* CSS 변수 사용 */
     border-radius: 5px;
     text-align: center;
+    background-color: var(--background-color); /* 입력 필드 배경색도 다크모드에 맞춤 */
+    color: var(--text-color); /* 입력 필드 글자색도 다크모드에 맞춤 */
 }
 
 .search-btn {
     padding: 8px 15px;
     border: none;
-    background-color: #1abc9c;
-    color: white;
+    background-color: var(--common-button-bg); /* CSS 변수 사용 */
+    color: var(--header-text-color); /* 버튼 글자색도 변수로 */
     font-weight: bold;
     cursor: pointer;
     border-radius: 5px;
@@ -147,7 +213,7 @@ body.dark-mode #theme-toggle {
 }
 
 .search-btn:hover {
-    background-color: #16a085;
+    background-color: var(--common-button-hover-bg); /* CSS 변수 사용 */
 }
 
 .pagination {
@@ -161,9 +227,9 @@ body.dark-mode #theme-toggle {
 }
 
 .page-btn {
-  background-color: #f1f1f1;
-  border: 1px solid #ccc;
-  color: #333;
+  background-color: var(--background-color); /* 페이지 버튼 배경색도 변수로 */
+  border: 1px solid var(--table-border-color); /* 페이지 버튼 테두리도 변수로 */
+  color: var(--text-color); /* 페이지 버튼 글자색도 변수로 */
   padding: 8px 14px;
   cursor: pointer;
   border-radius: 6px;
@@ -171,29 +237,29 @@ body.dark-mode #theme-toggle {
 }
 
 .page-btn:hover {
-  background-color: #007bff;
-  color: white;
+  background-color: var(--common-button-hover-bg); /* 호버 색상도 변수로 */
+  color: var(--header-text-color); /* 호버 시 글자색도 변수로 */
 }
 
 .page-btn.active {
-  background-color: #007bff;
-  color: white;
+  background-color: var(--common-button-bg); /* 활성 버튼 색상도 변수로 */
+  color: var(--header-text-color); /* 활성 버튼 글자색도 변수로 */
   font-weight: bold;
 }
 
 .page-btn:disabled {
-  background-color: #e0e0e0;
-  color: #888;
+  background-color: var(--table-header-bg); /* 비활성 버튼 색상도 변수로 */
+  color: var(--footer-text-color); /* 비활성 버튼 글자색도 변수로 */
   cursor: not-allowed;
 }
 
 #home-title {
-    cursor: pointer;         /* 마우스 포인터를 손 모양으로 */
-    transition: color 0.2s;  /* 색상 변경 부드럽게 */
-  }
-  
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
 #home-title:hover {
-color: #007bff; /* 또는 네이비/파랑 등 강조 색 */
+    color: var(--tabs-active-bg-color); /* 탭 활성 색상과 통일 */
 }
 
 .select-wrapper {
@@ -204,12 +270,14 @@ color: #007bff; /* 또는 네이비/파랑 등 강조 색 */
 #brands {
   padding: 8px;
   width: 150px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--table-border-color); /* CSS 변수 사용 */
   border-radius: 5px;
   text-align: center;
-  appearance: none; /* 기본 화살표 제거 */
-  background-color: white;
+  appearance: none;
+  background-color: var(--background-color); /* 선택 박스 배경색도 다크모드에 맞춤 */
+  color: var(--text-color); /* 선택 박스 글자색도 다크모드에 맞춤 */
   font-size: 14px;
+  /* SVG 이미지 색상도 다크모드에 맞춰 조정 필요 (CSS로 직접 변경 어려움, JS로 변경하거나 필터 사용) */
   background-image: url('data:image/svg+xml;utf8,<svg fill="gray" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
   background-repeat: no-repeat;
   background-position: right 10px center;

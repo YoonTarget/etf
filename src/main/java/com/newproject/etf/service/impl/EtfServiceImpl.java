@@ -1,5 +1,6 @@
 package com.newproject.etf.service.impl;
 
+import com.newproject.etf.dto.EtfDto;
 import com.newproject.etf.entity.EtfEntity;
 import com.newproject.etf.repository.EtfBatchJdbcRepository;
 import com.newproject.etf.service.EtfService;
@@ -27,6 +28,8 @@ public class EtfServiceImpl implements EtfService {
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
     @Value("${api.service-key}")
     private String serviceKey;
+    @Value("${api.base-url}")
+    private String baseUrl;
 
     @Autowired
     public EtfServiceImpl(WebClient webClient, EtfBatchJdbcRepository etfBatchJdbcRepository) {
@@ -35,25 +38,25 @@ public class EtfServiceImpl implements EtfService {
     }
 
     @Override
-    public Mono<ResponseEntity<String>> list(String endPoint, Map<String, String> queryParams) {
-        String endBasDtRaw = queryParams.get("endBasDt");
+    public Mono<ResponseEntity<String>> list(String endPoint, EtfDto queryParams) {
+        String endBasDtRaw = queryParams.getEndBasDt();
         String formattedEndBasDt = StringUtils.hasText(endBasDtRaw)
                 ? LocalDate.parse(endBasDtRaw.replace("-", ""), formatter).plusDays(1).format(formatter)
                 : "";
 
-        StringBuilder url = new StringBuilder("https://apis.data.go.kr/1160100/service/GetSecuritiesProductInfoService/")
+        StringBuilder url = new StringBuilder(baseUrl)
                 .append(endPoint)
                 .append("?resultType=json")
                 .append("&serviceKey=")
                         .append(serviceKey)
                 .append("&numOfRows=")
-                        .append(queryParams.getOrDefault("numOfRows", "10"))
+                        .append(queryParams.getNumOfRows())
                 .append("&pageNo=")
-                        .append(queryParams.getOrDefault("pageNo", "1"))
+                        .append(queryParams.getPageNo())
                 .append("&likeItmsNm=")
-                        .append(URLEncoder.encode(queryParams.getOrDefault("likeItmsNm", "").toUpperCase(), StandardCharsets.UTF_8))
+                        .append(URLEncoder.encode(queryParams.getLikeItmsNm().toUpperCase(), StandardCharsets.UTF_8))
                 .append("&beginBasDt=")
-                        .append(queryParams.getOrDefault("beginBasDt", "").replace("-", ""))
+                        .append(queryParams.getBeginBasDt().replace("-", ""))
                 .append("&endBasDt=")
                         .append(formattedEndBasDt)
                 ;

@@ -8,6 +8,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "index"; // templates/index.html을 반환
+        return "etf-list"; // templates/etf-list.html을 반환
     }
 }

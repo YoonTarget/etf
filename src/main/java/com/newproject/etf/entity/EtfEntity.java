@@ -3,21 +3,27 @@ package com.newproject.etf.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "etf_entity")
+@Table(name = "etf_price_info")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@IdClass(EtfPriceInfoId.class) // 복합 키 클래스 지정
 public class EtfEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // ID
+    @Id // basDt를 복합 키의 첫 번째 부분으로 지정
+    @Column(name = "bas_dt", nullable = false)
+    private String basDt; // 기준일자 (YYYYMMDD 형식)
+
+    @Id // itmsNm을 복합 키의 두 번째 부분으로 지정
+    @Column(name = "itms_nm", nullable = false)
+    private String itmsNm; // 종목명
 
     @Column(name = "flt_rt", precision = 5, scale = 2)
     private BigDecimal fltRt; // 등락률
@@ -55,17 +61,11 @@ public class EtfEntity {
     @Column(name = "bss_idx_clpr", precision = 10, scale = 3)
     private BigDecimal bssIdxClpr; // 기초지수_종가
 
-    @Column(name = "bas_dt")
-    private String basDt; // 기준일자
-
     @Column(name = "srtn_cd", length = 6)
     private String srtnCd; // 단축코드
 
     @Column(name = "isin_cd", length = 12)
     private String isinCd; // ISIN코드
-
-    @Column(name = "itms_nm", length = 120)
-    private String itmsNm; // 종목명
 
     @Column(name = "clpr", precision = 10, scale = 0)
     private BigDecimal clpr; // 종가

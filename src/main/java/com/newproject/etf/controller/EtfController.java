@@ -1,5 +1,6 @@
 package com.newproject.etf.controller;
 
+import com.newproject.etf.dto.EtfDto;
 import com.newproject.etf.entity.EtfEntity;
 import com.newproject.etf.service.EtfService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class EtfController {
     }
 
     @GetMapping(value = "/{apiName}")
-    public Mono<ResponseEntity<String>> getPriceInfo(Model model, @PathVariable("apiName") String apiName, @RequestParam Map<String, String> queryParams) {
+    public Mono<ResponseEntity<String>> getPriceInfo(Model model, @PathVariable("apiName") String apiName, EtfDto queryParams) {
         return etfService.list(apiName, queryParams);
     }
 

@@ -27,11 +27,4 @@ public class EtfController {
     public Mono<ResponseEntity<String>> getPriceInfo(Model model, @PathVariable("apiName") String apiName, EtfDto queryParams) {
         return etfService.list(apiName, queryParams);
     }
-
-    @PostMapping(value = "/save")
-    public void saveAllEtfData(@RequestBody List<EtfEntity> etfEntities) {
-        // 데이터 저장 로직 구현
-        // 예: etfService.saveAll(data);
-        etfService.saveAll(etfEntities);
-    }
 }

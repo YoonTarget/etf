@@ -10,6 +10,4 @@ import java.util.Map;
 
 public interface EtfService {
     public Mono<ResponseEntity<String>> list(String endPoint, EtfDto queryParams);
-
-    public void saveAll(List<EtfEntity> entities);
 }

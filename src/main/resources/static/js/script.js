@@ -27,8 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let startPageNo = 0; // 시작 페이지
     let endPageNo = 0; // 마지막 페이지
     let params = new URLSearchParams(this.location.search);
-    document.getElementById("start-date").value = params.get("beginBasDt") || "";
-    document.getElementById("end-date").value = params.get("endBasDt") || "";
+//    document.getElementById("start-date").value = params.get("beginBasDt") || "";
+//    document.getElementById("end-date").value = params.get("endBasDt") || "";
     document.getElementById("search-id").value = params.get("likeItmsNm") || "";
 
     fetchData();

@@ -18,6 +18,7 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.batch.item.support.ListItemReader;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -32,12 +33,12 @@ import java.util.Optional;
 @EnableBatchProcessing
 public class EtfBatchConfig {
 
+    public static final String JOB_NAME = "importEtfDataJob";
+
     private final EtfApiService etfApiService;
     private final EntityManagerFactory entityManagerFactory;
     private final PlatformTransactionManager transactionManager;
     private final JobRepository jobRepository;
-
-    private LocalDate targetDate; // JobParameter로 받을 날짜 저장용 필드
 
     public EtfBatchConfig(EtfApiService etfApiService, EntityManagerFactory entityManagerFactory,
                           PlatformTransactionManager transactionManager, JobRepository jobRepository) {
@@ -47,27 +48,25 @@ public class EtfBatchConfig {
         this.jobRepository = jobRepository;
     }
 
-    @BeforeStep // Step 실행 전에 호출되는 메서드
-    public void beforeStep(StepExecution stepExecution) {
-        String dateString = stepExecution.getJobParameters().getString("targetDate");
-        if (dateString != null) {
-            this.targetDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("yyyyMMdd"));
-            System.out.println("[EtfBatchConfig] Setting targetDate from JobParameter: " + targetDate);
-        } else {
-            this.targetDate = LocalDate.now(); // 파라미터 없으면 기본값으로 오늘 날짜 사용
-            System.out.println("[EtfBatchConfig] No targetDate JobParameter found. Using current date: " + targetDate);
-        }
-    }
-
     // 1. ItemReader: API에서 데이터를 읽어오는 부분
     @Bean
-    public ItemReader<EtfDto> etfApiReader() {
-        System.out.println("[EtfBatchConfig] Initializing etfApiReader for date: " + targetDate);
-        List<EtfDto> allItems = etfApiService.fetchAllEtfDataForDate(targetDate)
+    public ItemReader<EtfDto> etfApiReader(@Value("#{jobParameters['targetDate']}") String targetDateString) {
+        // targetDateString이 null이거나 비어있을 경우 기본값 설정
+        LocalDate actualTargetDate;
+        if (targetDateString != null && !targetDateString.isEmpty()) {
+            actualTargetDate = LocalDate.parse(targetDateString, DateTimeFormatter.ofPattern("yyyyMMdd"));
+            System.out.println("[EtfBatchConfig] Initializing etfApiReader for date from JobParameter: " + actualTargetDate);
+        } else {
+            actualTargetDate = LocalDate.now(); // Job Parameter가 없으면 오늘 날짜 사용
+            System.out.println("[EtfBatchConfig] No targetDate JobParameter found. Using current date: " + actualTargetDate);
+        }
+
+        System.out.println("[EtfBatchConfig] Initializing etfApiReader for date: " + actualTargetDate);
+        List<EtfDto> allItems = etfApiService.fetchAllEtfDataForDate(actualTargetDate)
                 .collectList()
                 .block(); // Flux를 List로 변환하고 블로킹
 
-        System.out.println("[EtfBatchConfig] Finished reading data from API for date: " + targetDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ". Total items: " + allItems.size());
+        System.out.println("[EtfBatchConfig] Finished reading data from API for date: " + actualTargetDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ". Total items: " + allItems.size());
         return new ListItemReader<>(allItems);
     }
 
@@ -143,7 +142,7 @@ public class EtfBatchConfig {
         System.out.println("[EtfBatchConfig] Building etfDataLoadingStep.");
         return new StepBuilder("etfDataLoadingStep", jobRepository)
                 .<EtfDto, EtfEntity>chunk(100, transactionManager) // 청크 사이즈, DTO -> Entity
-                .reader(etfApiReader())
+                .reader(etfApiReader(null))
                 .processor(etfItemProcessor())
                 .writer(etfDbWriter())
                 .build();
@@ -153,7 +152,7 @@ public class EtfBatchConfig {
     @Bean
     public Job importEtfDataJob(EtfJobCompletionNotificationListener listener) {
         System.out.println("[EtfBatchConfig] Building importEtfDataJob.");
-        return new JobBuilder("importEtfDataJob", jobRepository)
+        return new JobBuilder(JOB_NAME, jobRepository)
                 .listener(listener) // Job 완료/실패 후 동작할 리스너
                 .start(etfDataLoadingStep())
                 .build();

@@ -1,15 +1,16 @@
 package com.newproject.etf.config;
 
+import com.newproject.etf.batch.EtfApiPagingReader; // 새롭게 만든 Reader 임포트
 import com.newproject.etf.dto.EtfDto;
 import com.newproject.etf.entity.EtfEntity;
 import com.newproject.etf.listener.EtfJobCompletionNotificationListener;
 import com.newproject.etf.service.EtfApiService;
 import jakarta.persistence.EntityManagerFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -17,7 +18,6 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
-import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,47 +31,41 @@ import java.util.Optional;
 
 @Configuration
 @EnableBatchProcessing
+@RequiredArgsConstructor
 public class EtfBatchConfig {
 
     public static final String JOB_NAME = "importEtfDataJob";
+    private static final int API_PAGE_SIZE = 10000; // API에서 한 번에 가져올 최대 건수
 
     private final EtfApiService etfApiService;
     private final EntityManagerFactory entityManagerFactory;
     private final PlatformTransactionManager transactionManager;
     private final JobRepository jobRepository;
 
-    public EtfBatchConfig(EtfApiService etfApiService, EntityManagerFactory entityManagerFactory,
-                          PlatformTransactionManager transactionManager, JobRepository jobRepository) {
-        this.etfApiService = etfApiService;
-        this.entityManagerFactory = entityManagerFactory;
-        this.transactionManager = transactionManager;
-        this.jobRepository = jobRepository;
-    }
 
-    // 1. ItemReader: API에서 데이터를 읽어오는 부분
+    // 1. ItemReader: API에서 데이터를 페이지별로 읽어오는 부분
     @Bean
-    public ItemReader<EtfDto> etfApiReader(@Value("#{jobParameters['targetDate']}") String targetDateString) {
-        // targetDateString이 null이거나 비어있을 경우 기본값 설정
+    @StepScope // Step 실행 시점에 생성되도록 StepScope 사용
+    public ItemReader<EtfDto> etfApiPagingReader(
+            @Value("#{jobParameters[targetDate]}") String targetDateString) {
+
+        // Job Parameter에서 받은 날짜를 LocalDate로 파싱하거나, 없으면 오늘 날짜 사용
         LocalDate actualTargetDate;
         if (targetDateString != null && !targetDateString.isEmpty()) {
             actualTargetDate = LocalDate.parse(targetDateString, DateTimeFormatter.ofPattern("yyyyMMdd"));
-            System.out.println("[EtfBatchConfig] Initializing etfApiReader for date from JobParameter: " + actualTargetDate);
+            System.out.println("[EtfBatchConfig] Initializing etfApiPagingReader for date from JobParameter: " + actualTargetDate);
         } else {
-            actualTargetDate = LocalDate.now(); // Job Parameter가 없으면 오늘 날짜 사용
+            actualTargetDate = LocalDate.now(); // Job Parameter가 없으면 오늘 날짜 사용 (권장하지 않음, 파라미터 필수)
             System.out.println("[EtfBatchConfig] No targetDate JobParameter found. Using current date: " + actualTargetDate);
         }
 
-        System.out.println("[EtfBatchConfig] Initializing etfApiReader for date: " + actualTargetDate);
-        List<EtfDto> allItems = etfApiService.fetchAllEtfDataForDate(actualTargetDate)
-                .collectList()
-                .block(); // Flux를 List로 변환하고 블로킹
-
-        System.out.println("[EtfBatchConfig] Finished reading data from API for date: " + actualTargetDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ". Total items: " + allItems.size());
-        return new ListItemReader<>(allItems);
+        // 새롭게 구현한 EtfApiPagingReader를 반환
+        return new EtfApiPagingReader(etfApiService, actualTargetDate, API_PAGE_SIZE);
     }
 
     // 2. ItemProcessor: 읽어온 데이터를 가공 (DTO -> Entity)
     @Bean
+    @StepScope
     public ItemProcessor<EtfDto, EtfEntity> etfItemProcessor() {
         return dto -> {
             EtfEntity entity = new EtfEntity();
@@ -79,7 +73,6 @@ public class EtfBatchConfig {
             entity.setItmsNm(dto.getItmsNm());
 
             try {
-                // null이거나 빈 문자열일 경우 처리하여 NumberFormatException 방지
                 entity.setFltRt(parseBigDecimal(dto.getFltRt()));
                 entity.setNav(parseBigDecimal(dto.getNav()));
                 entity.setMkp(parseBigDecimal(dto.getMkp()));
@@ -96,7 +89,6 @@ public class EtfBatchConfig {
 
             } catch (NumberFormatException e) {
                 System.err.println("Number format error for item: " + dto.getItmsNm() + " on date " + dto.getBasDt() + ". Error: " + e.getMessage());
-                // 오류가 발생한 항목은 건너뛰기
                 return null;
             }
 
@@ -108,7 +100,6 @@ public class EtfBatchConfig {
         };
     }
 
-    // Helper method for safe BigDecimal parsing
     private BigDecimal parseBigDecimal(String value) {
         return Optional.ofNullable(value)
                 .filter(s -> !s.isEmpty())
@@ -116,7 +107,6 @@ public class EtfBatchConfig {
                 .orElse(null);
     }
 
-    // Helper method for safe Long parsing
     private Long parseLong(String value) {
         return Optional.ofNullable(value)
                 .filter(s -> !s.isEmpty())
@@ -126,13 +116,11 @@ public class EtfBatchConfig {
 
     // 3. ItemWriter: 가공된 데이터를 DB에 저장 (UPSERT)
     @Bean
+    @StepScope
     public ItemWriter<EtfEntity> etfDbWriter() {
         System.out.println("[EtfBatchConfig] Initializing etfDbWriter.");
         JpaItemWriterBuilder<EtfEntity> writerBuilder = new JpaItemWriterBuilder<EtfEntity>()
                 .entityManagerFactory(entityManagerFactory);
-
-        // 복합 키를 사용한 UPSERT (INSERT OR UPDATE) 전략
-        // 기본키가 이미 존재하면 UPDATE, 없으면 INSERT (JPA 기본 동작)
         return writerBuilder.build();
     }
 
@@ -141,8 +129,8 @@ public class EtfBatchConfig {
     public Step etfDataLoadingStep() {
         System.out.println("[EtfBatchConfig] Building etfDataLoadingStep.");
         return new StepBuilder("etfDataLoadingStep", jobRepository)
-                .<EtfDto, EtfEntity>chunk(100, transactionManager) // 청크 사이즈, DTO -> Entity
-                .reader(etfApiReader(null))
+                .<EtfDto, EtfEntity>chunk(5000, transactionManager) // 청크 사이즈: 5000건씩 처리
+                .reader(etfApiPagingReader(null)) // @StepScope 빈은 Spring에 의해 자동 주입되므로 null 전달
                 .processor(etfItemProcessor())
                 .writer(etfDbWriter())
                 .build();
@@ -153,7 +141,7 @@ public class EtfBatchConfig {
     public Job importEtfDataJob(EtfJobCompletionNotificationListener listener) {
         System.out.println("[EtfBatchConfig] Building importEtfDataJob.");
         return new JobBuilder(JOB_NAME, jobRepository)
-                .listener(listener) // Job 완료/실패 후 동작할 리스너
+                .listener(listener)
                 .start(etfDataLoadingStep())
                 .build();
     }

@@ -1,4 +1,3 @@
-// src/main/java/com/newproject/etf/scheduler/EtfBatchScheduler.java (예시)
 package com.newproject.etf.scheduler;
 
 import com.newproject.etf.config.EtfBatchConfig;
@@ -22,29 +21,41 @@ import java.time.format.DateTimeFormatter;
 public class EtfBatchScheduler {
 
     private final JobLauncher jobLauncher;
-    private final Job importEtfDataJob; // EtfBatchConfig에서 정의한 Job 빈 주입
+    private final Job importEtfDataJob;
 
-    // 매일 새벽 2시에 실행 (예시)
-    // 초 분 시 일 월 요일
-    // @Scheduled(cron = "0 0 2 * * ?") // 실제 운영 시 사용
-    @Scheduled(fixedRate = 10000) // 테스트를 위해 10초마다 실행 (배포 시 주석 처리)
+    /**
+     * 매일 자정 (오전 0시 0분 0초)에 Job을 실행합니다.
+     * cron = "초 분 시 일 월 요일"
+     * ?는 일과 요일 중 하나만 지정할 때 사용합니다.
+     */
+    @Scheduled(cron = "0 30 19 * * ?") // 매일 자정
     public void runEtfDataImportJob() {
         try {
             // Job Parameters 생성
-            // 'targetDate' 파라미터는 'YYYYMMDD' 형식으로 전달
-            // Job 인스턴스의 고유성을 보장하기 위해 date와 timestamp를 함께 사용
+            // 'targetDate'는 배치 Job이 처리할 기준 날짜를 의미합니다.
+            // 'time' 파라미터는 Job 인스턴스의 고유성을 보장하기 위해 매번 다른 값을 추가합니다.
             String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
             JobParameters jobParameters = new JobParametersBuilder()
-                    .addString("targetDate", currentDate) // 이 파라미터가 @Value("#{jobParameters[targetDate]}")로 주입됩니다.
-                    .addLong("time", System.currentTimeMillis()) // Job 인스턴스 중복 방지 (필수)
+                    .addString("targetDate", currentDate)
+                    .addLong("time", System.currentTimeMillis()) // 매번 다른 값으로 Job 인스턴스 중복 방지
                     .toJobParameters();
 
-            System.out.println("[EtfBatchScheduler] Launching job: " + EtfBatchConfig.JOB_NAME + " with targetDate: " + currentDate);
+            System.out.println("[EtfBatchScheduler] Launching job: " + EtfBatchConfig.JOB_NAME + " for targetDate: " + currentDate);
             jobLauncher.run(importEtfDataJob, jobParameters);
             System.out.println("[EtfBatchScheduler] Job launched successfully.");
 
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException e) {
-            System.err.println("[EtfBatchScheduler] Error running job: " + e.getMessage());
+        } catch (JobExecutionAlreadyRunningException e) {
+            System.err.println("[EtfBatchScheduler] Job is already running for this instance: " + e.getMessage());
+        } catch (JobInstanceAlreadyCompleteException e) {
+            System.err.println("[EtfBatchScheduler] Job instance already completed for today: " + e.getMessage());
+            // 일반적으로 cron으로 매일 실행 시 JobParameters가 매번 달라지므로 이 예외는 발생하지 않습니다.
+            // 하지만 JobParameters가 동일하다면 발생할 수 있습니다.
+        } catch (JobRestartException e) {
+            System.err.println("[EtfBatchScheduler] Job restart failed: " + e.getMessage());
+        } catch (JobParametersInvalidException e) {
+            System.err.println("[EtfBatchScheduler] Invalid Job Parameters: " + e.getMessage());
+        } catch (Exception e) { // 기타 예상치 못한 예외 처리
+            System.err.println("[EtfBatchScheduler] An unexpected error occurred: " + e.getMessage());
             e.printStackTrace();
         }
     }

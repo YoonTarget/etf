@@ -46,21 +46,9 @@ public class EtfBatchConfig {
     // 1. ItemReader: API에서 데이터를 페이지별로 읽어오는 부분
     @Bean
     @StepScope // Step 실행 시점에 생성되도록 StepScope 사용
-    public ItemReader<EtfDto> etfApiPagingReader(
-            @Value("#{jobParameters[targetDate]}") String targetDateString) {
-
-        // Job Parameter에서 받은 날짜를 LocalDate로 파싱하거나, 없으면 오늘 날짜 사용
-        LocalDate actualTargetDate;
-        if (targetDateString != null && !targetDateString.isEmpty()) {
-            actualTargetDate = LocalDate.parse(targetDateString, DateTimeFormatter.ofPattern("yyyyMMdd"));
-            System.out.println("[EtfBatchConfig] Initializing etfApiPagingReader for date from JobParameter: " + actualTargetDate);
-        } else {
-            actualTargetDate = LocalDate.now(); // Job Parameter가 없으면 오늘 날짜 사용 (권장하지 않음, 파라미터 필수)
-            System.out.println("[EtfBatchConfig] No targetDate JobParameter found. Using current date: " + actualTargetDate);
-        }
-
+    public ItemReader<EtfDto> etfApiPagingReader() {
         // 새롭게 구현한 EtfApiPagingReader를 반환
-        return new EtfApiPagingReader(etfApiService, actualTargetDate, API_PAGE_SIZE);
+        return new EtfApiPagingReader(etfApiService, API_PAGE_SIZE);
     }
 
     // 2. ItemProcessor: 읽어온 데이터를 가공 (DTO -> Entity)
@@ -130,7 +118,7 @@ public class EtfBatchConfig {
         System.out.println("[EtfBatchConfig] Building etfDataLoadingStep.");
         return new StepBuilder("etfDataLoadingStep", jobRepository)
                 .<EtfDto, EtfEntity>chunk(5000, transactionManager) // 청크 사이즈: 5000건씩 처리
-                .reader(etfApiPagingReader(null)) // @StepScope 빈은 Spring에 의해 자동 주입되므로 null 전달
+                .reader(etfApiPagingReader()) // @StepScope 빈은 Spring에 의해 자동 주입되므로 null 전달
                 .processor(etfItemProcessor())
                 .writer(etfDbWriter())
                 .build();

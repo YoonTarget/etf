@@ -30,9 +30,8 @@ public class EtfApiService {
         this.webClient = webClient;
     }
 
-    public Flux<EtfDto> fetchEtfData(LocalDate date, int pageNo, int numOfRows) {
-        String formattedDate = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        System.out.println("Calling external API with basDt: " + formattedDate + ", pageNo: " + pageNo + ", numOfRows: " + numOfRows);
+    public Flux<EtfDto> fetchEtfData(int pageNo, int numOfRows) {
+        System.out.println("Calling external API with pageNo: " + pageNo + ", numOfRows: " + numOfRows);
 
         String url = baseUrl +
                 "?serviceKey=" +

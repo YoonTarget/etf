@@ -21,18 +21,16 @@ import java.util.stream.Collectors; // List 조작을 위해 추가
 public class EtfApiPagingReader implements ItemStreamReader<EtfDto> {
 
     private final EtfApiService etfApiService;
-    private final LocalDate targetDate; // 스케줄러에서 넘겨받을 날짜
     private final int pageSize; // 한 번에 조회할 최대 갯수 (예: 10000)
 
-    private AtomicInteger currentPage = new AtomicInteger(1); // 현재 페이지 번호 (1부터 시작)
+    private AtomicInteger currentPage = new AtomicInteger(0); // 현재 페이지 번호 (1부터 시작)
     private Iterator<EtfDto> currentDataIterator; // 현재 페이지의 데이터를 담을 이터레이터
 
     // 생성자를 통해 필요한 의존성 주입
-    public EtfApiPagingReader(EtfApiService etfApiService, LocalDate targetDate, int pageSize) {
+    public EtfApiPagingReader(EtfApiService etfApiService, int pageSize) {
         this.etfApiService = etfApiService;
-        this.targetDate = targetDate;
         this.pageSize = pageSize;
-        System.out.println("[EtfApiPagingReader] Initialized for date: " + targetDate + ", pageSize: " + pageSize);
+        System.out.println("[EtfApiPagingReader] Initialized for pageSize: " + pageSize);
     }
 
     @Override
@@ -80,10 +78,10 @@ public class EtfApiPagingReader implements ItemStreamReader<EtfDto> {
     }
 
     private void loadPageData() {
-        System.out.println("[EtfApiPagingReader] Calling API for page " + currentPage.get() + ", size " + pageSize + " for date " + targetDate);
+        System.out.println("[EtfApiPagingReader] Calling API for page " + currentPage.get() + ", size " + pageSize);
         // EtfApiService를 통해 실제 API 호출을 수행
         // 예: etfApiService.fetchEtfData(targetDate, currentPage.get(), pageSize)
-        List<EtfDto> pageData = etfApiService.fetchEtfData(targetDate, currentPage.get(), pageSize)
+        List<EtfDto> pageData = etfApiService.fetchEtfData(currentPage.get(), pageSize)
                 .collectList()
                 .block(); // Flux를 List로 변환하고 블로킹
 

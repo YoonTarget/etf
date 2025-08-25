@@ -28,19 +28,18 @@ public class EtfBatchScheduler {
      * cron = "초 분 시 일 월 요일"
      * ?는 일과 요일 중 하나만 지정할 때 사용합니다.
      */
-    @Scheduled(cron = "0 53 17 * * ?") // 매일 자정
+    @Scheduled(cron = "0 49 22 * * ?") // 매일 자정
     public void runEtfDataImportJob() {
         try {
             // Job Parameters 생성
             // 'targetDate'는 배치 Job이 처리할 기준 날짜를 의미합니다.
             // 'time' 파라미터는 Job 인스턴스의 고유성을 보장하기 위해 매번 다른 값을 추가합니다.
-            String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
             JobParameters jobParameters = new JobParametersBuilder()
-                    .addString("targetDate", currentDate)
                     .addLong("time", System.currentTimeMillis()) // 매번 다른 값으로 Job 인스턴스 중복 방지
                     .toJobParameters();
 
-            System.out.println("[EtfBatchScheduler] Launching job: " + EtfBatchConfig.JOB_NAME + " for targetDate: " + currentDate);
+            System.out.println("[EtfBatchScheduler] Launching job: " + EtfBatchConfig.JOB_NAME + " with parameters: " + jobParameters);
+            // Job 실행
             jobLauncher.run(importEtfDataJob, jobParameters);
             System.out.println("[EtfBatchScheduler] Job launched successfully.");
 

@@ -9,6 +9,8 @@ import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -117,10 +119,22 @@ public class EtfBatchConfig {
     public Step etfDataLoadingStep() {
         System.out.println("[EtfBatchConfig] Building etfDataLoadingStep.");
         return new StepBuilder("etfDataLoadingStep", jobRepository)
-                .<EtfDto, EtfEntity>chunk(5000, transactionManager) // 청크 사이즈: 5000건씩 처리
+                .<EtfDto, EtfEntity>chunk(1000, transactionManager) // 청크 사이즈: 5000건씩 처리
                 .reader(etfApiPagingReader()) // @StepScope 빈은 Spring에 의해 자동 주입되므로 null 전달
                 .processor(etfItemProcessor())
                 .writer(etfDbWriter())
+                .transactionManager(transactionManager)
+                .listener(new StepExecutionListener() {
+                    @Override
+                    public void beforeStep(StepExecution stepExecution) {
+                        // 각 페이지 처리 전 3초 대기
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                })
                 .build();
     }
 

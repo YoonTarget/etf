@@ -3,8 +3,10 @@ package com.newproject.etf.service;
 import com.newproject.etf.dto.ApiResponse;
 import com.newproject.etf.dto.EtfDto;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -40,10 +42,14 @@ public class EtfApiService {
                 numOfRows +
                 "&pageNo=" +
                 pageNo +
-                "&resultType=json";
+                "&likeItmsNm=" + 
+                URLEncoder.encode("미국", StandardCharsets.UTF_8) +
+                "&resultType=json"
+        ;
 
         return webClient.get()
                 .uri(url)
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(ApiResponse.class) // Expect a wrapper object
                 .flatMapMany(response -> {

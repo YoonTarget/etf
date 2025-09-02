@@ -28,7 +28,7 @@ public class EtfBatchScheduler {
      * cron = "초 분 시 일 월 요일"
      * ?는 일과 요일 중 하나만 지정할 때 사용합니다.
      */
-    @Scheduled(cron = "0 7 22 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void runEtfDataImportJob() {
         try {
             // Job Parameters 생성

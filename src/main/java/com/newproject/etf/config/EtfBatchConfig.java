@@ -110,7 +110,9 @@ public class EtfBatchConfig {
     public ItemWriter<EtfEntity> etfDbWriter() {
         System.out.println("[EtfBatchConfig] Initializing etfDbWriter.");
         JpaItemWriterBuilder<EtfEntity> writerBuilder = new JpaItemWriterBuilder<EtfEntity>()
-                .entityManagerFactory(entityManagerFactory);
+                .entityManagerFactory(entityManagerFactory)
+                .usePersist(true) // UPSERT를 위해 persist 사용
+                ;
         return writerBuilder.build();
     }
 
@@ -124,12 +126,15 @@ public class EtfBatchConfig {
                 .processor(etfItemProcessor())
                 .writer(etfDbWriter())
                 .transactionManager(transactionManager)
+                .faultTolerant()
+                .skip(Exception.class)
+                .skipLimit(Integer.MAX_VALUE)
                 .listener(new StepExecutionListener() {
                     @Override
                     public void beforeStep(StepExecution stepExecution) {
-                        // 각 페이지 처리 전 3초 대기
+                        // 각 페이지 처리 전 5초 대기
                         try {
-                            Thread.sleep(3000);
+                            Thread.sleep(5000);
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }

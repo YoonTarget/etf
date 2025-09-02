@@ -28,8 +28,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Configuration
 @EnableBatchProcessing
@@ -53,11 +55,20 @@ public class EtfBatchConfig {
         return new EtfApiPagingReader(etfApiService, API_PAGE_SIZE);
     }
 
-    // 2. ItemProcessor: 읽어온 데이터를 가공 (DTO -> Entity)
+    // Processor: 중복 체크 + 데이터 변환
     @Bean
     @StepScope
     public ItemProcessor<EtfDto, EtfEntity> etfItemProcessor() {
+        Set<String> existingKeys = loadExistingEtfKeys();
+
         return dto -> {
+            String key = dto.getSrtnCd() + "_" + dto.getBasDt();
+
+            // 기존 데이터 중복이면 스킵
+            if (existingKeys.contains(key)) {
+                return null;
+            }
+
             EtfEntity entity = new EtfEntity();
             entity.setBasDt(dto.getBasDt());
             entity.setItmsNm(dto.getItmsNm());
@@ -76,18 +87,34 @@ public class EtfBatchConfig {
                 entity.setBssIdxClpr(parseBigDecimal(dto.getBssIdxClpr()));
                 entity.setClpr(parseBigDecimal(dto.getClpr()));
                 entity.setVs(parseBigDecimal(dto.getVs()));
-
             } catch (NumberFormatException e) {
-                System.err.println("Number format error for item: " + dto.getItmsNm() + " on date " + dto.getBasDt() + ". Error: " + e.getMessage());
-                return null;
+                System.err.println("Number format error for item: " + dto.getItmsNm() + " on date " + dto.getBasDt());
+                return null; // 변환 불가 항목 스킵
             }
 
             entity.setSrtnCd(dto.getSrtnCd());
             entity.setIsinCd(dto.getIsinCd());
             entity.setBssIdxIdxNm(dto.getBssIdxIdxNm());
 
+            // 배치 내 중복 방지
+            existingKeys.add(key);
+
             return entity;
         };
+    }
+
+    private Set<String> loadExistingEtfKeys() {
+        var em = entityManagerFactory.createEntityManager();
+        Set<String> keys = new HashSet<>();
+        try {
+            List<String> result = em.createQuery(
+                            "SELECT CONCAT(e.srtnCd, '_', e.basDt) FROM EtfEntity e", String.class)
+                    .getResultList();
+            keys.addAll(result);
+        } finally {
+            em.close();
+        }
+        return keys;
     }
 
     private BigDecimal parseBigDecimal(String value) {
@@ -111,7 +138,7 @@ public class EtfBatchConfig {
         System.out.println("[EtfBatchConfig] Initializing etfDbWriter.");
         JpaItemWriterBuilder<EtfEntity> writerBuilder = new JpaItemWriterBuilder<EtfEntity>()
                 .entityManagerFactory(entityManagerFactory)
-                .usePersist(true) // UPSERT를 위해 persist 사용
+                .usePersist(true)
                 ;
         return writerBuilder.build();
     }
@@ -121,14 +148,11 @@ public class EtfBatchConfig {
     public Step etfDataLoadingStep() {
         System.out.println("[EtfBatchConfig] Building etfDataLoadingStep.");
         return new StepBuilder("etfDataLoadingStep", jobRepository)
-                .<EtfDto, EtfEntity>chunk(1000, transactionManager) // 청크 사이즈: 5000건씩 처리
-                .reader(etfApiPagingReader()) // @StepScope 빈은 Spring에 의해 자동 주입되므로 null 전달
+                .<EtfDto, EtfEntity>chunk(1000, transactionManager) // 청크 사이즈: 1000건씩 처리
+                .reader(etfApiPagingReader())
                 .processor(etfItemProcessor())
                 .writer(etfDbWriter())
                 .transactionManager(transactionManager)
-                .faultTolerant()
-                .skip(Exception.class)
-                .skipLimit(Integer.MAX_VALUE)
                 .listener(new StepExecutionListener() {
                     @Override
                     public void beforeStep(StepExecution stepExecution) {

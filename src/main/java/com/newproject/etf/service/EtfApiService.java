@@ -23,6 +23,7 @@ public class EtfApiService {
 
     @Value("${api.base-url}")
     private String baseUrl;
+
     @Value("${api.service-key}")
     private String serviceKey;
 

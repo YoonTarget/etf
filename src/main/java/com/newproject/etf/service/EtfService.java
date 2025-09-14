@@ -236,6 +236,13 @@ public class EtfService {
         etfRepository.deleteAll();
     }
 
+    /**
+     * 가장 최근 날짜의 모든 ETF 데이터 조회
+     */
+    public List<EtfEntity> getRecentEtfData() {
+        return etfRepository.findLatestEtfData();
+    }
+
     // === 내부 클래스: 통계 데이터 ===
 
     public static class MarketCapStats {

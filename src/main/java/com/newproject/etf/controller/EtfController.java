@@ -10,15 +10,21 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/etf")
 public class EtfController {
     private final EtfService etfService;
 
-    @GetMapping("/etf/{date}")
+    @GetMapping("/recent")
+    public List<EtfEntity> getRecentEtfData() {
+        return etfService.getRecentEtfData();
+    }
+
+    @GetMapping("/{date}")
     public List<EtfEntity> getEtfByDate(@PathVariable String date) {
         return etfService.getEtfDataByDate(date);
     }
 
-    @GetMapping("/etf/{date}/{name}")
+    @GetMapping("/{date}/{name}")
     public Optional<EtfEntity> getEtf(@PathVariable String date, @PathVariable String name) {
         return etfService.getEtfById(date, name);
     }

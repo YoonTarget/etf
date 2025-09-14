@@ -110,4 +110,10 @@ public interface EtfRepository extends JpaRepository<EtfEntity, EtfPriceInfoId> 
     long countByConditions(@Param("basDt") String basDt,
                            @Param("minRate") BigDecimal minRate,
                            @Param("minVolume") Long minVolume);
+
+    /**
+     * 가장 최근 날짜의 모든 ETF 데이터 조회
+     */
+    @Query("SELECT e FROM EtfEntity e WHERE e.basDt = (SELECT MAX(e2.basDt) FROM EtfEntity e2)")
+    List<EtfEntity> findLatestEtfData();
 }

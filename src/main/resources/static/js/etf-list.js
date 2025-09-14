@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const url = `${location.pathname}?${params.toString()}`;
         history.pushState({}, "", url);
 
-        fetch(`/openDataApi/get${params.get("tab") || "ETF"}PriceInfo?${params.toString()}`)
+        fetch(`/etf/recent?${params.toString()}`)
             .then(res => {
                 if (!res.ok) {
                     throw new Error("서버 응답 오류");

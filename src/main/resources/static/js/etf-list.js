@@ -79,75 +79,58 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(err => console.error("데이터 불러오기 실패:", err));
     };
 
-    // 🎯 데이터를 화면에 렌더링하는 함수
+    // 🎯 데이터를 화면에 렌더링하는 함수 (수정됨)
     function renderData(data) {
         const tableBody = document.getElementById("list");
         tableBody.innerHTML = ""; // 기존 데이터 초기화
 
-        const body = data?.response?.body;
-        const item = body?.items?.item;
+        // 기존의 페이징 로직 및 변수들은 모두 삭제합니다.
+        // data는 이미 모든 최신 데이터가 담긴 배열입니다.
+        const items = data;
 
-        pageNo = body?.pageNo; // ex) 1
-        numOfRows = body?.numOfRows; // ex) 10
-        totalCount = body?.totalCount; // ex) 109
-        totalPages = Math.ceil(totalCount / numOfRows); // ex) 11
-
-        let pagination = document.getElementById("pagination");
-
-        pagination.innerHTML = `
-            <button class="page-btn" title="첫 페이지" ${pageNo === 1 ? 'disabled' : ''}>처음</button>
-            <button class="page-btn" title="이전 페이지" ${pageNo === 1 ? 'disabled' : ''}>이전</button>
-        `;
-
-        startPageNo = Math.floor((pageNo - 1) / numOfRows) * numOfRows + 1;
-        endPageNo = Math.min(startPageNo + numOfRows - 1, totalPages);
-        for(let i = startPageNo; i <= endPageNo; i++) {
-            pagination.innerHTML += `
-                <button class="page-btn ${i === pageNo ? 'active' : ''}">${i}</button>
-            `;
+        // 데이터가 없는 경우를 처리합니다.
+        if (!items || items.length === 0) {
+            tableBody.innerHTML = "<tr><td colspan='7'>데이터가 없습니다.</td></tr>";
+            return;
         }
 
-        pagination.innerHTML += `
-            <button class="page-btn" title="다음 페이지" ${pageNo === totalPages ? 'disabled' : ''}>다음</button>
-            <button class="page-btn" title="마지막 페이지" ${pageNo === totalPages ? 'disabled' : ''}>마지막</button>
-        `;
+        // 데이터를 순회하며 테이블에 행을 추가합니다.
+        items.forEach(key => {
+            const row = document.createElement("tr");
 
-        if (item.length === 0) {
-            tableBody.innerHTML = "<tr><td colspan='7'>데이터가 없습니다.</td></tr>";
-        } else {
-            item.forEach(key => {
-                console.log(key);
-                const row = document.createElement("tr");
-                let basDt = key.basDt;
+            // 날짜 형식 변환 (YYYY-MM-DD)
+            let basDt = key.basDt;
+            if (basDt && basDt.length === 8) {
                 basDt = basDt.substring(0, 4) + "-" + basDt.substring(4, 6) + "-" + basDt.substring(6);
+            }
 
-                let fltRt = key.fltRt || "0";
-                let fltRtColor = "";
-                if(fltRt.startsWith(".")) {
-                    fltRt = "+0" + fltRt;
-                    fltRtColor = "color: red;";
-                }
-                else if(fltRt.startsWith("-")) {
-                    if(fltRt.startsWith("-.")) {
-                        fltRt = "-0" + fltRt.substring(fltRt.indexOf("."));
-                    }
-                    fltRtColor = "color: blue;";
-                }
-                else {
-                    fltRt = "+" + fltRt;
-                    fltRtColor = "color: red;";
-                }
-                row.innerHTML = `
-                    <td>${basDt}</td>
-                    <td><a href="" target="_blank">${key.itmsNm}</a></td>
-                    <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
-                    <td style="${fltRtColor}">${fltRt}%</td>
-                    <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>
-                    <td>${Number(key.trPrc)?.toLocaleString() || "0"}원</td>
-                    <td>${Number(key.mrktTotAmt)?.toLocaleString() || "0"}원</td>
-                `;
-                tableBody.appendChild(row);
-            });
+            // 등락률(fltRt) 포맷팅 및 색상 설정
+            const fltRtValue = Number(key.fltRt);
+            let fltRtColor = "";
+            if(fltRtValue > 0) {
+                fltRtColor = "color: red;";
+            }
+            else {
+                fltRtColor = "color: blue;";
+            }
+
+            row.innerHTML = `
+                <td>${basDt}</td>
+                <td><a href="" target="_blank">${key.itmsNm}</a></td>
+                <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
+                <td style="${fltRtColor}">${fltRtValue}%</td>
+                <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>
+                <td>${Number(key.trPrc)?.toLocaleString() || "0"}원</td>
+                <td>${Number(key.mrktTotAmt)?.toLocaleString() || "0"}원</td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // 모든 페이징 버튼 생성 코드를 삭제합니다.
+        // 필요한 경우, "pagination" 요소를 완전히 숨기거나 제거합니다.
+        const pagination = document.getElementById("pagination");
+        if (pagination) {
+            pagination.innerHTML = '';
         }
     }
 

@@ -25,6 +25,7 @@ repositories {
 
 dependencies {
 //	implementation 'org.mongodb:mongodb-driver-sync:5.3.0'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.postgresql:postgresql:42.7.2'
 	implementation 'org.springframework.boot:spring-boot-starter-batch'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

@@ -6,6 +6,7 @@ import com.newproject.etf.entity.EtfPriceInfoId;
 import com.newproject.etf.repository.EtfRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -239,6 +240,8 @@ public class EtfService {
     /**
      * 가장 최근 날짜의 모든 ETF 데이터 조회
      */
+    // ✅ "etfs"라는 이름의 캐시를 사용
+    @Cacheable(value = "etfs")
     public List<EtfEntity> getRecentEtfData() {
         return etfRepository.findLatestEtfData();
     }

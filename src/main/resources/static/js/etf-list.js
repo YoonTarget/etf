@@ -14,6 +14,7 @@ const brands = [
 ];
 
 document.addEventListener("DOMContentLoaded", function () {
+    let allItems = []; // 전체 데이터를 저장하는 전역 변수
     const tabs = document.querySelectorAll(".tab-link");
     let active = document.querySelector(".tab-link.active");
     const title = document.querySelector(".title");
@@ -30,6 +31,33 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("search-id").value = params.get("likeItmsNm") || "";
 
     fetchData();
+
+    document.getElementById("search-id").addEventListener("input", function(event) {
+        const searchValue = event.target.value.trim().toLowerCase();
+        filterAndRenderData(searchValue);
+    });
+
+    document.getElementById("search-btn").addEventListener("click", function() {
+        const searchValue = document.getElementById("search-id").value.trim().toLowerCase();
+        filterAndRenderData(searchValue);
+    });
+
+    // ✅ 전체 데이터를 필터링하고 렌더링하는 함수
+    function filterAndRenderData(searchValue) {
+        let filteredItems;
+        if (searchValue === "") {
+            // 검색어가 없으면 전체 데이터 사용
+            filteredItems = allItems;
+        } else {
+            // 종목명(itmsNm)을 기준으로 필터링 (대소문자 구분 없이)
+            filteredItems = allItems.filter(item => {
+                return item.itmsNm.toLowerCase().includes(searchValue);
+            });
+        }
+
+        // ✅ 필터링된 데이터와 함께 렌더링 함수 호출
+        renderData(filteredItems);
+    }
 
     title.addEventListener("mouseenter", function(event) {
         tooltip.innerText = tooltips["ETF"][1];
@@ -61,20 +89,21 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // API 호출 함수
+    // ✅ 수정된 fetchData 함수
     function fetchData() {
-        const url = `${location.pathname}?${params.toString()}`;
+        const url = `/etf/recent?${params.toString()}`;
         history.pushState({}, "", url);
 
-        fetch(`/etf/recent?${params.toString()}`)
+        fetch(url)
             .then(res => {
                 if (!res.ok) {
                     throw new Error("서버 응답 오류");
                 }
-                return res.json(); // JSON 데이터로 변환
+                return res.json();
             })
             .then(data => {
-                console.log("받은 데이터:", data);
-                renderData(data); // 렌더링 함수 호출
+                allItems = data; // 전체 데이터를 전역 변수에 저장
+                filterAndRenderData(""); // ✅ 초기 로딩 후 검색 기능 활성화 (빈 검색어로 시작)
             })
             .catch(err => console.error("데이터 불러오기 실패:", err));
     };
@@ -93,6 +122,12 @@ document.addEventListener("DOMContentLoaded", function () {
             tableBody.innerHTML = "<tr><td colspan='7'>데이터가 없습니다.</td></tr>";
             return;
         }
+
+        // --- 현재 페이지 데이터 추출 ---
+        // ✅ 필터링된 배열을 슬라이싱
+//        const startIndex = (pageNo - 1) * numOfRows;
+//        const endIndex = Math.min(startIndex + numOfRows, filteredItems.length);
+//        const currentPageItems = filteredItems.slice(startIndex, endIndex);
 
         // 데이터를 순회하며 테이블에 행을 추가합니다.
         items.forEach(key => {

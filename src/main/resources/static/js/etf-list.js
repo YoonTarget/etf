@@ -141,9 +141,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // 등락률(fltRt) 포맷팅 및 색상 설정
             const fltRtValue = Number(key.fltRt);
+            let fltRt = fltRtValue.toLocaleString();
             let fltRtColor = "";
             if(fltRtValue > 0) {
+                fltRt = `+${fltRt}`;
                 fltRtColor = "color: red;";
+            }
+            else if(fltRtValue === 0) {
+                fltRtColor = "color: black;";
             }
             else {
                 fltRtColor = "color: blue;";
@@ -153,7 +158,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <td>${basDt}</td>
                 <td><a href="" target="_blank">${key.itmsNm}</a></td>
                 <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
-                <td style="${fltRtColor}">${fltRtValue}%</td>
+                <td style="${fltRtColor}">${fltRt}%</td>
                 <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>
                 <td>${Number(key.trPrc)?.toLocaleString() || "0"}원</td>
                 <td>${Number(key.mrktTotAmt)?.toLocaleString() || "0"}원</td>

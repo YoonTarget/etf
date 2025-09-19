@@ -91,10 +91,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // API 호출 함수
     // ✅ 수정된 fetchData 함수
     function fetchData() {
-        const url = `/etf/recent?${params.toString()}`;
-        history.pushState({}, "", url);
+        // 💡 URL 파라미터만 업데이트하고, 기본 페이지 URL은 유지합니다.
+        const url = `${location.pathname}?${params.toString()}`;
+        history.pushState({}, "", url); // ✅ 주소창을 /etf?param=value 형태로 유지
 
-        fetch(url)
+        // ✅ API는 /etf/recent로 호출
+        fetch(`/etf/recent?${params.toString()}`)
             .then(res => {
                 if (!res.ok) {
                     throw new Error("서버 응답 오류");
@@ -119,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 데이터가 없는 경우를 처리합니다.
         if (!items || items.length === 0) {
-            tableBody.innerHTML = "<tr><td colspan='7'>데이터가 없습니다.</td></tr>";
+            tableBody.innerHTML = "<tr><td colspan='7' style='text-align: center;'>데이터가 없습니다.</td></tr>";
             return;
         }
 

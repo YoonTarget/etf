@@ -80,7 +80,46 @@ src/
 GET /etf/recent
 
 [
-  { "ticker": "SPY", "name": "SPDR S&P 500 ETF Trust", "closePrice": 512.34 },
-  { "ticker": "QQQ", "name": "Invesco QQQ Trust", "closePrice": 427.55 }
+  {
+      "basDt": "20250924",
+      "srtnCd": "379800",
+      "isinCd": "KR7379800006",
+      "itmsNm": "KODEX 미국S&P500",
+      "clpr": "21265",
+      "vs": "-5",
+      "fltRt": "-.02",
+      "nav": "21231.91",
+      "mkp": "21190",
+      "hipr": "21265",
+      "lopr": "21165",
+      "trqu": "2413104",
+      "trPrc": "51171879986",
+      "mrktTotAmt": "5382171500000",
+      "stLstgCnt": "253100000",
+      "bssIdxIdxNm": "S&P 500",
+      "bssIdxClpr": "6637.97",
+      "nPptTotAmt": "5339825832851"
+  },
+  {
+      "basDt": "20250924",
+      "srtnCd": "379810",
+      "isinCd": "KR7379810005",
+      "itmsNm": "KODEX 미국나스닥100",
+      "clpr": "22940",
+      "vs": "-60",
+      "fltRt": "-.26",
+      "nav": "22901.68",
+      "mkp": "22855",
+      "hipr": "22940",
+      "lopr": "22830",
+      "trqu": "1288200",
+      "trPrc": "29467738544",
+      "mrktTotAmt": "3350387000000",
+      "stLstgCnt": "146050000",
+      "bssIdxIdxNm": "NASDAQ 100",
+      "bssIdxClpr": "24503.57",
+      "nPptTotAmt": "3340209415021"
+  },
+  ...
 ]
 ```

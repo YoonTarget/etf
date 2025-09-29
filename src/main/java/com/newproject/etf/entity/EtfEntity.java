@@ -21,7 +21,10 @@ public class EtfEntity {
     @Column(name = "bas_dt", nullable = false)
     private String basDt; // 기준일자 (YYYYMMDD 형식)
 
-    @Id // itmsNm을 복합 키의 두 번째 부분으로 지정
+    @Id // srtnCd를 복합 키의 두 번째 부분으로 지정
+    @Column(name = "srtn_cd", length = 6)
+    private String srtnCd; // 단축코드
+
     @Column(name = "itms_nm", nullable = false)
     private String itmsNm; // 종목명
 
@@ -60,9 +63,6 @@ public class EtfEntity {
 
     @Column(name = "bss_idx_clpr", precision = 10, scale = 3)
     private BigDecimal bssIdxClpr; // 기초지수_종가
-
-    @Column(name = "srtn_cd", length = 6)
-    private String srtnCd; // 단축코드
 
     @Column(name = "isin_cd", length = 12)
     private String isinCd; // ISIN코드

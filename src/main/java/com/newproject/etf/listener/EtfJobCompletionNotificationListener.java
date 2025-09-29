@@ -1,5 +1,7 @@
 package com.newproject.etf.listener;
 
+import com.newproject.etf.service.EtfService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
@@ -12,7 +14,10 @@ import java.time.Duration; // Duration 임포트
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class EtfJobCompletionNotificationListener implements JobExecutionListener {
+
+    private EtfService eftService;
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
@@ -27,6 +32,8 @@ public class EtfJobCompletionNotificationListener implements JobExecutionListene
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             log.info("🎉🎉🎉 ETF Data Import Job이 성공적으로 완료되었습니다! 🎉🎉🎉");
             log.info("End Time: {}", jobExecution.getEndTime());
+
+            eftService.invalidateEtfCache();
 
             // 시작 시간과 종료 시간 모두 LocalDateTime이므로 Duration을 사용하여 시간 차이를 계산
             if (jobExecution.getStartTime() != null && jobExecution.getEndTime() != null) {

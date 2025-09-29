@@ -6,6 +6,7 @@ import com.newproject.etf.entity.EtfPriceInfoId;
 import com.newproject.etf.repository.EtfRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -244,6 +245,15 @@ public class EtfService {
     @Cacheable(value = "etfs")
     public List<EtfEntity> getRecentEtfData() {
         return etfRepository.findLatestEtfData();
+    }
+
+    /**
+     * "etfs" 캐시 저장소의 모든 데이터를 삭제합니다.
+     * 이 메서드는 배치 작업이 성공적으로 완료된 직후 호출되어야 합니다.
+     */
+    @CacheEvict(value = "etfs", allEntries = true)
+    public void invalidateEtfCache() {
+        log.info("✅ ETF 캐시 데이터가 성공적으로 초기화되었습니다.");
     }
 
     // === 내부 클래스: 통계 데이터 ===

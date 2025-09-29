@@ -158,7 +158,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             row.innerHTML = `
                 <td>${basDt}</td>
-                <td><a href="" target="_blank">${key.itmsNm}</a></td>
+                <td>
+                    <a href="/etf/detail/${key.srtnCd}" target="_blank">${key.itmsNm}</a>
+                </td>
                 <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
                 <td style="${fltRtColor}">${fltRt}%</td>
                 <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>

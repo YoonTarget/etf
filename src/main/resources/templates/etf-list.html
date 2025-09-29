@@ -48,18 +48,5 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
-    <script>
-        // DOMContentLoaded 이벤트 리스너 내부 또는 외부에서 호출
-        document.addEventListener("DOMContentLoaded", async () => {
-            await loadHTML('header-placeholder', '/includes/header.html');
-            await loadHTML('footer-placeholder', '/includes/footer.html');
-            // 헤더/푸터가 로드된 후 공통 기능 초기화
-            initializeCommonFeatures();
-            // 각 페이지의 메인 로직은 해당 JS 파일에서 실행되도록 유지 (etf-list.js 또는 etf-detail.js)
-            // etf-list.js 또는 etf-detail.js 파일 내부의 DOMContentLoaded 로직은 그대로 두어도 됩니다.
-            // 다만, initializeCommonFeatures()에서 다크모드, home-title 관련 로직을 제거해야 합니다.
-        });
-    </script>
 </body>
 </html>

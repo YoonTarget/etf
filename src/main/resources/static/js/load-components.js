@@ -1,4 +1,14 @@
 // js/load-components.js
+// DOMContentLoaded 이벤트 리스너 내부 또는 외부에서 호출
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadHTML('header-placeholder', '/includes/header.html');
+    await loadHTML('footer-placeholder', '/includes/footer.html');
+    // 헤더/푸터가 로드된 후 공통 기능 초기화
+    initializeCommonFeatures();
+    // 각 페이지의 메인 로직은 해당 JS 파일에서 실행되도록 유지 (etf-list.js 또는 etf-detail.js)
+    // etf-list.js 또는 etf-detail.js 파일 내부의 DOMContentLoaded 로직은 그대로 두어도 됩니다.
+    // 다만, initializeCommonFeatures()에서 다크모드, home-title 관련 로직을 제거해야 합니다.
+});
 
 async function loadHTML(elementId, filePath) {
     try {
@@ -40,6 +50,6 @@ function initializeCommonFeatures() {
 
     // home-title 클릭 이벤트 (경로는 프로젝트 구조에 따라 조정)
     homeTitle.addEventListener("click", () => {
-        window.location.href = "/etf-list.html";
+        window.location.href = "/";
     });
 }

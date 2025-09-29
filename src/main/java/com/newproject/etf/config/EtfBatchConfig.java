@@ -55,7 +55,7 @@ public class EtfBatchConfig {
         return new EtfApiPagingReader(etfApiService, API_PAGE_SIZE);
     }
 
-    // Processor: 중복 체크 + 데이터 변환
+    // 2. Processor: 중복 체크 + 데이터 변환
     @Bean
     @StepScope
     public ItemProcessor<EtfDto, EtfEntity> etfItemProcessor() {
@@ -70,8 +70,8 @@ public class EtfBatchConfig {
             }
 
             EtfEntity entity = new EtfEntity();
+            entity.setSrtnCd(dto.getSrtnCd());
             entity.setBasDt(dto.getBasDt());
-            entity.setItmsNm(dto.getItmsNm());
 
             try {
                 entity.setFltRt(parseBigDecimal(dto.getFltRt()));
@@ -92,7 +92,7 @@ public class EtfBatchConfig {
                 return null; // 변환 불가 항목 스킵
             }
 
-            entity.setSrtnCd(dto.getSrtnCd());
+            entity.setItmsNm(dto.getItmsNm());
             entity.setIsinCd(dto.getIsinCd());
             entity.setBssIdxIdxNm(dto.getBssIdxIdxNm());
 

@@ -11,5 +11,5 @@ import java.io.Serializable;
 @EqualsAndHashCode
 public class EtfPriceInfoId implements Serializable {
     private String basDt; // 기준일자
-    private String itmsNm; // 종목명
+    private String srtnCd; // 단축코드
 }

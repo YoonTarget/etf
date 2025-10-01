@@ -19,9 +19,9 @@ public class EtfController {
         return etfService.getRecentEtfData();
     }
 
-    @GetMapping("/{date}")
-    public List<EtfEntity> getEtfByDate(@PathVariable String date) {
-        return etfService.getEtfDataByDate(date);
+    @GetMapping("/{srtnCd}")
+    public List<EtfEntity> getEtfByDate(@PathVariable String srtnCd) {
+        return etfService.getAllEtfDataOfSrtnCd(srtnCd);
     }
 
     @GetMapping("/{date}/{name}")

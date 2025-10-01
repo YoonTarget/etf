@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
             row.innerHTML = `
                 <td>${basDt}</td>
                 <td>
-                    <a href="/etf/detail/${key.srtnCd}" target="_blank">${key.itmsNm}</a>
+                    <a href="javascript:view('${key.srtnCd}');">${key.itmsNm}</a>
                 </td>
                 <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
                 <td style="${fltRtColor}">${fltRt}%</td>
@@ -230,3 +230,31 @@ document.addEventListener("DOMContentLoaded", function () {
         fetchData();
     });
 });
+
+function view(srtnCd) {
+    alert(srtnCd);
+
+    fetch(`/etf/${srtnCd}`)
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("서버 응답 오류");
+            }
+            return res.json();
+        })
+        .then(data => {
+            document.querySelector("main").innerHTML = `
+                <h2>${data.itmsNm} (${data.srtnCd})</h2>
+                <p>기준일: ${data.basDt}</p>
+                <p>현재가: ${Number(data.clpr).toLocaleString()}원</p>
+                <p>등락률: ${data.fltRt}%</p>
+                <p>거래량: ${Number(data.trqu).toLocaleString()}건</p>
+                <p>거래대금: ${Number(data.trPrc).toLocaleString()}원</p>
+                <p>시가총액: ${Number(data.mrktTotAmt).toLocaleString()}원</p>
+                <button onclick="history.back()">뒤로가기</button>
+            `;
+//            console.log(data);
+//            allItems = data; // 전체 데이터를 전역 변수에 저장
+//            filterAndRenderData(""); // ✅ 초기 로딩 후 검색 기능 활성화 (빈 검색어로 시작)
+        })
+        .catch(err => console.error("데이터 불러오기 실패:", err));
+}

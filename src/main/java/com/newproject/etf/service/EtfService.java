@@ -256,6 +256,14 @@ public class EtfService {
         log.info("✅ ETF 캐시 데이터가 성공적으로 초기화되었습니다.");
     }
 
+    /**
+     * 특정 단축코드의 모든 ETF 데이터 조회 (날짜 내림차순)
+     */
+    public List<EtfEntity> getAllEtfDataOfSrtnCd(String srtnCd) {
+        log.debug("특정 단축코드 ETF 데이터 조회: {}", srtnCd);
+        return etfRepository.findBySrtnCdOrderByBasDtDesc(srtnCd);
+    }
+
     // === 내부 클래스: 통계 데이터 ===
 
     public static class MarketCapStats {

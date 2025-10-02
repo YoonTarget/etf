@@ -234,6 +234,9 @@ document.addEventListener("DOMContentLoaded", function () {
 function view(srtnCd) {
     alert(srtnCd);
 
+    location.href = `/etf-detail/${srtnCd}`;
+
+    /*
     fetch(`/etf/${srtnCd}`)
         .then(res => {
             if (!res.ok) {
@@ -252,9 +255,10 @@ function view(srtnCd) {
                 <p>시가총액: ${Number(data.mrktTotAmt).toLocaleString()}원</p>
                 <button onclick="history.back()">뒤로가기</button>
             `;
-//            console.log(data);
+            console.log(data);
 //            allItems = data; // 전체 데이터를 전역 변수에 저장
 //            filterAndRenderData(""); // ✅ 초기 로딩 후 검색 기능 활성화 (빈 검색어로 시작)
         })
         .catch(err => console.error("데이터 불러오기 실패:", err));
+    */
 }

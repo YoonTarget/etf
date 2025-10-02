@@ -3,6 +3,7 @@ package com.newproject.etf.service;
 import com.newproject.etf.dto.EtfDto;
 import com.newproject.etf.entity.EtfEntity;
 import com.newproject.etf.entity.EtfPriceInfoId;
+import com.newproject.etf.mapper.EtfMapper;
 import com.newproject.etf.repository.EtfRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ import java.util.Optional;
 @Slf4j
 public class EtfService {
     private final EtfRepository etfRepository;
+    private final EtfMapper etfMapper;
 
     // === 기본 CRUD 메서드들 ===
 
@@ -243,8 +245,10 @@ public class EtfService {
      */
     // ✅ "etfs"라는 이름의 캐시를 사용
     @Cacheable(value = "etfs")
-    public List<EtfEntity> getRecentEtfData() {
-        return etfRepository.findLatestEtfData();
+    public List<EtfDto> getRecentEtfData() {
+        return etfRepository.findLatestEtfData().stream()
+                .map(EtfMapper::toDto)
+                .toList();
     }
 
     /**
@@ -259,9 +263,11 @@ public class EtfService {
     /**
      * 특정 단축코드의 모든 ETF 데이터 조회 (날짜 내림차순)
      */
-    public List<EtfEntity> getAllEtfDataOfSrtnCd(String srtnCd) {
+    public List<EtfDto> getAllEtfDataOfSrtnCd(String srtnCd) {
         log.debug("특정 단축코드 ETF 데이터 조회: {}", srtnCd);
-        return etfRepository.findBySrtnCdOrderByBasDtDesc(srtnCd);
+        return etfRepository.findBySrtnCdOrderByBasDtDesc(srtnCd).stream()
+                .map(EtfMapper::toDto) // Entity → DTO 변환
+                .toList();
     }
 
     // === 내부 클래스: 통계 데이터 ===

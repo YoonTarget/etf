@@ -1,5 +1,6 @@
 package com.newproject.etf.controller;
 
+import com.newproject.etf.dto.EtfDto;
 import com.newproject.etf.entity.EtfEntity;
 import com.newproject.etf.service.EtfService;
 import lombok.RequiredArgsConstructor;
@@ -15,12 +16,12 @@ public class EtfController {
     private final EtfService etfService;
 
     @GetMapping("/recent")
-    public List<EtfEntity> getRecentEtfData() {
+    public List<EtfDto> getRecentEtfData() {
         return etfService.getRecentEtfData();
     }
 
     @GetMapping("/{srtnCd}")
-    public List<EtfEntity> getEtfByDate(@PathVariable String srtnCd) {
+    public List<EtfDto> getEtfByDate(@PathVariable String srtnCd) {
         return etfService.getAllEtfDataOfSrtnCd(srtnCd);
     }
 

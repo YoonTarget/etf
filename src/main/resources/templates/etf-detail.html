@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>진격의 ETF > 종목 상세 페이지</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/load-components.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+<!-- Header -->
+<!--
+<header class="bg-white shadow-md p-4">
+    <h1 class="text-2xl font-bold text-blue-600">ETF 종목 상세</h1>
+</header>
+-->
+
+<div id="header-placeholder"></div>
+
+<!-- Main -->
+<main class="max-w-7xl mx-auto p-6 grid grid-cols-12 gap-6">
+
+    <!-- Left : 종목 기본 정보 -->
+    <aside class="col-span-3 bg-white rounded-2xl shadow p-4">
+        <h2 class="text-xl font-semibold mb-3">📊 종목 기본 정보</h2>
+        <ul class="space-y-2 text-sm">
+            <li><span class="font-medium">종목명:</span> <span th:text="${etfInfo.itmsNm}"></span></li>
+            <li><span class="font-medium">ISIN코드:</span> <span th:text="${etfInfo.isinCd}"></span></li>
+            <li><span class="font-medium">시가총액:</span> <span th:text="${etfInfo.mrktTotAmt}"></span></li>
+            <li><span class="font-medium">순자산가치:</span> <span th:text="${etfInfo.nav}"></span></li>
+            <li><span class="font-medium">상장일:</span> <span th:text="${etfInfo.basDt}"></span></li>
+        </ul>
+    </aside>
+
+    <!-- Center : 차트 & 성과 -->
+    <section class="col-span-6 bg-white rounded-2xl shadow p-4">
+        <h2 class="text-xl font-semibold mb-3">📈 가격 & 성과</h2>
+
+        <!-- 차트 영역 -->
+        <!-- 차트 컨테이너에 높이 지정 -->
+        <div style="width: 100%; height: 400px;">
+            <canvas id="etfChart" class="h-64 w-full"></canvas>
+        </div>
+
+        <!-- 성과 테이블 -->
+        <table class="mt-4 w-full text-sm border-t">
+            <thead class="bg-gray-50">
+            <tr>
+                <th class="p-2 text-left">구분</th>
+                <th class="p-2 text-right">1개월</th>
+                <th class="p-2 text-right">3개월</th>
+                <th class="p-2 text-right">1년</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="border-t">
+                <td class="p-2">수익률</td>
+                <td class="p-2 text-right text-green-600">+3.2%</td>
+                <td class="p-2 text-right text-green-600">+8.4%</td>
+                <td class="p-2 text-right text-red-600">-2.1%</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Right : 뉴스 & 토론 -->
+    <aside class="col-span-3 bg-white rounded-2xl shadow p-4">
+        <h2 class="text-xl font-semibold mb-3">📰 뉴스 & 토론</h2>
+        <ul class="space-y-3 text-sm">
+            <li>
+                <a href="#" class="text-blue-600 hover:underline">
+                    [뉴스] KODEX 200, 거래량 급증
+                </a>
+                <p class="text-gray-500 text-xs">2025-10-02</p>
+            </li>
+            <li>
+                <a href="#" class="text-blue-600 hover:underline">
+                    [토론] 장기 투자하기 좋은 ETF일까?
+                </a>
+                <p class="text-gray-500 text-xs">2025-10-01</p>
+            </li>
+        </ul>
+    </aside>
+
+</main>
+
+<div id="footer-placeholder"></div>
+
+<!-- Chart.js Script -->
+<script>
+    const ctx = document.getElementById('etfChart').getContext('2d');
+    const etfChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['9/20', '9/21', '9/22', '9/23', '9/24', '9/25', '9/26'],
+        datasets: [{
+          label: 'ETF 가격',
+          data: [45000, 45500, 44800, 46000, 47000, 46500, 47500],
+          borderColor: 'rgb(37, 99, 235)',
+          backgroundColor: 'rgba(37, 99, 235, 0.2)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 4,
+          pointBackgroundColor: 'rgb(37, 99, 235)'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        }
+      }
+    });
+</script>
+
+</body>
+</html>

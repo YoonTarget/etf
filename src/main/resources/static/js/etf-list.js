@@ -134,6 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // 데이터를 순회하며 테이블에 행을 추가합니다.
         items.forEach(key => {
             const row = document.createElement("tr");
+            row.classList.add("hover:bg-blue-100", "transition", "cursor-pointer");
 
             // 날짜 형식 변환 (YYYY-MM-DD)
             let basDt = key.basDt;
@@ -232,8 +233,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function view(srtnCd) {
-    alert(srtnCd);
-
     location.href = `/etf-detail/${srtnCd}`;
 
     /*

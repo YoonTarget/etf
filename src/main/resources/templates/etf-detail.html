@@ -54,6 +54,7 @@
                 <th class="p-2 text-left">구분</th>
                 <th class="p-2 text-right">1개월</th>
                 <th class="p-2 text-right">3개월</th>
+                <th class="p-2 text-right">6개월</th>
                 <th class="p-2 text-right">1년</th>
             </tr>
             </thead>
@@ -92,15 +93,16 @@
 <div id="footer-placeholder"></div>
 
 <!-- Chart.js Script -->
-<script>
+<script th:inline="javascript">
     const ctx = document.getElementById('etfChart').getContext('2d');
+    const etfData = /*[[${etfDetails}]]*/ '[]'; // Thymeleaf로부터 데이터 받기
     const etfChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['9/20', '9/21', '9/22', '9/23', '9/24', '9/25', '9/26'],
+        labels: etfData.map(item => item.basDt), // 날짜 배열
         datasets: [{
           label: 'ETF 가격',
-          data: [45000, 45500, 44800, 46000, 47000, 46500, 47500],
+          data: etfData.map(item => item.clpr), // 종가 배열
           borderColor: 'rgb(37, 99, 235)',
           backgroundColor: 'rgba(37, 99, 235, 0.2)',
           fill: true,

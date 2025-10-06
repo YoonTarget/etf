@@ -33,16 +33,18 @@ public class HomeController {
             return "error-page"; // 데이터 없을 때 처리
         }
 
+        /*
         // 상장일 = basDt 최솟값
         String listedDate = etfDetails.stream()
                 .map(EtfDto::getBasDt)
                 .min(Comparator.naturalOrder())
                 .orElse(null);
+         */
 
         Map<String, Object> etfInfo = Map.of(
                 "itmsNm", etfDetails.get(0).getItmsNm(), // 종목명
                 "isinCd", etfDetails.get(0).getIsinCd(), // ISIN 코드
-                "basDt", listedDate, // 상장일
+                "basDt", etfDetails.get(0).getBasDt(), // 상장일
                 "nav", etfDetails.get(0).getNav(), // 순자산가치
                 "mrktTotAmt", etfDetails.get(0).getMrktTotAmt() // 시가총액
         );

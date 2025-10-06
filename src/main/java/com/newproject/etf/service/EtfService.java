@@ -265,7 +265,7 @@ public class EtfService {
      */
     public List<EtfDto> getAllEtfDataOfSrtnCd(String srtnCd) {
         log.debug("특정 단축코드 ETF 데이터 조회: {}", srtnCd);
-        return etfRepository.findBySrtnCdOrderByBasDtDesc(srtnCd).stream()
+        return etfRepository.findBySrtnCdOrderByBasDtAsc(srtnCd).stream()
                 .map(EtfMapper::toDto) // Entity → DTO 변환
                 .toList();
     }

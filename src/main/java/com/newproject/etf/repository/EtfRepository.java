@@ -21,7 +21,7 @@ public interface EtfRepository extends JpaRepository<EtfEntity, EtfPriceInfoId> 
     List<EtfEntity> findByBasDt(String basDt);
 
     /**
-     * 특정 단축코드의 모든 ETF 데이터 조회 (날짜 내림차순)
+     * 특정 단축코드의 모든 ETF 데이터 조회 (날짜 오름차순)
      */
     List<EtfEntity> findBySrtnCdOrderByBasDtAsc(String srtnCd);
 

@@ -261,7 +261,7 @@ public class EtfService {
     }
 
     /**
-     * 특정 단축코드의 모든 ETF 데이터 조회 (날짜 내림차순)
+     * 특정 단축코드의 모든 ETF 데이터 조회 (날짜 오름차순)
      */
     public List<EtfDto> getAllEtfDataOfSrtnCd(String srtnCd) {
         log.debug("특정 단축코드 ETF 데이터 조회: {}", srtnCd);

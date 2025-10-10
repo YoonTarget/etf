@@ -52,19 +52,21 @@
             <thead class="bg-gray-50">
             <tr>
                 <th class="p-2 text-left">구분</th>
-                <th class="p-2 text-right">1개월</th>
-                <th class="p-2 text-right">3개월</th>
-                <th class="p-2 text-right">6개월</th>
+                <th class="p-2 text-right">전체</th>
                 <th class="p-2 text-right">1년</th>
+                <th class="p-2 text-right">6개월</th>
+                <th class="p-2 text-right">3개월</th>
+                <th class="p-2 text-right">1개월</th>
             </tr>
             </thead>
             <tbody>
             <tr class="border-t">
-                <td class="p-2">수익률</td>
-                <td class="p-2 text-right text-red-600">+3.2%</td>
-                <td class="p-2 text-right text-red-600">+8.4%</td>
-                <td class="p-2 text-right text-blue-600">-2.1%</td>
-                <td class="p-2 text-right text-blue-600">-1.2%</td>
+                <td class="p-2 font-medium">수익률</td>
+                <td id="ret-total" class="p-2 text-right">-</td>
+                <td id="ret-1y" class="p-2 text-right">-</td>
+                <td id="ret-6m" class="p-2 text-right">-</td>
+                <td id="ret-3m" class="p-2 text-right">-</td>
+                <td id="ret-1m" class="p-2 text-right">-</td>
             </tr>
             </tbody>
         </table>
@@ -96,14 +98,46 @@
 <!-- Chart.js Script -->
 <script th:inline="javascript">
     const ctx = document.getElementById('etfChart').getContext('2d');
-    const etfData = /*[[${etfDetails}]]*/ '[]'; // Thymeleaf로부터 데이터 받기
+    const etfData = /*[[${etfDetails}]]*/ []; // Thymeleaf로부터 데이터 받기
+
+    const labels = etfData.map(item => item.basDt);
+    const prices = etfData.map(item => item.clpr);
+
+    // 수익률 계산 함수
+    const rateOfChange = (start, end) => ((end - start) / start * 100).toFixed(2);
+
+    // 안전 인덱스 계산 (데이터가 부족하면 undefined 방지)
+    const len = prices.length;
+    const safeIdx = (n) => (len - n >= 0 ? len - n : 0);
+
+    // 구간별 수익률 계산
+    const overallChange  = rateOfChange(prices[0], prices[len - 1]);
+    const oneYearChange  = rateOfChange(prices[safeIdx(252)], prices[len - 1]);
+    const sixMonthChange = rateOfChange(prices[safeIdx(126)], prices[len - 1]);
+    const threeMonthChange = rateOfChange(prices[safeIdx(63)], prices[len - 1]);
+    const oneMonthChange = rateOfChange(prices[safeIdx(21)], prices[len - 1]);
+
+    // 표시용 포맷 함수
+    const formatReturn = (value) => {
+      const sign = value >= 0 ? '+' : '';
+      const color = value >= 0 ? 'text-red-600' : 'text-blue-600';
+      return `<span class="${color}">${sign}${value}%</span>`;
+    };
+
+    // 테이블 채우기
+    document.getElementById('ret-total').innerHTML = formatReturn(overallChange);
+    document.getElementById('ret-1y').innerHTML    = formatReturn(oneYearChange);
+    document.getElementById('ret-6m').innerHTML    = formatReturn(sixMonthChange);
+    document.getElementById('ret-3m').innerHTML    = formatReturn(threeMonthChange);
+    document.getElementById('ret-1m').innerHTML    = formatReturn(oneMonthChange);
+
     const etfChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: etfData.map(item => item.basDt), // 날짜 배열
+        labels: labels, // 날짜 배열
         datasets: [{
           label: 'ETF 가격',
-          data: etfData.map(item => item.clpr), // 종가 배열
+          data: prices, // 종가 배열
           borderColor: 'rgb(37, 99, 235)',
           backgroundColor: 'rgba(37, 99, 235, 0.2)',
           fill: true,

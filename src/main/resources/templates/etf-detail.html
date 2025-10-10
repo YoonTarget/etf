@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>진격의 ETF > 종목 상세 페이지</title>
+    <title>진격의 ETF</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/load-components.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -53,20 +53,24 @@
             <tr>
                 <th class="p-2 text-left">구분</th>
                 <th class="p-2 text-right">전체</th>
+                <!--
                 <th class="p-2 text-right">1년</th>
                 <th class="p-2 text-right">6개월</th>
                 <th class="p-2 text-right">3개월</th>
                 <th class="p-2 text-right">1개월</th>
+                -->
             </tr>
             </thead>
             <tbody>
             <tr class="border-t">
                 <td class="p-2 font-medium">수익률</td>
                 <td id="ret-total" class="p-2 text-right">-</td>
+                <!--
                 <td id="ret-1y" class="p-2 text-right">-</td>
                 <td id="ret-6m" class="p-2 text-right">-</td>
                 <td id="ret-3m" class="p-2 text-right">-</td>
                 <td id="ret-1m" class="p-2 text-right">-</td>
+                -->
             </tr>
             </tbody>
         </table>
@@ -126,10 +130,12 @@
 
     // 테이블 채우기
     document.getElementById('ret-total').innerHTML = formatReturn(overallChange);
+    /*
     document.getElementById('ret-1y').innerHTML    = formatReturn(oneYearChange);
     document.getElementById('ret-6m').innerHTML    = formatReturn(sixMonthChange);
     document.getElementById('ret-3m').innerHTML    = formatReturn(threeMonthChange);
     document.getElementById('ret-1m').innerHTML    = formatReturn(oneMonthChange);
+    */
 
     const etfChart = new Chart(ctx, {
       type: 'line',

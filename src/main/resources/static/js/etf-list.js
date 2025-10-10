@@ -135,6 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
         items.forEach(key => {
             const row = document.createElement("tr");
             row.classList.add("hover:bg-blue-100", "transition", "cursor-pointer");
+            row.addEventListener("click", () => view(key.srtnCd));
 
             // 날짜 형식 변환 (YYYY-MM-DD)
             let basDt = key.basDt;
@@ -159,9 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             row.innerHTML = `
                 <td>${basDt}</td>
-                <td>
-                    <a href="javascript:view('${key.srtnCd}');">${key.itmsNm}</a>
-                </td>
+                <td>${key.itmsNm}</td>
                 <td>${Number(key.clpr)?.toLocaleString() || "0"}원</td>
                 <td style="${fltRtColor}">${fltRt}%</td>
                 <td>${Number(key.trqu)?.toLocaleString() || "0"}건</td>

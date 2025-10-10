@@ -37,10 +37,12 @@ document.addEventListener("DOMContentLoaded", function () {
         filterAndRenderData(searchValue);
     });
 
+    /*
     document.getElementById("search-btn").addEventListener("click", function() {
         const searchValue = document.getElementById("search-id").value.trim().toLowerCase();
         filterAndRenderData(searchValue);
     });
+    */
 
     // ✅ 전체 데이터를 필터링하고 렌더링하는 함수
     function filterAndRenderData(searchValue) {
@@ -74,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // 🟢 탭 클릭 이벤트
+    /*
     tabs.forEach(tab => {
         tab.addEventListener("click", function () {
             const target = this.textContent;
@@ -87,16 +90,17 @@ document.addEventListener("DOMContentLoaded", function () {
             fetchData();
         });
     });
+    */
 
     // API 호출 함수
     // ✅ 수정된 fetchData 함수
     function fetchData() {
         // 💡 URL 파라미터만 업데이트하고, 기본 페이지 URL은 유지합니다.
-        const url = `${location.pathname}?${params.toString()}`;
+        const url = `${location.pathname}`;
         history.pushState({}, "", url); // ✅ 주소창을 /etf?param=value 형태로 유지
 
         // ✅ API는 /etf/recent로 호출
-        fetch(`/etf/recent?${params.toString()}`)
+        fetch(`/etf/recent`)
             .then(res => {
                 if (!res.ok) {
                     throw new Error("서버 응답 오류");
@@ -172,17 +176,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // 모든 페이징 버튼 생성 코드를 삭제합니다.
         // 필요한 경우, "pagination" 요소를 완전히 숨기거나 제거합니다.
+        /*
         const pagination = document.getElementById("pagination");
         if (pagination) {
             pagination.innerHTML = '';
         }
+        */
     }
 
     // jQuery UI Datepicker 활성화
+    /*
     $("#start-date, #end-date").datepicker({
         dateFormat: "yy-mm-dd" // 날짜 포맷 지정 (예: 2025-03-20)
     });
+    */
 
+    /*
     document.getElementById("search-btn").addEventListener("click", function() {
 //        const startDate = document.getElementById("start-date").value;
 //        const endDate = document.getElementById("end-date").value;
@@ -196,14 +205,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
         fetchData();
     });
+    */
 
+    /*
     document.getElementById("search-id").addEventListener("keydown", function(event) {
         if(event.key === "Enter") {
             event.preventDefault();
             document.getElementById("search-btn").click();
         }
     });
+    */
 
+    /*
     document.getElementById("pagination").addEventListener("click", function(event) {
         if(!event.target.classList.contains("page-btn")) return;
 
@@ -229,6 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         fetchData();
     });
+    */
 });
 
 function view(srtnCd) {

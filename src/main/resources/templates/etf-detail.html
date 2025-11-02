@@ -79,18 +79,16 @@
     <!-- Right : 뉴스 & 토론 -->
     <aside class="col-span-3 bg-white rounded-2xl shadow p-4">
         <h2 class="text-xl font-semibold mb-3">📰 뉴스 & 토론</h2>
-        <ul class="space-y-3 text-sm">
-            <li>
-                <a href="#" class="text-blue-600 hover:underline">
-                    [뉴스] KODEX 200, 거래량 급증
+        <ul class="space-y-3 text-sm" id="news-list">
+            <li th:each="item : ${news}">
+                <a th:href="${item.link}" target="_blank" class="text-blue-600 hover:underline" th:text="${item.title}">
                 </a>
-                <p class="text-gray-500 text-xs">2025-10-02</p>
+                <p class="text-gray-500 text-xs" th:text="${#dates.format(item.pubDate, 'yyyy-MM-dd')}">
+                </p>
             </li>
-            <li>
-                <a href="#" class="text-blue-600 hover:underline">
-                    [토론] 장기 투자하기 좋은 ETF일까?
-                </a>
-                <p class="text-gray-500 text-xs">2025-10-01</p>
+
+            <li th:if="${#lists.isEmpty(news)}">
+                <p class="text-gray-500">관련 뉴스가 없습니다.</p>
             </li>
         </ul>
     </aside>

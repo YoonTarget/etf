@@ -246,7 +246,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function view(srtnCd) {
-    location.href = `/etf-detail/${srtnCd}`;
+    location.href = `/etf/${srtnCd}`;
 
     /*
     fetch(`/etf/${srtnCd}`)

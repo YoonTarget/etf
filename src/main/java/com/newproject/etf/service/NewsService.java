@@ -12,6 +12,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,8 @@ public class NewsService {
                                 // ✅ source는 SyndEntrySource 객체를 반환하므로 .getTitle()로 이름 추출
                                 entry.getSource() != null ? entry.getSource().getTitle() : "미상"
                         ))
-                        .collect(Collectors.toList());
+                        .sorted(Comparator.comparing(NewsItemDto::getPubDate, Comparator.nullsLast(Comparator.reverseOrder())))
+                        .toList();
             }
         } catch (Exception e) {
             // 네트워크 오류, 파싱 오류 등 예외 처리

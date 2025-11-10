@@ -117,8 +117,8 @@ public interface EtfRepository extends JpaRepository<EtfEntity, EtfPriceInfoId> 
                            @Param("minVolume") Long minVolume);
 
     /**
-     * 가장 최근 날짜의 모든 ETF 데이터 조회
+     * 가장 최근 날짜의 모든 ETF 데이터 조회(거래량 높은 순으로 정렬)
      */
-    @Query("SELECT e FROM EtfEntity e WHERE e.basDt = (SELECT MAX(e2.basDt) FROM EtfEntity e2)")
+    @Query("SELECT e FROM EtfEntity e WHERE e.basDt = (SELECT MAX(e2.basDt) FROM EtfEntity e2) ORDER BY e.trqu DESC")
     List<EtfEntity> findLatestEtfData();
 }

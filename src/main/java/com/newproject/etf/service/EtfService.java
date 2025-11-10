@@ -241,7 +241,7 @@ public class EtfService {
     }
 
     /**
-     * 가장 최근 날짜의 모든 ETF 데이터 조회
+     * 가장 최근 날짜의 모든 ETF 데이터 조회(거래량 높은 순으로 정렬)
      */
     // ✅ "etfs"라는 이름의 캐시를 사용
     @Cacheable(value = "etfs")

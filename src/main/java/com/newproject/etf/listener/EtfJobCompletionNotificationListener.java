@@ -5,11 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.StepExecution;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.ZoneId; // ZoneId 임포트
-import java.time.ZonedDateTime; // ZonedDateTime 임포트
 import java.time.Duration; // Duration 임포트
 
 @Component
@@ -17,7 +16,7 @@ import java.time.Duration; // Duration 임포트
 @RequiredArgsConstructor
 public class EtfJobCompletionNotificationListener implements JobExecutionListener {
 
-    private EtfService eftService;
+    private final EtfService eftService;
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
@@ -45,7 +44,7 @@ public class EtfJobCompletionNotificationListener implements JobExecutionListene
             }
 
             log.info("Processed Items: {}", jobExecution.getStepExecutions().stream()
-                    .mapToLong(stepExecution -> stepExecution.getWriteCount())
+                    .mapToLong(StepExecution::getWriteCount)
                     .sum());
         } else if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.error("🔥🔥🔥 ETF Data Import Job이 실패했습니다! 🔥🔥🔥");

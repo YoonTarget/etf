@@ -43,8 +43,8 @@ public class EtfApiService {
                 numOfRows +
                 "&pageNo=" +
                 pageNo +
-                "&likeItmsNm=" + 
-                URLEncoder.encode("미국", StandardCharsets.UTF_8) +
+//                "&likeItmsNm=" +
+//                URLEncoder.encode("미국", StandardCharsets.UTF_8) +
                 "&resultType=json"
         ;
 

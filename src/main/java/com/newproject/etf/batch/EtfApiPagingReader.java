@@ -40,6 +40,11 @@ public class EtfApiPagingReader implements ItemStreamReader<EtfDto> {
             currentPage.set(executionContext.getInt("etfApiPagingReader.page"));
             System.out.println("[EtfApiPagingReader] Resuming from page: " + currentPage.get());
         } else {
+            /*
+            * todo
+            *  - 100 페이지부터 배치 돌리기
+            *  - 배치 구조 변경 필요
+            * */
             currentPage.set(1); // 첫 시작 페이지
             System.out.println("[EtfApiPagingReader] Starting from page 1.");
         }

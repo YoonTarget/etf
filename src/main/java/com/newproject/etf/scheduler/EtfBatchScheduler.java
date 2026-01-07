@@ -3,9 +3,12 @@ package com.newproject.etf.scheduler;
 import com.newproject.etf.config.EtfBatchConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -22,20 +25,22 @@ public class EtfBatchScheduler {
 
     private final JobLauncher jobLauncher;
     private final Job importEtfDataJob;
+    private final JobExplorer jobExplorer; // Job 상태 조회를 위해 추가
 
     /**
      * 매일 자정 (오전 0시 0분 0초)에 Job을 실행합니다.
      * cron = "초 분 시 일 월 요일"
      * ?는 일과 요일 중 하나만 지정할 때 사용합니다.
      */
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "${scheduler.etf.cron}")
     public void runEtfDataImportJob() {
         try {
             // Job Parameters 생성
             // 'targetDate'는 배치 Job이 처리할 기준 날짜를 의미합니다.
-            // 'time' 파라미터는 Job 인스턴스의 고유성을 보장하기 위해 매번 다른 값을 추가합니다.
+            // 재시작(Restart)을 지원하기 위해, 하루 동안은 동일한 파라미터(날짜)를 유지해야 합니다.
+            String targetDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
             JobParameters jobParameters = new JobParametersBuilder()
-                    .addLong("time", System.currentTimeMillis()) // 매번 다른 값으로 Job 인스턴스 중복 방지
+                    .addString("targetDate", targetDate)
                     .toJobParameters();
 
             System.out.println("[EtfBatchScheduler] Launching job: " + EtfBatchConfig.JOB_NAME + " with parameters: " + jobParameters);
@@ -56,6 +61,40 @@ public class EtfBatchScheduler {
         } catch (Exception e) { // 기타 예상치 못한 예외 처리
             System.err.println("[EtfBatchScheduler] An unexpected error occurred: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 실패한 Job이 있는지 주기적으로 확인하여 재시도합니다.
+     * 예: 1시간(3600000ms)마다 실행
+     */
+    @Scheduled(fixedDelay = 3600000)
+    public void retryFailedJob() {
+        try {
+            String targetDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            JobParameters jobParameters = new JobParametersBuilder()
+                    .addString("targetDate", targetDate)
+                    .toJobParameters();
+
+            // 해당 파라미터로 실행된 마지막 JobExecution 조회
+            JobInstance lastJobInstance = jobExplorer.getLastJobInstance(EtfBatchConfig.JOB_NAME);
+            if (lastJobInstance == null) {
+                return;
+            }
+            JobExecution lastExecution = jobExplorer.getLastJobExecution(lastJobInstance);
+
+            if (lastExecution != null && lastExecution.getStatus().isUnsuccessful()) {
+                System.out.println("[EtfBatchScheduler] Found failed job for date: " + targetDate + ". Attempting restart...");
+                
+                // 재실행 (Spring Batch는 파라미터가 같고 이전 상태가 실패면, 실패한 지점부터 이어서 실행함)
+                jobLauncher.run(importEtfDataJob, jobParameters);
+            }
+        } catch (JobInstanceAlreadyCompleteException e) {
+            // 이미 완료된 경우 무시
+        } catch (JobExecutionAlreadyRunningException e) {
+            // 이미 실행 중인 경우 무시
+        } catch (Exception e) {
+            System.err.println("[EtfBatchScheduler] Error during retry check: " + e.getMessage());
         }
     }
 }

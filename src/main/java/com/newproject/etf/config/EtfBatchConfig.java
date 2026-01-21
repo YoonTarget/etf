@@ -7,6 +7,7 @@ import com.newproject.etf.listener.EtfJobCompletionNotificationListener;
 import com.newproject.etf.service.EtfApiService;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecution;
@@ -19,23 +20,23 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Configuration
 @EnableBatchProcessing
 @RequiredArgsConstructor
+@Slf4j
 public class EtfBatchConfig {
 
     public static final String JOB_NAME = "importEtfDataJob";
@@ -45,12 +46,13 @@ public class EtfBatchConfig {
     private final EntityManagerFactory entityManagerFactory;
     private final PlatformTransactionManager transactionManager;
     private final JobRepository jobRepository;
+    private final DataSource dataSource; // JDBC Writer 사용을 위해 주입
 
 
     // 1. ItemReader: API에서 데이터를 페이지별로 읽어오는 부분
     @Bean
     @StepScope // Step 실행 시점에 생성되도록 StepScope 사용
-    public ItemReader<EtfDto> etfApiPagingReader() {
+    public EtfApiPagingReader etfApiPagingReader() {
         // 새롭게 구현한 EtfApiPagingReader를 반환
         return new EtfApiPagingReader(etfApiService, API_PAGE_SIZE);
     }
@@ -59,15 +61,8 @@ public class EtfBatchConfig {
     @Bean
     @StepScope
     public ItemProcessor<EtfDto, EtfEntity> etfItemProcessor() {
-        Set<String> existingKeys = loadExistingEtfKeys();
-
         return dto -> {
-            String key = dto.getSrtnCd() + "_" + dto.getBasDt();
-
-            // 기존 데이터 중복이면 스킵
-            if (existingKeys.contains(key)) {
-                return null;
-            }
+            // 메모리 기반 중복 체크 로직 제거 (DB에서 처리)
 
             EtfEntity entity = new EtfEntity();
             entity.setSrtnCd(dto.getSrtnCd());
@@ -88,7 +83,7 @@ public class EtfBatchConfig {
                 entity.setClpr(parseBigDecimal(dto.getClpr()));
                 entity.setVs(parseBigDecimal(dto.getVs()));
             } catch (NumberFormatException e) {
-                System.err.println("Number format error for item: " + dto.getItmsNm() + " on date " + dto.getBasDt());
+                log.error("Number format error for item: {} on date {}", dto.getItmsNm(), dto.getBasDt());
                 return null; // 변환 불가 항목 스킵
             }
 
@@ -96,25 +91,8 @@ public class EtfBatchConfig {
             entity.setIsinCd(dto.getIsinCd());
             entity.setBssIdxIdxNm(dto.getBssIdxIdxNm());
 
-            // 배치 내 중복 방지
-            existingKeys.add(key);
-
             return entity;
         };
-    }
-
-    private Set<String> loadExistingEtfKeys() {
-        var em = entityManagerFactory.createEntityManager();
-        Set<String> keys = new HashSet<>();
-        try {
-            List<String> result = em.createQuery(
-                            "SELECT CONCAT(e.srtnCd, '_', e.basDt) FROM EtfEntity e", String.class)
-                    .getResultList();
-            keys.addAll(result);
-        } finally {
-            em.close();
-        }
-        return keys;
     }
 
     private BigDecimal parseBigDecimal(String value) {
@@ -135,20 +113,30 @@ public class EtfBatchConfig {
     @Bean
     @StepScope
     public ItemWriter<EtfEntity> etfDbWriter() {
-        System.out.println("[EtfBatchConfig] Initializing etfDbWriter.");
-        JpaItemWriterBuilder<EtfEntity> writerBuilder = new JpaItemWriterBuilder<EtfEntity>()
-                .entityManagerFactory(entityManagerFactory)
-                .usePersist(true)
-                ;
-        return writerBuilder.build();
+        log.info("Initializing etfDbWriter.");
+        // JpaItemWriter 대신 JdbcBatchItemWriter 사용 (INSERT IGNORE / ON CONFLICT 지원)
+        return new JdbcBatchItemWriterBuilder<EtfEntity>()
+                .dataSource(dataSource)
+                .sql("INSERT INTO etf_price_info (" +
+                        "srtn_cd, bas_dt, flt_rt, nav, mkp, hipr, lopr, trqu, tr_prc, " +
+                        "mrkt_tot_amt, n_ppt_tot_amt, st_lstg_cnt, bss_idx_clpr, clpr, vs, " +
+                        "itms_nm, isin_cd, bss_idx_idx_nm) " +
+                        "VALUES (" +
+                        ":srtnCd, :basDt, :fltRt, :nav, :mkp, :hipr, :lopr, :trqu, :trPrc, " +
+                        ":mrktTotAmt, :nPptTotAmt, :stLstgCnt, :bssIdxClpr, :clpr, :vs, " +
+                        ":itmsNm, :isinCd, :bssIdxIdxNm) " +
+                        "ON CONFLICT (srtn_cd, bas_dt) DO NOTHING")
+                .beanMapped()
+                .assertUpdates(false) // 중복 데이터(DO NOTHING) 발생 시 0건 업데이트되어도 오류로 처리하지 않음
+                .build();
     }
 
     // Step 정의
     @Bean
     public Step etfDataLoadingStep() {
-        System.out.println("[EtfBatchConfig] Building etfDataLoadingStep.");
+        log.info("Building etfDataLoadingStep.");
         return new StepBuilder("etfDataLoadingStep", jobRepository)
-                .<EtfDto, EtfEntity>chunk(1000, transactionManager) // 청크 사이즈: 1000건씩 처리
+                .<EtfDto, EtfEntity>chunk(50, transactionManager) // 청크 사이즈를 더 축소 (100 -> 50)
                 .reader(etfApiPagingReader())
                 .processor(etfItemProcessor())
                 .writer(etfDbWriter())
@@ -170,7 +158,7 @@ public class EtfBatchConfig {
     // Job 정의
     @Bean
     public Job importEtfDataJob(EtfJobCompletionNotificationListener listener) {
-        System.out.println("[EtfBatchConfig] Building importEtfDataJob.");
+        log.info("Building importEtfDataJob.");
         return new JobBuilder(JOB_NAME, jobRepository)
                 .listener(listener)
                 .start(etfDataLoadingStep())

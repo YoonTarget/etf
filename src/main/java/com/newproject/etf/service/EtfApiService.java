@@ -2,6 +2,7 @@ package com.newproject.etf.service;
 
 import com.newproject.etf.dto.ApiResponse;
 import com.newproject.etf.dto.EtfDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class EtfApiService {
 
     @Value("${api.base-url}")
@@ -34,7 +36,7 @@ public class EtfApiService {
     }
 
     public Flux<EtfDto> fetchEtfData(int pageNo, int numOfRows) {
-        System.out.println("Calling external API with pageNo: " + pageNo + ", numOfRows: " + numOfRows);
+        log.info("Calling external API with pageNo: {}, numOfRows: {}", pageNo, numOfRows);
 
         String url = baseUrl +
                 "?serviceKey=" +
@@ -59,7 +61,7 @@ public class EtfApiService {
                             response.getResponse().getBody().getItems().getItem() != null) {
                         return Flux.fromIterable(response.getResponse().getBody().getItems().getItem());
                     }
-                    System.out.println("API returned no data or invalid structure for page " + pageNo);
+                    log.warn("API returned no data or invalid structure for page {}", pageNo);
                     return Flux.empty(); // Return empty Flux if no data or invalid structure
                 });
     }

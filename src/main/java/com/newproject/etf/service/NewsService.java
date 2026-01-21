@@ -4,6 +4,7 @@ import com.newproject.etf.dto.NewsItemDto;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class NewsService {
     public List<NewsItemDto> getNewsByQuery(String query) throws UnsupportedEncodingException {
         // ✅ 1. 검색어(query)를 UTF-8로 URL 인코딩
@@ -52,7 +54,7 @@ public class NewsService {
             }
         } catch (Exception e) {
             // 네트워크 오류, 파싱 오류 등 예외 처리
-            System.err.println("RSS 피드 처리 중 오류 발생: " + e.getMessage());
+            log.error("RSS 피드 처리 중 오류 발생: {}", e.getMessage());
             return Collections.emptyList();
         }
     }

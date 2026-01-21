@@ -2,6 +2,7 @@ package com.newproject.etf.scheduler;
 
 import com.newproject.etf.config.EtfBatchConfig;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
@@ -17,10 +18,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class EtfBatchScheduler {
 
     private final JobLauncher jobLauncher;
@@ -38,28 +41,29 @@ public class EtfBatchScheduler {
             // Job Parameters 생성
             // 'targetDate'는 배치 Job이 처리할 기준 날짜를 의미합니다.
             // 재시작(Restart)을 지원하기 위해, 하루 동안은 동일한 파라미터(날짜)를 유지해야 합니다.
-            String targetDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            String targetDate = LocalDate.now()
+                    .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
             JobParameters jobParameters = new JobParametersBuilder()
                     .addString("targetDate", targetDate)
                     .toJobParameters();
 
-            System.out.println("[EtfBatchScheduler] Launching job: " + EtfBatchConfig.JOB_NAME + " with parameters: " + jobParameters);
+            log.info("Launching job: {} with parameters: {}", EtfBatchConfig.JOB_NAME, jobParameters);
             // Job 실행
             jobLauncher.run(importEtfDataJob, jobParameters);
-            System.out.println("[EtfBatchScheduler] Job launched successfully.");
+            log.info("Job launched successfully.");
 
         } catch (JobExecutionAlreadyRunningException e) {
-            System.err.println("[EtfBatchScheduler] Job is already running for this instance: " + e.getMessage());
+            log.error("Job is already running for this instance: {}", e.getMessage());
         } catch (JobInstanceAlreadyCompleteException e) {
-            System.err.println("[EtfBatchScheduler] Job instance already completed for today: " + e.getMessage());
+            log.error("Job instance already completed for today: {}", e.getMessage());
             // 일반적으로 cron으로 매일 실행 시 JobParameters가 매번 달라지므로 이 예외는 발생하지 않습니다.
             // 하지만 JobParameters가 동일하다면 발생할 수 있습니다.
         } catch (JobRestartException e) {
-            System.err.println("[EtfBatchScheduler] Job restart failed: " + e.getMessage());
+            log.error("Job restart failed: {}", e.getMessage());
         } catch (JobParametersInvalidException e) {
-            System.err.println("[EtfBatchScheduler] Invalid Job Parameters: " + e.getMessage());
+            log.error("Invalid Job Parameters: {}", e.getMessage());
         } catch (Exception e) { // 기타 예상치 못한 예외 처리
-            System.err.println("[EtfBatchScheduler] An unexpected error occurred: " + e.getMessage());
+            log.error("An unexpected error occurred: {}", e.getMessage());
             e.printStackTrace();
         }
     }
@@ -68,7 +72,7 @@ public class EtfBatchScheduler {
      * 실패한 Job이 있는지 주기적으로 확인하여 재시도합니다.
      * 예: 1시간(3600000ms)마다 실행
      */
-    @Scheduled(fixedDelay = 3600000)
+    @Scheduled(fixedDelay = 1000 * 60) // 테스트 : 1분마다 실행
     public void retryFailedJob() {
         try {
             String targetDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -84,7 +88,7 @@ public class EtfBatchScheduler {
             JobExecution lastExecution = jobExplorer.getLastJobExecution(lastJobInstance);
 
             if (lastExecution != null && lastExecution.getStatus().isUnsuccessful()) {
-                System.out.println("[EtfBatchScheduler] Found failed job for date: " + targetDate + ". Attempting restart...");
+                log.info("Found failed job for date: {}. Attempting restart...", targetDate);
                 
                 // 재실행 (Spring Batch는 파라미터가 같고 이전 상태가 실패면, 실패한 지점부터 이어서 실행함)
                 jobLauncher.run(importEtfDataJob, jobParameters);
@@ -94,7 +98,7 @@ public class EtfBatchScheduler {
         } catch (JobExecutionAlreadyRunningException e) {
             // 이미 실행 중인 경우 무시
         } catch (Exception e) {
-            System.err.println("[EtfBatchScheduler] Error during retry check: " + e.getMessage());
+            log.error("Error during retry check: {}", e.getMessage());
         }
     }
 }

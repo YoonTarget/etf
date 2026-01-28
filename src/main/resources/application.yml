@@ -45,4 +45,4 @@ api:
 
 scheduler:
   etf:
-    cron: "0 32 18 * * ?"
+    cron: "0 0 0 * * ?"

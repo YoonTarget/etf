@@ -64,15 +64,14 @@ public class EtfBatchScheduler {
             log.error("Invalid Job Parameters: {}", e.getMessage());
         } catch (Exception e) { // 기타 예상치 못한 예외 처리
             log.error("An unexpected error occurred: {}", e.getMessage());
-            e.printStackTrace();
         }
     }
 
     /**
      * 실패한 Job이 있는지 주기적으로 확인하여 재시도합니다.
-     * 예: 1시간(3600000ms)마다 실행
+     * 예: 1분(60000ms)마다 실행
      */
-    @Scheduled(fixedDelay = 1000 * 60) // 테스트 : 1분마다 실행
+    @Scheduled(fixedDelay = 1000 * 60)
     public void retryFailedJob() {
         try {
             String targetDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));

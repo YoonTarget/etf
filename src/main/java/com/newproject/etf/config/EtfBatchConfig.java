@@ -1,36 +1,28 @@
 package com.newproject.etf.config;
 
-import com.newproject.etf.batch.EtfApiPagingReader; // 새롭게 만든 Reader 임포트
+import com.newproject.etf.batch.EtfApiPagingReader;
 import com.newproject.etf.dto.EtfDto;
 import com.newproject.etf.entity.EtfEntity;
 import com.newproject.etf.listener.EtfJobCompletionNotificationListener;
 import com.newproject.etf.service.EtfApiService;
-import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 
 @Configuration
@@ -40,35 +32,37 @@ import java.util.Optional;
 public class EtfBatchConfig {
 
     public static final String JOB_NAME = "importEtfDataJob";
-    private static final int API_PAGE_SIZE = 10000; // API에서 한 번에 가져올 최대 건수
+    
+    // [Efficiency] API 호출 횟수 최소화를 위해 한 번에 많이 가져옴 (API 제한 고려)
+    private static final int API_PAGE_SIZE = 10000; 
+    
+    // [Performance] DB 트랜잭션 효율을 위해 적절한 크기로 끊어서 커밋
+    private static final int CHUNK_SIZE = 1000;
 
     private final EtfApiService etfApiService;
-    private final EntityManagerFactory entityManagerFactory;
     private final PlatformTransactionManager transactionManager;
     private final JobRepository jobRepository;
-    private final DataSource dataSource; // JDBC Writer 사용을 위해 주입
+    private final DataSource dataSource;
 
-
-    // 1. ItemReader: API에서 데이터를 페이지별로 읽어오는 부분
     @Bean
-    @StepScope // Step 실행 시점에 생성되도록 StepScope 사용
+    @StepScope
     public EtfApiPagingReader etfApiPagingReader() {
-        // 새롭게 구현한 EtfApiPagingReader를 반환
         return new EtfApiPagingReader(etfApiService, API_PAGE_SIZE);
     }
 
-    // 2. Processor: 중복 체크 + 데이터 변환
     @Bean
     @StepScope
     public ItemProcessor<EtfDto, EtfEntity> etfItemProcessor() {
         return dto -> {
-            // 메모리 기반 중복 체크 로직 제거 (DB에서 처리)
-
             EtfEntity entity = new EtfEntity();
             entity.setSrtnCd(dto.getSrtnCd());
             entity.setBasDt(dto.getBasDt());
+            entity.setItmsNm(dto.getItmsNm());
+            entity.setIsinCd(dto.getIsinCd());
+            entity.setBssIdxIdxNm(dto.getBssIdxIdxNm());
 
             try {
+                // [Data Integrity] Nullable 필드에 대한 안전한 파싱 및 기본값 처리
                 entity.setFltRt(parseBigDecimal(dto.getFltRt()));
                 entity.setNav(parseBigDecimal(dto.getNav()));
                 entity.setMkp(parseBigDecimal(dto.getMkp()));
@@ -83,38 +77,31 @@ public class EtfBatchConfig {
                 entity.setClpr(parseBigDecimal(dto.getClpr()));
                 entity.setVs(parseBigDecimal(dto.getVs()));
             } catch (NumberFormatException e) {
-                log.error("Number format error for item: {} on date {}", dto.getItmsNm(), dto.getBasDt());
-                return null; // 변환 불가 항목 스킵
+                log.warn("Number format error for item: {} on date {}. Skipping item.", dto.getItmsNm(), dto.getBasDt());
+                return null; // 파싱 에러 시 해당 항목 스킵 (Fault Tolerance)
             }
-
-            entity.setItmsNm(dto.getItmsNm());
-            entity.setIsinCd(dto.getIsinCd());
-            entity.setBssIdxIdxNm(dto.getBssIdxIdxNm());
-
             return entity;
         };
     }
 
     private BigDecimal parseBigDecimal(String value) {
         return Optional.ofNullable(value)
-                .filter(s -> !s.isEmpty())
+                .filter(s -> !s.trim().isEmpty())
                 .map(BigDecimal::new)
-                .orElse(null);
+                .orElse(BigDecimal.ZERO);
     }
 
     private Long parseLong(String value) {
         return Optional.ofNullable(value)
-                .filter(s -> !s.isEmpty())
+                .filter(s -> !s.trim().isEmpty())
                 .map(Long::parseLong)
-                .orElse(null);
+                .orElse(0L);
     }
 
-    // 3. ItemWriter: 가공된 데이터를 DB에 저장 (UPSERT)
     @Bean
     @StepScope
     public ItemWriter<EtfEntity> etfDbWriter() {
         log.info("Initializing etfDbWriter.");
-        // JpaItemWriter 대신 JdbcBatchItemWriter 사용 (INSERT IGNORE / ON CONFLICT 지원)
         return new JdbcBatchItemWriterBuilder<EtfEntity>()
                 .dataSource(dataSource)
                 .sql("INSERT INTO etf_price_info (" +
@@ -127,35 +114,25 @@ public class EtfBatchConfig {
                         ":itmsNm, :isinCd, :bssIdxIdxNm) " +
                         "ON CONFLICT (srtn_cd, bas_dt) DO NOTHING")
                 .beanMapped()
-                .assertUpdates(false) // 중복 데이터(DO NOTHING) 발생 시 0건 업데이트되어도 오류로 처리하지 않음
+                .assertUpdates(false)
                 .build();
     }
 
-    // Step 정의
     @Bean
     public Step etfDataLoadingStep() {
         log.info("Building etfDataLoadingStep.");
         return new StepBuilder("etfDataLoadingStep", jobRepository)
-                .<EtfDto, EtfEntity>chunk(50, transactionManager) // 청크 사이즈를 더 축소 (100 -> 50)
+                .<EtfDto, EtfEntity>chunk(CHUNK_SIZE, transactionManager)
                 .reader(etfApiPagingReader())
                 .processor(etfItemProcessor())
                 .writer(etfDbWriter())
-                .transactionManager(transactionManager)
-                .listener(new StepExecutionListener() {
-                    @Override
-                    public void beforeStep(StepExecution stepExecution) {
-                        // 각 페이지 처리 전 5초 대기
-                        try {
-                            Thread.sleep(5000);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                })
+                // [Resilience] 내결함성 설정: 예외 발생 시 즉시 실패하지 않고 스킵
+                .faultTolerant()
+                .skip(Exception.class) // 모든 예외에 대해 스킵 시도 (운영 정책에 따라 구체화 가능)
+                .skipLimit(100)        // 최대 100개까지 에러 허용
                 .build();
     }
 
-    // Job 정의
     @Bean
     public Job importEtfDataJob(EtfJobCompletionNotificationListener listener) {
         log.info("Building importEtfDataJob.");

@@ -1,6 +1,8 @@
 spring:
   application:
     name: etf
+  profiles:
+    include: secret
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
@@ -9,9 +11,11 @@ spring:
     static-locations: classpath:/static/
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    # URL 구조와 공통 옵션은 여기서 관리 (Git 공유 됨)
+    # 접속 정보는 secret 파일의 변수(${secret.db...})로 주입받음
+    url: jdbc:postgresql://${secret.db.host}:${secret.db.port}/${secret.db.name}?prepareThreshold=0&reWriteBatchedInserts=true
+    username: ${secret.db.username}
+    password: ${secret.db.password}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
@@ -19,7 +23,7 @@ spring:
       connection-timeout: 60000
       connection-test-query: SELECT 1
       leak-detection-threshold: 0
-      connection-init-sql: SET statement_timeout = 0 # 제한 해제 (대량 배치 작업을 위해 타임아웃 끔)
+      connection-init-sql: SET statement_timeout = 0
   batch:
     jdbc:
       initialize-schema: always
@@ -40,7 +44,7 @@ spring:
     max-in-memory-size: 10485760
 
 api:
-  service-key: ${SERVICE_KEY}
+  service-key: ${secret.api.service-key}
   base-url: https://apis.data.go.kr/1160100/service/GetSecuritiesProductInfoService/getETFPriceInfo
 
 scheduler:

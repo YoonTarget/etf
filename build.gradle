@@ -33,6 +33,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	
+	// [배포 필수] 애플리케이션의 상태(Health Check)를 모니터링하기 위한 기능
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

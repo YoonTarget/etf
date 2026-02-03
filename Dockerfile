@@ -1,5 +1,4 @@
 # 1. 빌드 단계 (Builder Stage)
-# Gradle이 설치된 이미지를 사용하여 소스 코드를 빌드합니다.
 FROM gradle:8.5-jdk17 AS builder
 
 # 작업 디렉토리 설정
@@ -8,14 +7,11 @@ WORKDIR /app
 # 소스 코드 복사
 COPY . .
 
-# [해결] gradlew 파일에 실행 권한 부여
-RUN chmod +x ./gradlew
-
-# Gradle 빌드 실행 (테스트 제외하여 빌드 속도 향상)
-RUN ./gradlew clean build -x test
+# [해결책] ./gradlew 파일 대신, 이미지에 설치된 'gradle' 명령어를 직접 사용합니다.
+# 이렇게 하면 파일 권한(126 에러)이나 줄바꿈 문자(CRLF) 문제를 원천 차단할 수 있습니다.
+RUN gradle clean build -x test
 
 # 2. 실행 단계 (Runtime Stage)
-# 더 안정적인 Eclipse Temurin JDK 이미지를 사용합니다.
 FROM eclipse-temurin:17-jre-jammy
 
 # 작업 디렉토리 설정
@@ -24,7 +20,7 @@ WORKDIR /app
 # 빌드 단계에서 생성된 JAR 파일을 복사해옵니다.
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# 컨테이너 실행 시 사용할 포트 노출 (문서화 용도)
+# 컨테이너 실행 시 사용할 포트 노출
 EXPOSE 8080
 
 # 애플리케이션 실행 명령어

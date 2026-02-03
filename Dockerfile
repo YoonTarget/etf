@@ -1,22 +1,28 @@
-# 1. Base Image: 무엇을 기반으로 실행할 것인가?
-# Java 17을 실행할 수 있는 가장 가벼운 리눅스(Alpine) 버전을 사용합니다.
-# JDK(개발도구)가 아닌 JRE(실행환경)만 사용하여 용량을 줄입니다.
-FROM eclipse-temurin:17-jre-alpine
+# 1. 빌드 단계 (Builder Stage)
+# Gradle이 설치된 이미지를 사용하여 소스 코드를 빌드합니다.
+FROM gradle:8.5-jdk17 AS builder
 
-# 2. 작업 디렉토리 설정
-# 컨테이너 내부에서 파일들이 위치할 폴더를 만듭니다.
+# 작업 디렉토리 설정
 WORKDIR /app
 
-# 3. 빌드된 Jar 파일 복사
-# 로컬에서 빌드한 jar 파일을 컨테이너 내부의 app.jar로 복사합니다.
-# 주의: 이 Dockerfile을 실행하기 전에 반드시 './gradlew bootJar'로 빌드를 먼저 해야 합니다.
-COPY build/libs/*.jar app.jar
+# 소스 코드 복사
+COPY . .
 
-# 4. 환경 변수 설정 (기본값)
-# 실행 시점에 덮어쓸 수 있지만, 기본적으로 프로덕션(prod) 프로필로 실행되도록 합니다.
-ENV SPRING_PROFILES_ACTIVE=prod
+# Gradle 빌드 실행 (테스트 제외하여 빌드 속도 향상)
+RUN ./gradlew clean build -x test
 
-# 5. 실행 명령어
-# 컨테이너가 시작될 때 실행할 명령입니다.
-# java -jar app.jar 명령어를 실행합니다.
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# 2. 실행 단계 (Runtime Stage)
+# 더 안정적인 Eclipse Temurin JDK 이미지를 사용합니다.
+FROM eclipse-temurin:17-jre-jammy
+
+# 작업 디렉토리 설정
+WORKDIR /app
+
+# 빌드 단계에서 생성된 JAR 파일을 복사해옵니다.
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+# 컨테이너 실행 시 사용할 포트 노출 (문서화 용도)
+EXPOSE 8080
+
+# 애플리케이션 실행 명령어
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]

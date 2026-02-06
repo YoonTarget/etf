@@ -49,4 +49,4 @@ api:
 
 scheduler:
   etf:
-    cron: "0 0 0 * * ?"
+    cron: "0 0 9 * * ?"

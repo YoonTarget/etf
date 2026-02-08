@@ -121,4 +121,10 @@ public interface EtfRepository extends JpaRepository<EtfEntity, EtfPriceInfoId> 
      */
     @Query("SELECT e FROM EtfEntity e WHERE e.basDt = (SELECT MAX(e2.basDt) FROM EtfEntity e2) ORDER BY e.trqu DESC")
     List<EtfEntity> findLatestEtfData();
+
+    /**
+     * 가장 최근 기준일자 조회
+     */
+    @Query("SELECT MAX(e.basDt) FROM EtfEntity e")
+    String findMaxBasDt();
 }

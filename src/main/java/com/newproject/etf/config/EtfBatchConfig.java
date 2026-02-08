@@ -4,6 +4,7 @@ import com.newproject.etf.batch.EtfApiPagingReader;
 import com.newproject.etf.dto.EtfDto;
 import com.newproject.etf.entity.EtfEntity;
 import com.newproject.etf.listener.EtfJobCompletionNotificationListener;
+import com.newproject.etf.repository.EtfRepository;
 import com.newproject.etf.service.EtfApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +41,7 @@ public class EtfBatchConfig {
     private static final int CHUNK_SIZE = 1000;
 
     private final EtfApiService etfApiService;
+    private final EtfRepository etfRepository; // Repository 주입
     private final PlatformTransactionManager transactionManager;
     private final JobRepository jobRepository;
     private final DataSource dataSource;
@@ -47,7 +49,7 @@ public class EtfBatchConfig {
     @Bean
     @StepScope
     public EtfApiPagingReader etfApiPagingReader() {
-        return new EtfApiPagingReader(etfApiService, API_PAGE_SIZE);
+        return new EtfApiPagingReader(etfApiService, etfRepository, API_PAGE_SIZE);
     }
 
     @Bean

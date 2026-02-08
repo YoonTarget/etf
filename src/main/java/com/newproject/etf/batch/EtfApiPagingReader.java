@@ -1,8 +1,13 @@
 package com.newproject.etf.batch;
 
 import com.newproject.etf.dto.EtfDto; // API 응답 DTO
+import com.newproject.etf.repository.EtfRepository; // DB 조회용 리포지토리
 import com.newproject.etf.service.EtfApiService; // API 호출 서비스
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.ItemStreamReader; // ItemStreamReader 사용
@@ -20,20 +25,34 @@ import java.util.concurrent.atomic.AtomicInteger; // 페이지 번호를 위한 
 public class EtfApiPagingReader implements ItemStreamReader<EtfDto> {
 
     private final EtfApiService etfApiService;
+    private final EtfRepository etfRepository; // DB 조회를 위한 리포지토리 추가
     private final int pageSize; // 한 번에 조회할 최대 갯수 (예: 10000)
 
     private final AtomicInteger currentPage = new AtomicInteger(1); // 페이지 번호는 1부터 시작하는 것이 일반적입니다.
     private Iterator<EtfDto> currentDataIterator; // 현재 페이지의 데이터를 담을 이터레이터
+    private String maxBasDt; // DB에 저장된 가장 최근 기준일자
+    private StepExecution stepExecution; // Step 실행 정보를 담는 객체
 
     // 생성자를 통해 필요한 의존성 주입
-    public EtfApiPagingReader(EtfApiService etfApiService, int pageSize) {
+    public EtfApiPagingReader(EtfApiService etfApiService, EtfRepository etfRepository, int pageSize) {
         this.etfApiService = etfApiService;
+        this.etfRepository = etfRepository;
         this.pageSize = pageSize;
         log.info("Initialized for pageSize: {}", pageSize);
     }
 
+    // Step 실행 전에 StepExecution을 가져옴
+    @BeforeStep
+    public void saveStepExecution(StepExecution stepExecution) {
+        this.stepExecution = stepExecution;
+    }
+
     @Override
     public void open(ExecutionContext executionContext) throws ItemStreamException {
+        // DB에서 가장 최근 기준일자를 조회하여 저장
+        maxBasDt = etfRepository.findMaxBasDt();
+        log.info("Max BasDt in DB: {}", maxBasDt);
+
         // Job 재시작 시점에 이전 페이지 정보를 로드하거나, 처음 시작 시 초기화
         if (executionContext.containsKey("etfApiPagingReader.page")) {
             currentPage.set(executionContext.getInt("etfApiPagingReader.page"));
@@ -75,7 +94,29 @@ public class EtfApiPagingReader implements ItemStreamReader<EtfDto> {
                 return null;
             }
         }
-        return currentDataIterator.next();
+
+        EtfDto item = currentDataIterator.next();
+
+        // 중복 데이터 체크: DB에 저장된 최신 날짜보다 '작은' 데이터가 나오면 종료 (같은 날짜는 재처리 허용)
+        // API 데이터가 최신순(내림차순)으로 정렬되어 있다고 가정합니다.
+        // [수정] <= 0 에서 < 0 으로 변경하여, 같은 날짜의 데이터가 부분적으로만 저장된 경우에도 누락 없이 처리되도록 함.
+        if (maxBasDt != null && item.getBasDt() != null && item.getBasDt().compareTo(maxBasDt) < 0) {
+            String message = String.format("Found older data (BasDt: %s < MaxBasDt: %s). Stopping reader.", item.getBasDt(), maxBasDt);
+            log.info(message);
+
+            // DB의 BATCH_STEP_EXECUTION 및 BATCH_JOB_EXECUTION 테이블에도 종료 사유 기록
+            if (stepExecution != null) {
+                // StepExecution에 메시지 추가
+                stepExecution.setExitStatus(stepExecution.getExitStatus().addExitDescription(message));
+                
+                // JobExecution에도 메시지 추가
+                JobExecution jobExecution = stepExecution.getJobExecution();
+                jobExecution.setExitStatus(jobExecution.getExitStatus().addExitDescription(message));
+            }
+            return null; // 더 이상 읽지 않고 종료
+        }
+
+        return item;
     }
 
     private void loadPageData() {

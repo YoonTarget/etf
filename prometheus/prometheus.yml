@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s # 15초마다 데이터 수집
+
+scrape_configs:
+  - job_name: 'etf-app'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['etf-app:8080'] # Docker 내부 네트워크로 접근

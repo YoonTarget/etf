@@ -10,10 +10,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    environment:
-      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,prometheus
-      - MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED=true
-      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
+    # 환경 변수 대신 Java 시스템 속성으로 직접 주입 (가장 강력한 우선순위)
+    command: >
+      java -Djava.security.egd=file:/dev/./urandom
+      -Dmanagement.endpoints.web.exposure.include=health,info,prometheus
+      -Dmanagement.endpoint.health.show-details=always
+      -jar app.jar
 
   nginx:
     image: nginx:1.15-alpine

@@ -10,6 +10,10 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    environment:
+      - MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE=health,info,prometheus
+      - MANAGEMENT_ENDPOINT_PROMETHEUS_ENABLED=true
+      - MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS=always
 
   nginx:
     image: nginx:1.15-alpine

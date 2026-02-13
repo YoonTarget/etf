@@ -158,3 +158,8 @@ GET /etf/recent
   ...
 ]
 ```
+
+---
+
+## 🚀 배포 상태
+![Deploy to EC2 with Docker](https://github.com/YoonTarget/etf/actions/workflows/deploy.yml/badge.svg)

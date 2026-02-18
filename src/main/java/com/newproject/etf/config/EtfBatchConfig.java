@@ -18,12 +18,14 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
+import org.springframework.batch.item.support.CompositeItemWriter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Optional;
 
 @Configuration
@@ -34,14 +36,11 @@ public class EtfBatchConfig {
 
     public static final String JOB_NAME = "importEtfDataJob";
     
-    // [Efficiency] API 호출 횟수 최소화를 위해 한 번에 많이 가져옴 (API 제한 고려)
     private static final int API_PAGE_SIZE = 10000; 
-    
-    // [Performance] DB 트랜잭션 효율을 위해 적절한 크기로 끊어서 커밋
     private static final int CHUNK_SIZE = 1000;
 
     private final EtfApiService etfApiService;
-    private final EtfRepository etfRepository; // Repository 주입
+    private final EtfRepository etfRepository;
     private final PlatformTransactionManager transactionManager;
     private final JobRepository jobRepository;
     private final DataSource dataSource;
@@ -64,7 +63,6 @@ public class EtfBatchConfig {
             entity.setBssIdxIdxNm(dto.getBssIdxIdxNm());
 
             try {
-                // [Data Integrity] Nullable 필드에 대한 안전한 파싱 및 기본값 처리
                 entity.setFltRt(parseBigDecimal(dto.getFltRt()));
                 entity.setNav(parseBigDecimal(dto.getNav()));
                 entity.setMkp(parseBigDecimal(dto.getMkp()));
@@ -80,7 +78,7 @@ public class EtfBatchConfig {
                 entity.setVs(parseBigDecimal(dto.getVs()));
             } catch (NumberFormatException e) {
                 log.warn("Number format error for item: {} on date {}. Skipping item.", dto.getItmsNm(), dto.getBasDt());
-                return null; // 파싱 에러 시 해당 항목 스킵 (Fault Tolerance)
+                return null;
             }
             return entity;
         };
@@ -102,8 +100,7 @@ public class EtfBatchConfig {
 
     @Bean
     @StepScope
-    public ItemWriter<EtfEntity> etfDbWriter() {
-        log.info("Initializing etfDbWriter.");
+    public ItemWriter<EtfEntity> etfPriceDbWriter() {
         return new JdbcBatchItemWriterBuilder<EtfEntity>()
                 .dataSource(dataSource)
                 .sql("INSERT INTO etf_price_info (" +
@@ -121,17 +118,37 @@ public class EtfBatchConfig {
     }
 
     @Bean
+    @StepScope
+    public ItemWriter<EtfEntity> etfInfoDbWriter() {
+        return new JdbcBatchItemWriterBuilder<EtfEntity>()
+                .dataSource(dataSource)
+                .sql("INSERT INTO etf_info (srtn_cd, itms_nm, isin_cd) " +
+                     "VALUES (:srtnCd, :itmsNm, :isinCd) " +
+                     "ON CONFLICT (srtn_cd) DO NOTHING")
+                .beanMapped()
+                .assertUpdates(false)
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public CompositeItemWriter<EtfEntity> compositeItemWriter() {
+        CompositeItemWriter<EtfEntity> writer = new CompositeItemWriter<>();
+        writer.setDelegates(Arrays.asList(etfPriceDbWriter(), etfInfoDbWriter()));
+        return writer;
+    }
+
+    @Bean
     public Step etfDataLoadingStep() {
         log.info("Building etfDataLoadingStep.");
         return new StepBuilder("etfDataLoadingStep", jobRepository)
                 .<EtfDto, EtfEntity>chunk(CHUNK_SIZE, transactionManager)
                 .reader(etfApiPagingReader())
                 .processor(etfItemProcessor())
-                .writer(etfDbWriter())
-                // [Resilience] 내결함성 설정: 예외 발생 시 즉시 실패하지 않고 스킵
+                .writer(compositeItemWriter()) // Composite Writer 사용
                 .faultTolerant()
-                .skip(Exception.class) // 모든 예외에 대해 스킵 시도 (운영 정책에 따라 구체화 가능)
-                .skipLimit(100)        // 최대 100개까지 에러 허용
+                .skip(Exception.class)
+                .skipLimit(100)
                 .build();
     }
 

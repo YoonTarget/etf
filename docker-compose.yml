@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   etf-app:
-    build: .
+    image: yoontarget/etf:latest # build: . 대신 image 사용
     container_name: etf-app
     restart: always
     logging:

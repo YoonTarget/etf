@@ -8,7 +8,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "etf_tag")
+@Table(
+        name = "etf_tag",
+        indexes = {
+                @Index(name = "idx_etf_tag_tag_srtn", columnList = "tag_id, srtn_cd"),
+                @Index(name = "idx_etf_tag_srtn", columnList = "srtn_cd")
+        }
+)
 public class EtfTag {
 
     @Id

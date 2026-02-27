@@ -8,7 +8,13 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "etf_price_info")
+@Table(
+        name = "etf_price_info",
+        indexes = {
+                @Index(name = "idx_etf_price_srtn_basdt", columnList = "srtn_cd, bas_dt"),
+                @Index(name = "idx_etf_price_basdt", columnList = "bas_dt")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor

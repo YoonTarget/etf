@@ -9,9 +9,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -21,7 +24,6 @@ public class TagService {
     private final EtfInfoRepository etfInfoRepository;
     private final TagRepository tagRepository;
 
-    // 태그별 키워드 매핑 (확장 가능)
     private static final Map<String, List<String>> TAG_KEYWORDS = Map.of(
             "#반도체", List.of("반도체", "Semiconductor", "소부장"),
             "#2차전지", List.of("2차전지", "Battery", "전기차", "EV"),
@@ -38,44 +40,74 @@ public class TagService {
     @Transactional
     public void autoTagging() {
         log.info("Starting auto-tagging process...");
-        List<EtfInfo> allEtfs = etfInfoRepository.findAll();
-        int taggedCount = 0;
+
+        List<EtfInfo> allEtfs = etfInfoRepository.findAllWithTags();
+        Map<String, Tag> tagCache = preloadTags();
+
+        int taggedEtfCount = 0;
+        int assignedTagCount = 0;
 
         for (EtfInfo etf : allEtfs) {
-            String name = etf.getItmsNm().toUpperCase(); // 대소문자 무시를 위해 대문자로 변환
-            boolean isTagged = false;
+            String nameUpper = etf.getItmsNm().toUpperCase();
+            Set<String> existingTagNames = new HashSet<>(
+                    etf.getEtfTags().stream()
+                            .map(etfTag -> etfTag.getTag().getTagName())
+                            .toList()
+            );
 
+            boolean tagged = false;
             for (Map.Entry<String, List<String>> entry : TAG_KEYWORDS.entrySet()) {
                 String tagName = entry.getKey();
-                List<String> keywords = entry.getValue();
+                if (!containsAnyKeyword(nameUpper, entry.getValue())) {
+                    continue;
+                }
 
-                for (String keyword : keywords) {
-                    if (name.contains(keyword.toUpperCase())) {
-                        addTagToEtf(etf, tagName);
-                        isTagged = true;
-                        break; // 한 태그 내에서 키워드 중 하나만 매칭되면 다음 태그로 넘어감
-                    }
+                if (existingTagNames.add(tagName)) {
+                    etf.addTag(tagCache.get(tagName));
+                    assignedTagCount++;
+                    tagged = true;
+                    log.debug("Added tag '{}' to ETF '{}'", tagName, etf.getItmsNm());
                 }
             }
-            if (isTagged) {
-                taggedCount++;
+
+            if (tagged) {
+                taggedEtfCount++;
             }
         }
-        log.info("Auto-tagging completed. {} ETFs processed.", taggedCount);
+
+        log.info("Auto-tagging completed. taggedEtfCount={}, assignedTagCount={}", taggedEtfCount, assignedTagCount);
     }
 
-    private void addTagToEtf(EtfInfo etf, String tagName) {
-        // 1. 태그가 이미 존재하는지 확인하고 없으면 생성
-        Tag tag = tagRepository.findByTagName(tagName)
-                .orElseGet(() -> tagRepository.save(new Tag(tagName)));
+    private Map<String, Tag> preloadTags() {
+        Map<String, Tag> tagCache = new HashMap<>();
+        List<String> targetTagNames = new ArrayList<>(TAG_KEYWORDS.keySet());
 
-        // 2. ETF에 이미 해당 태그가 붙어있는지 확인 (중복 방지)
-        boolean alreadyHasTag = etf.getEtfTags().stream()
-                .anyMatch(etfTag -> etfTag.getTag().getTagName().equals(tagName));
-
-        if (!alreadyHasTag) {
-            etf.addTag(tag);
-            log.debug("Added tag '{}' to ETF '{}'", tagName, etf.getItmsNm());
+        for (Tag tag : tagRepository.findByTagNameIn(targetTagNames)) {
+            tagCache.put(tag.getTagName(), tag);
         }
+
+        List<Tag> missingTags = targetTagNames.stream()
+                .filter(tagName -> !tagCache.containsKey(tagName))
+                .map(Tag::new)
+                .toList();
+
+        if (!missingTags.isEmpty()) {
+            List<Tag> savedTags = tagRepository.saveAll(missingTags);
+            for (Tag tag : savedTags) {
+                tagCache.put(tag.getTagName(), tag);
+            }
+        }
+
+        return tagCache;
+    }
+
+    private boolean containsAnyKeyword(String nameUpper, List<String> keywords) {
+        for (String keyword : keywords) {
+            if (nameUpper.contains(keyword.toUpperCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
+

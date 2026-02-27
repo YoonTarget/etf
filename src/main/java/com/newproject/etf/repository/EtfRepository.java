@@ -13,118 +13,128 @@ import java.util.Optional;
 
 @Repository
 public interface EtfRepository extends JpaRepository<EtfEntity, EtfPriceInfoId> {
-    // === 기본 조회 메서드들 (메서드 이름 규칙 사용) ===
 
-    /**
-     * 특정 날짜의 모든 ETF 데이터 조회
-     */
+    interface EtfSummaryRow {
+        String getSrtnCd();
+        String getItmsNm();
+        BigDecimal getClpr();
+        BigDecimal getFltRt();
+        BigDecimal getVs();
+        Long getTrqu();
+        Long getMrktTotAmt();
+    }
+
     List<EtfEntity> findByBasDt(String basDt);
 
-    /**
-     * 특정 단축코드의 모든 ETF 데이터 조회 (날짜 오름차순)
-     */
     List<EtfEntity> findBySrtnCdOrderByBasDtAsc(String srtnCd);
 
-    /**
-     * 특정 종목명을 포함하는 ETF 데이터 조회
-     */
     List<EtfEntity> findByItmsNmContaining(String itmsNm);
 
-    /**
-     * 특정 날짜와 종목명으로 ETF 데이터 조회
-     */
     Optional<EtfEntity> findByBasDtAndItmsNm(String basDt, String itmsNm);
 
-    /**
-     * 특정 날짜와 종목명 조합이 존재하는지 확인
-     */
     boolean existsByBasDtAndItmsNm(String basDt, String itmsNm);
 
-    /**
-     * 특정 날짜의 데이터 개수 조회
-     */
     long countByBasDt(String basDt);
 
-    /**
-     * 특정 날짜의 모든 ETF 데이터 삭제
-     */
     void deleteByBasDt(String basDt);
 
-    /**
-     * 특정 종목의 모든 이력 데이터 삭제
-     */
     void deleteByItmsNm(String itmsNm);
 
-    /**
-     * 특정 등락률 이상의 ETF 조회
-     */
     List<EtfEntity> findByFltRtGreaterThanEqual(BigDecimal minFltRt);
 
-    /**
-     * 특정 거래량 이상의 ETF 조회
-     */
     List<EtfEntity> findByTrquGreaterThanEqual(Long minTrqu);
 
-    /**
-     * 날짜 순으로 정렬된 특정 종목 데이터 조회
-     */
     List<EtfEntity> findByItmsNmOrderByBasDtDesc(String itmsNm);
 
-    // === 복잡한 쿼리들 (@Query 어노테이션 사용) ===
-
-    /**
-     * 특정 날짜 범위의 ETF 데이터 조회
-     */
     @Query("SELECT e FROM EtfEntity e WHERE e.basDt BETWEEN :startDate AND :endDate ORDER BY e.basDt DESC, e.itmsNm ASC")
     List<EtfEntity> findByDateRange(@Param("startDate") String startDate, @Param("endDate") String endDate);
 
-    /**
-     * 특정 날짜의 상위 거래량 ETF 조회
-     */
     @Query("SELECT e FROM EtfEntity e WHERE e.basDt = :basDt AND e.trqu IS NOT NULL ORDER BY e.trqu DESC")
     List<EtfEntity> findTopTradingVolumeByDate(@Param("basDt") String basDt);
 
-    /**
-     * 특정 날짜의 등락률 상위/하위 ETF 조회
-     */
     @Query("SELECT e FROM EtfEntity e WHERE e.basDt = :basDt AND e.fltRt IS NOT NULL ORDER BY e.fltRt DESC")
     List<EtfEntity> findByDateOrderByFltRtDesc(@Param("basDt") String basDt);
 
-    /**
-     * 특정 기초지수의 ETF들 조회
-     */
     @Query("SELECT e FROM EtfEntity e WHERE e.bssIdxIdxNm LIKE %:indexName% ORDER BY e.basDt DESC")
     List<EtfEntity> findByIndexName(@Param("indexName") String indexName);
 
-    /**
-     * 특정 날짜의 시가총액 통계
-     */
     @Query("SELECT SUM(e.mrktTotAmt), AVG(e.mrktTotAmt), COUNT(e) FROM EtfEntity e WHERE e.basDt = :basDt AND e.mrktTotAmt IS NOT NULL")
     Object[] getMarketCapStatsByDate(@Param("basDt") String basDt);
 
-    /**
-     * 최근 거래일 조회 (Native Query)
-     */
     @Query(value = "SELECT DISTINCT bas_dt FROM etf_price_info ORDER BY bas_dt DESC LIMIT :limit", nativeQuery = true)
     List<String> findRecentTradingDates(@Param("limit") int limit);
 
-    /**
-     * 특정 조건의 ETF 개수 조회
-     */
     @Query("SELECT COUNT(e) FROM EtfEntity e WHERE e.basDt = :basDt AND e.fltRt >= :minRate AND e.trqu >= :minVolume")
     long countByConditions(@Param("basDt") String basDt,
                            @Param("minRate") BigDecimal minRate,
                            @Param("minVolume") Long minVolume);
 
-    /**
-     * 가장 최근 날짜의 모든 ETF 데이터 조회(거래량 높은 순으로 정렬)
-     */
     @Query("SELECT e FROM EtfEntity e WHERE e.basDt = (SELECT MAX(e2.basDt) FROM EtfEntity e2) ORDER BY e.trqu DESC")
     List<EtfEntity> findLatestEtfData();
 
-    /**
-     * 가장 최근 기준일자 조회
-     */
     @Query("SELECT MAX(e.basDt) FROM EtfEntity e")
     String findMaxBasDt();
+
+    Optional<EtfEntity> findTopBySrtnCdOrderByBasDtDesc(String srtnCd);
+
+    @Query("SELECT e FROM EtfEntity e " +
+           "WHERE e.srtnCd IN :srtnCds " +
+           "AND e.basDt = (SELECT MAX(e2.basDt) FROM EtfEntity e2 WHERE e2.srtnCd = e.srtnCd)")
+    List<EtfEntity> findLatestBySrtnCdIn(@Param("srtnCds") List<String> srtnCds);
+
+    @Query(value = """
+            SELECT
+              i.srtn_cd AS srtnCd,
+              i.itms_nm AS itmsNm,
+              p.clpr AS clpr,
+              p.flt_rt AS fltRt,
+              p.vs AS vs,
+              p.trqu AS trqu,
+              p.mrkt_tot_amt AS mrktTotAmt
+            FROM etf_info i
+            JOIN etf_tag et ON et.srtn_cd = i.srtn_cd
+            JOIN tag t ON t.tag_id = et.tag_id
+            LEFT JOIN LATERAL (
+              SELECT e.clpr, e.flt_rt, e.vs, e.trqu, e.mrkt_tot_amt
+              FROM etf_price_info e
+              WHERE e.srtn_cd = i.srtn_cd
+              ORDER BY e.bas_dt DESC
+              LIMIT 1
+            ) p ON true
+            WHERE t.tag_name = :tagName
+            ORDER BY COALESCE(p.trqu, 0) DESC, i.srtn_cd
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<EtfSummaryRow> findEtfSummariesByTag(@Param("tagName") String tagName, @Param("limit") int limit);
+
+    @Query(value = """
+            SELECT
+              i.srtn_cd AS srtnCd,
+              i.itms_nm AS itmsNm,
+              p.clpr AS clpr,
+              p.flt_rt AS fltRt,
+              p.vs AS vs,
+              p.trqu AS trqu,
+              p.mrkt_tot_amt AS mrktTotAmt
+            FROM etf_info i
+            LEFT JOIN LATERAL (
+              SELECT e.clpr, e.flt_rt, e.vs, e.trqu, e.mrkt_tot_amt
+              FROM etf_price_info e
+              WHERE e.srtn_cd = i.srtn_cd
+              ORDER BY e.bas_dt DESC
+              LIMIT 1
+            ) p ON true
+            WHERE
+              UPPER(i.itms_nm) LIKE UPPER(CONCAT('%', :query, '%'))
+              OR EXISTS (
+                SELECT 1
+                FROM etf_tag et
+                JOIN tag t ON t.tag_id = et.tag_id
+                WHERE et.srtn_cd = i.srtn_cd
+                  AND UPPER(t.tag_name) LIKE UPPER(CONCAT('%', :query, '%'))
+              )
+            ORDER BY COALESCE(p.trqu, 0) DESC, i.srtn_cd
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<EtfSummaryRow> findEtfSummariesByKeyword(@Param("query") String query, @Param("limit") int limit);
 }

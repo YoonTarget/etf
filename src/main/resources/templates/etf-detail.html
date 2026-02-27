@@ -1,317 +1,184 @@
 <!DOCTYPE html>
-<html lang="ko">
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>진격의 ETF</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <script src="/js/load-components.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title th:text="${etfInfo.itmsNm} + ' - 진격의 ETF'">ETF 상세</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-radius: 1rem; }
+        .info-label { font-weight: 600; color: #6c757d; }
+        .info-value { font-weight: 500; }
+        .chart-container { position: relative; height: 400px; width: 100%; }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-900">
+<body>
 
-<!-- Header -->
-<!--
-<header class="bg-white shadow-md p-4">
-    <h1 class="text-2xl font-bold text-blue-600">ETF 종목 상세</h1>
-</header>
--->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/"><i class="fas fa-rocket me-2"></i>진격의 ETF</a>
+    </div>
+</nav>
 
-<div id="header-placeholder"></div>
-
-<!-- Main -->
-<main class="max-w-7xl mx-auto p-6 grid grid-cols-12 gap-6">
-
-    <!-- Left : 종목 기본 정보 -->
-    <aside class="col-span-3 bg-white rounded-2xl shadow p-4">
-        <h2 class="text-xl font-semibold mb-3">📊 종목 기본 정보</h2>
-        <ul class="space-y-2 text-sm">
-            <li><span class="font-medium">종목명:</span> <span th:text="${etfInfo.itmsNm}"></span></li>
-            <li><span class="font-medium">ISIN코드:</span> <span th:text="${etfInfo.isinCd}"></span></li>
-            <li><span class="font-medium">기초지수명:</span> <span th:text="${etfInfo.bssIdxIdxNm}"></span></li>
-            <li><span class="font-medium">기초지수 종가:</span> <span th:text="${etfInfo.bssIdxClpr}"></span></li>
-            <li><span class="font-medium">시가총액:</span> <span th:text="${etfInfo.mrktTotAmt}"></span></li>
-            <li><span class="font-medium">순자산가치:</span> <span th:text="${etfInfo.nav}"></span></li>
-            <li><span class="font-medium">상장일:</span> <span th:text="${etfInfo.basDt}"></span></li>
-        </ul>
-    </aside>
-
-    <!-- Center : 차트 & 성과 -->
-    <section class="col-span-6 bg-white rounded-2xl shadow p-4">
-        <h2 class="text-xl font-semibold mb-3">📈 가격 & 성과</h2>
-
-        <!-- 차트 영역 -->
-        <!-- 차트 컨테이너에 높이 지정 -->
-        <div style="width: 100%; height: 400px;">
-            <canvas id="etfChart" class="h-64 w-full"></canvas>
+<div class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <span class="badge bg-secondary mb-2" th:text="${etfInfo.isinCd}">CODE</span>
+            <h2 class="fw-bold mb-0" th:text="${etfInfo.itmsNm}">ETF 종목명</h2>
         </div>
+    </div>
 
-        <!-- 성과 테이블 -->
-        <table class="mt-4 w-full text-sm border-t">
-            <thead class="bg-gray-50">
-            <tr>
-                <th class="p-2 text-left">구분</th>
-                <th class="p-2 text-right">전체</th>
-                <!--
-                <th class="p-2 text-right">1년</th>
-                <th class="p-2 text-right">6개월</th>
-                <th class="p-2 text-right">3개월</th>
-                <th class="p-2 text-right">1개월</th>
-                -->
-            </tr>
-            </thead>
-            <tbody>
-            <tr class="border-t">
-                <td class="p-2 font-medium">수익률</td>
-                <td id="ret-total" class="p-2 text-right">-</td>
-                <!--
-                <td id="ret-1y" class="p-2 text-right">-</td>
-                <td id="ret-6m" class="p-2 text-right">-</td>
-                <td id="ret-3m" class="p-2 text-right">-</td>
-                <td id="ret-1m" class="p-2 text-right">-</td>
-                -->
-            </tr>
-            </tbody>
-        </table>
-
-        <h2 class="text-xl font-semibold mb-3 mt-8">💬 댓글</h2>
-        <div id="comments-section">
-            <!-- 댓글 입력 폼 -->
-            <form id="comment-form" class="space-y-4">
-                <!-- 닉네임 입력 필드 -->
-                <div>
-                    <label for="nickname" class="block text-sm font-medium text-gray-700 sr-only">닉네임</label>
-                    <input type="text" id="nickname" name="nickname" required
-                           maxlength="20" placeholder="닉네임 (최대 20자)"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out shadow-sm text-sm"
-                           aria-label="닉네임 입력">
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3"><i class="fas fa-info-circle me-2"></i>기본 정보</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="info-label">기초지수</span>
+                            <span class="info-value text-end" th:text="${etfInfo.bssIdxIdxNm}">-</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="info-label">지수 종가</span>
+                            <span class="info-value" th:text="${etfInfo.bssIdxClpr}">-</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="info-label">시가총액</span>
+                            <span class="info-value" th:text="${etfInfo.mrktTotAmt}">-</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="info-label">순자산가치</span>
+                            <span class="info-value" th:text="${etfInfo.nav}">-</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="info-label">상장일</span>
+                            <span class="info-value" th:text="${etfInfo.basDt}">-</span>
+                        </li>
+                    </ul>
                 </div>
-
-                <!-- 댓글 내용 입력 필드 -->
-                <div>
-                    <label for="comment-content" class="block text-sm font-medium text-gray-700 sr-only">댓글 내용</label>
-                    <textarea id="comment-content" name="content" rows="4" required
-                              placeholder="댓글이나 분석 내용을 입력해주세요..."
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out shadow-sm text-sm resize-none"
-                              aria-label="댓글 내용 입력"></textarea>
-                </div>
-
-                <!-- 제출 버튼 -->
-                <div class="flex justify-end">
-                    <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition duration-150 ease-in-out shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                        댓글 등록
-                    </button>
-                </div>
-            </form>
-
-            <!-- 💡 댓글 목록이 표시될 영역 -->
-            <div id="comments-list" class="space-y-6 mt-6">
-                <!--
-                    여기에 JavaScript를 사용하여 Firestore에서 가져온 개별 댓글 항목들이
-                    동적으로 <div class="comment-item"> 형태로 추가됩니다.
-                -->
-                <!-- JavaScript로 동적으로 생성될 개별 댓글의 HTML 구조 예시 -->
-                <div class="comment-item p-4 bg-gray-50 rounded-lg shadow-sm">
-                    <div class="flex justify-between items-center mb-1">
-                        <!-- 닉네임 (작성자) -->
-                        <span class="font-semibold text-gray-800">사용자 닉네임</span>
-                        <!-- 작성 시간 -->
-                        <span class="text-xs text-gray-400">2분 전</span>
-                    </div>
-                    <!-- 댓글 내용 -->
-                    <p class="text-gray-700 text-sm break-words">
-                        이 ETF는 장기적으로 성장 가능성이 높아 보입니다.
-                    </p>
-                    <!-- 좋아요/반응 버튼 (선택 사항) -->
-                    <div class="mt-2 text-right">
-                        <button class="text-xs text-green-600 hover:text-green-800">
-                            👍 좋아요 (0)
-                        </button>
-                    </div>
-                </div>
-                <p class="text-gray-500 text-sm text-center py-4" id="no-comments-message">
-                    아직 댓글이 없습니다. 첫 번째 의견을 남겨주세요!
-                </p>
             </div>
         </div>
-    </section>
 
-    <!-- Right : 뉴스 & 토론 -->
-    <aside class="col-span-3 bg-white rounded-2xl shadow p-4">
-        <h2 class="text-xl font-semibold mb-3">📰 뉴스</h2>
-        <ul class="space-y-3 text-sm" id="news-list">
-            <li th:each="item, stat : ${news.subList(0, T(java.lang.Math).min(10, news.size()))}">
-                <a th:href="${item.link}" target="_blank" class="text-blue-600 hover:underline" th:text="${item.title}">
-                </a>
-                <p class="text-gray-500 text-xs" th:text="${#dates.format(item.pubDate, 'yyyy-MM-dd')}">
-                </p>
-            </li>
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3"><i class="fas fa-chart-line me-2"></i>가격 추이</h5>
+                    <div class="chart-container">
+                        <canvas id="etfChart"></canvas>
+                    </div>
 
-            <li th:if="${#lists.isEmpty(news)}">
-                <p class="text-gray-500">관련 뉴스가 없습니다.</p>
-            </li>
-        </ul>
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">전체 기간 수익률</span>
+                            <span id="ret-total" class="fs-5 fw-bold">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <div class="mt-4 text-center" id="show-more-news-btn" style="display: none;">
-            <button class="text-green-600 hover:text-green-800 font-medium text-sm">
-                뉴스 더보기 (<span id="remaining-count"></span>개 남음)
-            </button>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3"><i class="fas fa-comments me-2"></i>투자자 의견</h5>
+                    <form id="comment-form" class="mb-4">
+                        <div class="mb-2">
+                            <input type="text" class="form-control form-control-sm" id="nickname" placeholder="닉네임 (최대 20자)" required maxlength="20">
+                        </div>
+                        <div class="mb-2">
+                            <textarea class="form-control" id="comment-content" rows="3" placeholder="의견을 남겨주세요..." required></textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary btn-sm">등록</button>
+                        </div>
+                    </form>
+                    <div id="comments-list" class="vstack gap-3">
+                        <div class="text-center text-muted py-3">아직 댓글이 없습니다. 첫 의견을 남겨주세요.</div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </aside>
 
-</main>
+        <div class="col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3"><i class="fas fa-newspaper me-2"></i>관련 뉴스</h5>
+                    <div class="list-group list-group-flush" id="news-list">
+                        <a th:each="item : ${news}" th:href="${item.link}" target="_blank" class="list-group-item list-group-item-action px-0 border-0">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 text-primary text-truncate" th:text="${item.title}">뉴스 제목</h6>
+                            </div>
+                            <small class="text-muted" th:text="${#dates.format(item.pubDate, 'yyyy-MM-dd')}">날짜</small>
+                        </a>
+                        <div th:if="${#lists.isEmpty(news)}" class="text-center text-muted py-3">관련 뉴스가 없습니다.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<div id="footer-placeholder"></div>
-
-<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
-    const ctx = document.getElementById('etfChart').getContext('2d');
-    const etfData = /*[[${etfDetails}]]*/ []; // Thymeleaf로부터 데이터 받기
-
+    const etfData = /*[[${etfDetails}]]*/ [];
     const labels = etfData.map(item => item.basDt);
     const prices = etfData.map(item => item.clpr);
 
-    // 수익률 계산 함수
-    const rateOfChange = (start, end) => ((end - start) / start * 100).toFixed(2);
+    if (prices.length > 0) {
+        const startPrice = prices[0];
+        const endPrice = prices[prices.length - 1];
+        const returnRate = ((endPrice - startPrice) / startPrice * 100).toFixed(2);
 
-    // 안전 인덱스 계산 (데이터가 부족하면 undefined 방지)
-    const len = prices.length;
-    const safeIdx = (n) => (len - n >= 0 ? len - n : 0);
+        const retEl = document.getElementById('ret-total');
+        retEl.innerText = (returnRate > 0 ? '+' : '') + returnRate + '%';
+        retEl.className = 'fs-5 fw-bold ' + (returnRate > 0 ? 'text-danger' : (returnRate < 0 ? 'text-primary' : 'text-secondary'));
+    }
 
-    // 구간별 수익률 계산
-    const overallChange  = rateOfChange(prices[0], prices[len - 1]);
-    const oneYearChange  = rateOfChange(prices[safeIdx(252)], prices[len - 1]);
-    const sixMonthChange = rateOfChange(prices[safeIdx(126)], prices[len - 1]);
-    const threeMonthChange = rateOfChange(prices[safeIdx(63)], prices[len - 1]);
-    const oneMonthChange = rateOfChange(prices[safeIdx(21)], prices[len - 1]);
-
-    // 표시용 포맷 함수
-    const formatReturn = (value) => {
-      const sign = value >= 0 ? '+' : '';
-      const color = value >= 0 ? 'text-red-600' : 'text-blue-600';
-      return `<span class="${color}">${sign}${value}%</span>`;
-    };
-
-    // 테이블 채우기
-    document.getElementById('ret-total').innerHTML = formatReturn(overallChange);
-    /*
-    document.getElementById('ret-1y').innerHTML    = formatReturn(oneYearChange);
-    document.getElementById('ret-6m').innerHTML    = formatReturn(sixMonthChange);
-    document.getElementById('ret-3m').innerHTML    = formatReturn(threeMonthChange);
-    document.getElementById('ret-1m').innerHTML    = formatReturn(oneMonthChange);
-    */
-
-    const etfChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels, // 날짜 배열
-        datasets: [{
-          label: 'ETF 가격',
-          data: prices, // 종가 배열
-          borderColor: 'rgb(37, 99, 235)',
-          backgroundColor: 'rgba(37, 99, 235, 0.2)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 4,
-          pointBackgroundColor: 'rgb(37, 99, 235)'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: false
-          }
-        }
-      }
-    });
-
-    /*[# th:if="${news} and ${!#lists.isEmpty(news)}"]*/
-    // 서버에서 받은 전체 뉴스 데이터를 클라이언트 JavaScript 변수에 할당합니다.
-    const ALL_NEWS_DATA = /*[[${news}]]*/ [];
-    /*[/]*/
-
-    // 현재 표시된 뉴스 개수를 추적할 변수
-    let visibleNewsCount = 10;
-
-    document.addEventListener("DOMContentLoaded", function() {
-        if (typeof ALL_NEWS_DATA !== 'undefined' && ALL_NEWS_DATA.length > 10) {
-            // 초기 로딩 시 10개 이상일 경우에만 '더보기' 버튼을 표시합니다.
-            document.getElementById('show-more-news-btn').style.display = 'block';
-        }
-
-        // 초기 10개 항목만 Thymeleaf가 렌더링했으므로, JS는 '더보기' 버튼 이벤트만 처리합니다.
-        const showMoreBtn = document.getElementById('show-more-news-btn');
-        if (showMoreBtn) {
-            showMoreBtn.addEventListener('click', handleShowMore);
-
-            // 버튼 텍스트 초기화
-            updateButtonText();
+    const ctx = document.getElementById('etfChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '종가',
+                data: prices,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                x: { display: false },
+                y: { beginAtZero: false }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
         }
     });
 
-    // A. 뉴스 항목을 HTML 문자열로 생성하는 유틸리티 함수
-    function renderNewsItem(item) {
-        // 날짜 포맷팅은 JS에서 직접 처리합니다.
-        const formattedDate = item.pubDate ? new Date(item.pubDate).toISOString().split('T')[0] : '';
-
-        return `
-            <li>
-                <a href="${item.link}" target="_blank" class="text-blue-600 hover:underline">
-                    ${item.title}
-                </a>
-                <p class="text-gray-500 text-xs">${formattedDate}</p>
-            </li>
-        `;
-    }
-
-    // B. '더보기' 버튼 클릭 핸들러
-    function handleShowMore() {
-        const container = document.getElementById('news-list');
-        const newsToShow = 10; // 한 번에 보여줄 뉴스 개수
-
-        // 현재 표시해야 할 시작 인덱스
-        const startIndex = visibleNewsCount;
-        // 새로 표시할 끝 인덱스 (총 개수를 넘지 않도록 Math.min 사용)
-        const endIndex = Math.min(startIndex + newsToShow, ALL_NEWS_DATA.length);
-
-        let htmlContent = '';
-
-        // 새로 보여줄 뉴스 항목들을 HTML로 생성
-        for (let i = startIndex; i < endIndex; i++) {
-            htmlContent += renderNewsItem(ALL_NEWS_DATA[i]);
-        }
-
-        // 컨테이너에 HTML 삽입
-        container.insertAdjacentHTML('beforeend', htmlContent);
-
-        // 표시된 개수 업데이트
-        visibleNewsCount = endIndex;
-
-        // 버튼 텍스트 및 표시 여부 업데이트
-        updateButtonText();
-    }
-
-    // C. 버튼 텍스트 및 표시 여부 업데이트 함수
-    function updateButtonText() {
-        const showMoreBtn = document.getElementById('show-more-news-btn');
-        const remainingCountSpan = document.getElementById('remaining-count');
-
-        const remainingCount = ALL_NEWS_DATA.length - visibleNewsCount;
-
-        if (remainingCount > 0) {
-            // 남은 항목이 있으면 텍스트 업데이트
-            remainingCountSpan.textContent = remainingCount;
-        } else {
-            // 더 이상 남은 뉴스가 없으면 버튼 숨기기
-            showMoreBtn.style.display = 'none';
-        }
-    }
+    document.getElementById('comment-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('댓글 기능은 아직 서버 연동이 되어있지 않습니다.');
+    });
 </script>
 
 </body>

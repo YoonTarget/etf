@@ -36,6 +36,13 @@ header {
     text-align: center; /* 헤더 텍스트 중앙 정렬 유지 */
 }
 
+.hero-section {
+    background-image: linear-gradient(rgba(24, 38, 68, 0.55), rgba(24, 38, 68, 0.55)), url('/images/hero-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 /* --- h2 태그 스타일 --- */
 h2.title { /* 기존 h2에 .title 클래스가 있으니 이를 활용 */
     text-align: center; /* 텍스트를 중앙으로 정렬 */

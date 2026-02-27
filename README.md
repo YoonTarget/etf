@@ -1,165 +1,364 @@
 # 진격의 ETF
 
-💻 **Spring Boot + JPA 기반 ETF 추천 및 비교 웹 플랫폼**
+국내 상장 미국 ETF 데이터를 수집·저장하고, 태그 기반으로 탐색/조회할 수 있는 Spring Boot 서비스입니다.
 
-이 프로젝트는 국내 상장 미국 ETF 데이터를 효율적으로 조회·비교할 수 있도록 설계된 **백엔드 중심 애플리케이션**입니다.  
+- 외부 데이터 수집: 공공데이터포털 ETF API
+- 주기 실행: Spring Batch + Scheduler
+- 조회 방식: REST API + Thymeleaf 화면
+- 운영: Docker Compose, Nginx, Prometheus, Grafana
 
-공공데이터포털 API를 통해 데이터를 수집하고, Spring Batch로 자동화된 데이터 적재를 수행합니다.
+## 기술 스택
 
-단순 데이터 제공을 넘어 **커뮤니티 + 게임적 요소**를 접목하여 투자자들이 재미있게 소통할 수 있는 플랫폼을 지향합니다.
+- Language: Java 17
+- Framework: Spring Boot 3.4.x
+- Build: Gradle
+- DB: PostgreSQL
+- ORM: Spring Data JPA (JPQL/Native Query 포함)
+- Batch: Spring Batch
+- View: Thymeleaf + Bootstrap + jQuery
+- Test: JUnit 5, Spring Boot Test
 
----
+## 프로젝트 구조
 
-## 🛠 기술스택
-
-- **Language**: Java 17 (추후 Kotlin 마이그레이션 예정)
-- **Framework**: Spring Boot
-- **Database**: PostgreSQL
-- **Persistence Layer**:
-    - Spring Data JPA (`JpaRepository` 기반 CRUD)
-    - `EntityManager` + JPQL 직접 제어 (성능 최적화 및 복잡 쿼리 처리)
-- **Batch**: Spring Batch (공공데이터포털 ETF API → DB 저장)
-- **Build Tool**: Gradle
-- **Testing**: JUnit 5
-
----
-
-## 📂 프로젝트 구성도
-```plaintext
+```text
 src/
-├─ main/
-│   ├─ java/com/newProject/etf/
-│   │    ├─ batch/                  # Spring Batch 관련 처리 (데이터 적재, 정기 작업 등)
-│   │    ├─ config/                 # 프로젝트 전반의 환경 설정 (Batch, JPA, Scheduler, Security 등)
-│   │    ├─ controller/             # REST API 엔드포인트 (요청/응답 처리)
-│   │    ├─ dto/                    # 데이터 전송 객체 (계층 간 데이터 교환)
-│   │    ├─ entity/                 # JPA 엔티티 클래스 (DB 매핑)
-│   │    ├─ listener/               # 엔티티 리스너 (엔티티 상태 변화 감지 및 처리)
-│   │    ├─ repository/             # JPA Repository (CRUD 및 쿼리 메소드)
-│   │    ├─ scheduler/              # 스케줄러 (정해진 주기 작업 실행)
-│   │    └─ service/                # 서비스 계층 (비즈니스 로직 처리)
-│   └─ resources/
-│        ├─ docs/                   # API 및 프로젝트 문서
-│        ├─ templates/              # Thymeleaf 등 서버 사이드 렌더링 템플릿
-│        ├─ static/                 # 정적 리소스 (CSS, JS, 이미지 등)
-│        └─ application.properties  # 환경 설정 파일
-└─ test/                            # 단위 및 통합 테스트 (JUnit5)
-
+  main/
+    java/com/newproject/etf/
+      batch/        # 외부 API 페이징 리더
+      config/       # Batch/WebClient/Scheduler 설정
+      controller/   # API/페이지 컨트롤러
+      dto/          # 응답/뷰 DTO
+      entity/       # JPA 엔티티
+      listener/     # 배치 완료 리스너
+      mapper/       # Entity <-> DTO 변환
+      repository/   # JPA Repository
+      scheduler/    # 배치 스케줄러
+      service/      # 비즈니스 로직
+    resources/
+      templates/    # Thymeleaf 화면
+      static/       # css/js/images/favicon
+      application.yml
+      application-secret.yml.example
+  test/
 ```
 
----
+인프라 관련 디렉터리:
 
-## ✨ 주요 기능
-- 📊 **ETF 데이터 조회 및 비교**
-  - 공공데이터포털 금융상품 시세 API 활용
-  - 전일 종가, 거래량 등 기본 데이터 제공
-  - 종가·거래량 추이 시각화 및 ETF 간 비교
+- `.github/workflows/deploy.yml`: CI/CD (build -> docker push -> EC2 deploy)
+- `docker-compose.yml`: app/nginx/certbot/prometheus/grafana 구성
+- `nginx/conf.d/app.conf`: 리버스 프록시 + SSL
+- `prometheus/prometheus.yml`: Actuator metrics 수집
 
-- 💬 **투자자 커뮤니티** (개발 예정)
-  - 종목별 토론 게시판
-  - 사용자 간 의견 교환 및 정보 공유
+## 핵심 기능
 
-- 🏆 **게임적 요소 (Gamification)** (개발 예정)
-  - ETF 수익률 예상 투표 기능
-  - 정답자에게 포인트 지급 및 랭크 시스템 제공
-  - 포인트 기반 명예 시스템 (투자 밈 활용)
-  - 추후 제휴 혜택(쿠폰 등)과 연계 가능
+### 1) ETF 데이터 수집/적재
 
----
+- `EtfApiService`가 외부 ETF API 호출
+- `EtfApiPagingReader`가 페이지 단위로 읽고 중복/이전 데이터 구간 제어
+- `EtfBatchConfig`가 배치 Job/Step 구성
+- 스케줄러가 주기 실행 및 실패 재시도
 
-## ⚡ 차별성
-- 증권사 플랫폼처럼 **실시간 데이터 경쟁**에 집중하지 않음
-- **기본 데이터 + 비교 분석 + 커뮤니티 + 재미 요소** 결합
-- 투자 경험을 단순한 정보 소비가 아닌 **참여형 경험**으로 확장
+### 2) ETF 조회
 
----
+- 최근 ETF 목록: `GET /etf/recent`
+- ETF 상세 페이지: `GET /etf/detail/{srtnCd}`
+- 단건 조회: `GET /etf/{date}/{name}`
 
-## 🌱 향후 확장 방향
-- 🤖 **AI 에이전트**를 통한 개인화된 ETF 추천
-- 📊 투자자 성향 분석 및 맞춤형 콘텐츠 제공
-- 🏛️ “ETF 투자자들의 놀이터” 같은 커뮤니티 플랫폼으로 성장
+### 3) 태그 기반 탐색
 
----
+- 태그 목록: `GET /api/v1/tags`
+- 태그별 ETF 목록: `GET /api/v1/etfs/by-tag/{tagName}`
+- 자동 태깅 실행:
+  - `POST /api/v1/tags/auto`
+  - `POST /api/admin/tags/auto-tagging`
 
-## 🚀 기술적 특성  
+## 최근 반영된 개선 사항
 
-- **RESTful API 설계**  
-  - ETF 리스트 조회, 상세 조회, 다중 비교 API  
-  - 직관적이고 확장성 있는 URI 설계  
+### 태그 검색 성능 개선
 
-- **Database Integration**  
-  - PostgreSQL 기반 ETF 가격·정보 저장소 구축  
-  - Spring Data JPA를 활용한 표준 CRUD 처리  
-  - `EntityManager` & JPQL을 통한 **성능 최적화/복잡한 조건 조회**  
+- 기존: 태그별 ETF 조회 시 ETF마다 최신 가격 조회 (N+1 패턴)
+- 개선: `srtnCd IN (...)` 기반으로 최신 가격 일괄 조회
 
-- **Batch Processing**  
-  - Spring Batch 기반 **청크 단위 처리**  
-  - 공공데이터포털 API로부터 일별 ETF 종가 수집 및 저장  
-  - 중복 키 예외 처리 → 스킵 처리 전략 적용  
+### 자동 태깅 성능 개선
 
-- **Persistence 전략**  
-  - 단순 조회/CRUD → `JpaRepository`  
-  - 대용량 데이터 조회/특정 조건 최적화 → `EntityManager` + JPQL  
-  - 필요 시 Native Query 활용  
+- 기존: 태그 존재 확인/생성을 ETF 반복 루프 내에서 수행
+- 개선:
+  - 태그 사전 로딩
+  - 누락 태그 일괄 생성
+  - ETF-태그 연관관계 사전 fetch
 
-- **테스트 자동화**  
-  - JUnit 5 + Spring Boot Test  
-  - Repository 레벨 & Service 레벨 단위 테스트  
+## 실행 방법
 
----
+### 1) 사전 준비
 
-## 📡 API 사용 예시
+- Java 17
+- PostgreSQL
 
-### 가장 최근 날짜의 모든 ETF 데이터 조회
+`src/main/resources/application-secret.yml` 파일을 준비합니다.
+
+```yaml
+secret:
+  db:
+    host: localhost
+    port: 5432
+    name: etf
+    username: your_username
+    password: your_password
+  api:
+    service-key: your_data_go_kr_service_key
+```
+
+`application-secret.yml.example`를 복사해서 사용하면 됩니다.
+
+### 2) 로컬 실행
+
+```bash
+./gradlew bootRun
+```
+
+Windows:
+
+```powershell
+.\gradlew.bat bootRun
+```
+
+### 3) 테스트 실행
+
+```bash
+./gradlew test
+```
+
+## 관측/모니터링
+
+- Actuator endpoint: `/actuator/health`, `/actuator/info`, `/actuator/prometheus`
+- Prometheus가 app metrics를 scrape
+- Grafana에서 대시보드 시각화
+
+## 배포
+
+GitHub Actions에서 `master` 푸시 시:
+
+1. Gradle build
+2. Docker image push (`yoontarget/etf:latest`)
+3. EC2에서 `docker compose up -d`
+
+배포 배지:
+
+![Deploy to EC2 with Docker](https://github.com/YoonTarget/etf/actions/workflows/deploy.yml/badge.svg)
+
+## API 예시
+
+### 1) 최근 ETF 목록 조회
+
 ```http
 GET /etf/recent
+```
 
+응답 예시:
+
+```json
 [
   {
-      "basDt": "20250924",
-      "srtnCd": "379800",
-      "isinCd": "KR7379800006",
-      "itmsNm": "KODEX 미국S&P500",
-      "clpr": "21265",
-      "vs": "-5",
-      "fltRt": "-.02",
-      "nav": "21231.91",
-      "mkp": "21190",
-      "hipr": "21265",
-      "lopr": "21165",
-      "trqu": "2413104",
-      "trPrc": "51171879986",
-      "mrktTotAmt": "5382171500000",
-      "stLstgCnt": "253100000",
-      "bssIdxIdxNm": "S&P 500",
-      "bssIdxClpr": "6637.97",
-      "nPptTotAmt": "5339825832851"
-  },
-  {
-      "basDt": "20250924",
-      "srtnCd": "379810",
-      "isinCd": "KR7379810005",
-      "itmsNm": "KODEX 미국나스닥100",
-      "clpr": "22940",
-      "vs": "-60",
-      "fltRt": "-.26",
-      "nav": "22901.68",
-      "mkp": "22855",
-      "hipr": "22940",
-      "lopr": "22830",
-      "trqu": "1288200",
-      "trPrc": "29467738544",
-      "mrktTotAmt": "3350387000000",
-      "stLstgCnt": "146050000",
-      "bssIdxIdxNm": "NASDAQ 100",
-      "bssIdxClpr": "24503.57",
-      "nPptTotAmt": "3340209415021"
-  },
-  ...
+    "basDt": "20260226",
+    "srtnCd": "379800",
+    "isinCd": "KR7379800006",
+    "itmsNm": "KODEX 미국S&P500",
+    "clpr": "21265",
+    "vs": "-5",
+    "fltRt": "-0.02",
+    "nav": "21231.91",
+    "mkp": "21190",
+    "hipr": "21265",
+    "lopr": "21165",
+    "trqu": "2413104",
+    "mrktTotAmt": "5382171500000",
+    "bssIdxIdxNm": "S&P 500"
+  }
 ]
 ```
 
----
+### 2) ETF 상세 페이지 조회
 
-## 🚀 배포 상태
-![Deploy to EC2 with Docker](https://github.com/YoonTarget/etf/actions/workflows/deploy.yml/badge.svg)
+```http
+GET /etf/detail/{srtnCd}
+```
+
+- HTML(Thymeleaf) 페이지를 반환합니다.
+- 내부적으로 종목 시계열 + 관련 뉴스를 함께 로드합니다.
+
+### 3) 태그 목록 조회
+
+```http
+GET /api/v1/tags
+```
+
+응답 예시:
+
+```json
+[
+  { "id": 1, "tagName": "#미국대표", "etfCount": 120 },
+  { "id": 2, "tagName": "#반도체", "etfCount": 42 }
+]
+```
+
+### 4) 태그별 ETF 조회
+
+```http
+GET /api/v1/etfs/by-tag/{tagName}
+```
+
+응답 예시:
+
+```json
+[
+  {
+    "srtnCd": "091160",
+    "itmsNm": "KODEX 반도체",
+    "clpr": 35000,
+    "fltRt": 1.5,
+    "vs": 520,
+    "trqu": 1820000,
+    "mrktTotAmt": 1300000000000,
+    "tags": ["#반도체", "#미국대표"]
+  }
+]
+```
+
+### 5) 자동 태깅 실행
+
+```http
+POST /api/v1/tags/auto
+POST /api/admin/tags/auto-tagging
+```
+
+응답 예시:
+
+```json
+"Auto-tagging completed successfully."
+```
+
+## 요청 흐름 시퀀스 다이어그램
+
+### 1) `GET /etf/recent`
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant EC as EtfController
+    participant ES as EtfService
+    participant ER as EtfRepository
+    C->>EC: GET /etf/recent
+    EC->>ES: getRecentEtfData()
+    ES->>ER: findLatestEtfData()
+    ER-->>ES: List<EtfEntity>
+    ES-->>EC: List<EtfDto>
+    EC-->>C: JSON
+```
+
+### 2) `GET /etf/detail/{srtnCd}`
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant EC as EtfController
+    participant ES as EtfService
+    participant ER as EtfRepository
+    participant NS as NewsService
+    C->>EC: GET /etf/detail/{srtnCd}
+    EC->>ES: getAllEtfDataOfSrtnCd(srtnCd)
+    ES->>ER: findBySrtnCdOrderByBasDtAsc(srtnCd)
+    ER-->>ES: List<EtfEntity>
+    ES-->>EC: List<EtfDto>
+    EC->>NS: getNewsByQuery(indexName)
+    NS-->>EC: List<NewsItemDto>
+    EC-->>C: HTML (etf-detail)
+```
+
+### 3) `GET /api/v1/etfs/by-tag/{tagName}`
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant SC as EtfSearchController
+    participant SS as EtfSearchService
+    participant IR as EtfInfoRepository
+    participant ER as EtfRepository
+    C->>SC: GET /api/v1/etfs/by-tag/{tagName}
+    SC->>SS: findEtfsByTag(normalizedTagName)
+    SS->>IR: findByTagName(tagName)
+    IR-->>SS: List<EtfInfo>
+    SS->>ER: findLatestBySrtnCdIn(srtnCds)
+    ER-->>SS: List<EtfEntity>
+    SS-->>SC: List<EtfSummaryDto>
+    SC-->>C: JSON
+```
+
+### 4) `POST /api/v1/tags/auto`
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant TC as TagController
+    participant TS as TagService
+    participant IR as EtfInfoRepository
+    participant TR as TagRepository
+    C->>TC: POST /api/v1/tags/auto
+    TC->>TS: autoTagging()
+    TS->>IR: findAllWithTags()
+    TS->>TR: findByTagNameIn(tagNames)
+    TS->>TR: saveAll(missingTags)
+    TS-->>TC: done
+    TC-->>C: 200 OK
+```
+
+### 5) `importEtfDataJob` 배치 실행 흐름
+
+```mermaid
+sequenceDiagram
+    participant SCH as EtfBatchScheduler
+    participant JL as JobLauncher
+    participant JOB as importEtfDataJob
+    participant STEP as etfDataLoadingStep
+    participant R as EtfApiPagingReader
+    participant API as EtfApiService
+    participant P as ItemProcessor
+    participant W as CompositeItemWriter
+    participant DB as PostgreSQL
+    SCH->>JL: run(importEtfDataJob, targetDate)
+    JL->>JOB: start
+    JOB->>STEP: execute
+    loop page/chunk
+        STEP->>R: read()
+        R->>API: fetchEtfData(pageNo, pageSize)
+        API-->>R: List<EtfDto>
+        STEP->>P: process(EtfDto -> EtfEntity)
+        STEP->>W: write(chunk)
+        W->>DB: upsert etf_price_info
+        W->>DB: upsert etf_info
+    end
+    STEP-->>JOB: completed
+    JOB-->>JL: finished
+```
+
+### 6) `retryFailedJob` 재시도 흐름
+
+```mermaid
+sequenceDiagram
+    participant SCH as EtfBatchScheduler
+    participant JE as JobExplorer
+    participant JI as JobInstance
+    participant EX as JobExecution
+    participant JL as JobLauncher
+    participant JOB as importEtfDataJob
+    SCH->>JE: getLastJobInstance(JOB_NAME)
+    JE-->>SCH: last JobInstance
+    SCH->>JE: getLastJobExecution(lastJobInstance)
+    JE-->>SCH: last JobExecution
+    alt last execution is unsuccessful
+        SCH->>JL: run(importEtfDataJob, targetDate)
+        JL->>JOB: restart/execute
+        JOB-->>JL: finished
+    else success or no job
+        SCH-->>SCH: skip retry
+    end
+```

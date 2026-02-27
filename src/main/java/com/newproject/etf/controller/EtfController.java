@@ -31,7 +31,8 @@ public class EtfController {
         return etfService.getRecentEtfData();
     }
 
-    @GetMapping("/{srtnCd}")
+    // 상세 페이지 경로 변경: /{srtnCd} -> /detail/{srtnCd}
+    @GetMapping("/detail/{srtnCd}")
     public String etfDetail(Model model, @PathVariable String srtnCd) throws UnsupportedEncodingException {
         List<EtfDto> etfDetails = etfService.getAllEtfDataOfSrtnCd(srtnCd);
 

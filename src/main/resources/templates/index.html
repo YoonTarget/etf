@@ -111,6 +111,18 @@
             return `${month}\uC6D4 ${day}\uC77C`;
         }
 
+        function compareByReturnDesc(a, b) {
+            const rateA = Number(a?.fltRt ?? Number.NEGATIVE_INFINITY);
+            const rateB = Number(b?.fltRt ?? Number.NEGATIVE_INFINITY);
+            if (rateA !== rateB) return rateB - rateA;
+
+            const trquA = Number(a?.trqu ?? 0);
+            const trquB = Number(b?.trqu ?? 0);
+            if (trquA !== trquB) return trquB - trquA;
+
+            return String(a?.srtnCd ?? '').localeCompare(String(b?.srtnCd ?? ''));
+        }
+
         loadTags();
         loadRecentEtfs();
 
@@ -215,7 +227,7 @@
                     }
                 });
             });
-            return Array.from(byCode.values()).sort((a, b) => (b.trqu || 0) - (a.trqu || 0));
+            return Array.from(byCode.values()).sort(compareByReturnDesc);
         }
 
         function loadRecentEtfs() {
@@ -259,7 +271,7 @@
         }
 
         function renderEtfList(etfs) {
-            lastEtfs = etfs || [];
+            lastEtfs = (etfs || []).slice().sort(compareByReturnDesc);
             let html = '';
             if (lastEtfs.length === 0) {
                 $('#etf-list-container').removeClass('row g-3');

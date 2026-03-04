@@ -103,6 +103,14 @@
         let lastEtfs = [];
         let selectedTags = new Set();
 
+        function formatBasDtLabel(basDt) {
+            if (!basDt || basDt.length !== 8) return '';
+            const month = parseInt(basDt.substring(4, 6), 10);
+            const day = parseInt(basDt.substring(6, 8), 10);
+            if (Number.isNaN(month) || Number.isNaN(day)) return '';
+            return `${month}\uC6D4 ${day}\uC77C`;
+        }
+
         loadTags();
         loadRecentEtfs();
 
@@ -217,6 +225,7 @@
                 const top = (etfs || []).slice(0, 80).map(e => ({
                     srtnCd: e.srtnCd,
                     itmsNm: e.itmsNm,
+                    basDt: e.basDt,
                     clpr: Number(e.clpr ?? 0),
                     fltRt: Number(e.fltRt ?? 0),
                     vs: Number(e.vs ?? 0),
@@ -278,12 +287,14 @@
                     let price = new Intl.NumberFormat('ko-KR').format(etf.clpr ?? 0);
                     let rate = etf.fltRt ?? 0;
                     let trqu = new Intl.NumberFormat('ko-KR').format(etf.trqu ?? 0);
+                    const basDtLabel = formatBasDtLabel(etf.basDt);
+                    const priceWithDate = basDtLabel ? `${price}\uC6D0 (${basDtLabel})` : `${price}\uC6D0`;
 
                     html += `
                         <tr style="cursor:pointer" onclick="location.href='/etf/detail/${etf.srtnCd}'">
                             <td>${etf.srtnCd}</td>
                             <td>${etf.itmsNm}</td>
-                            <td class="text-end fw-semibold">${price}원</td>
+                            <td class="text-end fw-semibold">${priceWithDate}</td>
                             <td class="text-end ${colorClass} fw-semibold">${arrow} ${Math.abs(rate)}%</td>
                             <td class="text-end">${trqu}</td>
                         </tr>`;
@@ -302,6 +313,10 @@
 
                     let price = new Intl.NumberFormat('ko-KR').format(etf.clpr ?? 0);
                     let rate = etf.fltRt ?? 0;
+                    const basDtLabel = formatBasDtLabel(etf.basDt);
+                    const recentPriceLabel = basDtLabel
+                        ? `\uCD5C\uADFC \uC885\uAC00 (${basDtLabel})`
+                        : '\uCD5C\uADFC \uC885\uAC00';
 
                     html += `
                         <div class="col-12 col-md-6 col-lg-4">
@@ -316,7 +331,7 @@
                                     <h5 class="card-title etf-title mb-3">${etf.itmsNm}</h5>
                                     <div class="d-flex justify-content-between align-items-end">
                                         <div>
-                                            <span class="text-muted small">최근 종가</span>
+                                            <span class="text-muted small">${recentPriceLabel}</span>
                                             <div class="fs-5 fw-bold">${price}원</div>
                                         </div>
                                         <div class="text-end">

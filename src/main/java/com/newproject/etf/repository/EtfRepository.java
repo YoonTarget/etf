@@ -17,6 +17,7 @@ public interface EtfRepository extends JpaRepository<EtfEntity, EtfPriceInfoId> 
     interface EtfSummaryRow {
         String getSrtnCd();
         String getItmsNm();
+        String getBasDt();
         BigDecimal getClpr();
         BigDecimal getFltRt();
         BigDecimal getVs();
@@ -86,6 +87,7 @@ public interface EtfRepository extends JpaRepository<EtfEntity, EtfPriceInfoId> 
             SELECT
               i.srtn_cd AS srtnCd,
               i.itms_nm AS itmsNm,
+              p.bas_dt AS basDt,
               p.clpr AS clpr,
               p.flt_rt AS fltRt,
               p.vs AS vs,
@@ -95,7 +97,7 @@ public interface EtfRepository extends JpaRepository<EtfEntity, EtfPriceInfoId> 
             JOIN etf_tag et ON et.srtn_cd = i.srtn_cd
             JOIN tag t ON t.tag_id = et.tag_id
             LEFT JOIN LATERAL (
-              SELECT e.clpr, e.flt_rt, e.vs, e.trqu, e.mrkt_tot_amt
+              SELECT e.bas_dt, e.clpr, e.flt_rt, e.vs, e.trqu, e.mrkt_tot_amt
               FROM etf_price_info e
               WHERE e.srtn_cd = i.srtn_cd
               ORDER BY e.bas_dt DESC
@@ -111,6 +113,7 @@ public interface EtfRepository extends JpaRepository<EtfEntity, EtfPriceInfoId> 
             SELECT
               i.srtn_cd AS srtnCd,
               i.itms_nm AS itmsNm,
+              p.bas_dt AS basDt,
               p.clpr AS clpr,
               p.flt_rt AS fltRt,
               p.vs AS vs,
@@ -118,7 +121,7 @@ public interface EtfRepository extends JpaRepository<EtfEntity, EtfPriceInfoId> 
               p.mrkt_tot_amt AS mrktTotAmt
             FROM etf_info i
             LEFT JOIN LATERAL (
-              SELECT e.clpr, e.flt_rt, e.vs, e.trqu, e.mrkt_tot_amt
+              SELECT e.bas_dt, e.clpr, e.flt_rt, e.vs, e.trqu, e.mrkt_tot_amt
               FROM etf_price_info e
               WHERE e.srtn_cd = i.srtn_cd
               ORDER BY e.bas_dt DESC

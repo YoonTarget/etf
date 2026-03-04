@@ -52,6 +52,7 @@ public class EtfSearchService {
         return EtfSummaryDto.builder()
                 .srtnCd(row.getSrtnCd())
                 .itmsNm(row.getItmsNm())
+                .basDt(row.getBasDt())
                 .clpr(row.getClpr())
                 .fltRt(row.getFltRt())
                 .vs(row.getVs())

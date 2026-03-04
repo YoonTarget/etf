@@ -53,6 +53,8 @@ class EtfSearchServiceTest {
             @Override
             public String getItmsNm() { return "KODEX 반도체"; }
             @Override
+            public String getBasDt() { return "20260303"; }
+            @Override
             public BigDecimal getClpr() { return new BigDecimal("35000"); }
             @Override
             public BigDecimal getFltRt() { return new BigDecimal("1.5"); }
@@ -84,6 +86,8 @@ class EtfSearchServiceTest {
             public String getSrtnCd() { return "379810"; }
             @Override
             public String getItmsNm() { return "KODEX 미국나스닥100"; }
+            @Override
+            public String getBasDt() { return "20260303"; }
             @Override
             public BigDecimal getClpr() { return new BigDecimal("22940"); }
             @Override

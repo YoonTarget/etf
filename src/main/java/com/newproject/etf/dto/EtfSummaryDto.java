@@ -15,6 +15,7 @@ import java.util.List;
 public class EtfSummaryDto {
     private String srtnCd;      // 종목코드
     private String itmsNm;      // 종목명
+    private String basDt;       // 기준일자 (YYYYMMDD)
     private BigDecimal clpr;    // 현재가 (종가)
     private BigDecimal fltRt;   // 등락률
     private BigDecimal vs;      // 대비 (전일비)

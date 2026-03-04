@@ -173,8 +173,7 @@
         }
 
         function loadEtfsByTag(tagName) {
-            let safeTagName = tagName.replace('#', '');
-            return $.get(`/api/v1/etfs/by-tag/${safeTagName}?limit=80`);
+            return $.get(`/api/v1/etfs/by-tag?tagName=${encodeURIComponent(tagName)}&limit=80`);
         }
 
         function loadEtfsByTags(tags) {

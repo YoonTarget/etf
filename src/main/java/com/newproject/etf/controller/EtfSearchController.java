@@ -27,6 +27,15 @@ public class EtfSearchController {
     }
 
     // 특정 태그에 속한 ETF 목록 조회 (주문)
+    @GetMapping("/etfs/by-tag")
+    public ResponseEntity<List<EtfSummaryDto>> getEtfsByTagWithQuery(@RequestParam String tagName,
+                                                                      @RequestParam(defaultValue = "120") int limit) {
+        if (!tagName.startsWith("#")) {
+            tagName = "#" + tagName;
+        }
+        return ResponseEntity.ok(etfSearchService.findEtfsByTag(tagName, limit));
+    }
+
     @GetMapping("/etfs/by-tag/{tagName}")
     public ResponseEntity<List<EtfSummaryDto>> getEtfsByTag(@PathVariable String tagName,
                                                             @RequestParam(defaultValue = "120") int limit) {

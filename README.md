@@ -1,6 +1,6 @@
 # 진격의 ETF
 
-국내 상장 미국 ETF 데이터를 수집·저장하고, 태그 기반으로 탐색/조회할 수 있는 Spring Boot 서비스입니다.
+국내 상장 ETF 데이터를 수집·저장하고, 태그 기반으로 탐색/조회할 수 있는 Spring Boot 서비스입니다.
 
 - 외부 데이터 수집: 공공데이터포털 ETF API
 - 주기 실행: Spring Batch + Scheduler

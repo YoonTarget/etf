@@ -51,7 +51,7 @@ api:
 
 scheduler:
   etf:
-    cron: "0 0 9 * * ?"
+    cron: "0 10 16 * * ?"
 
 # Actuator 설정 (모니터링)
 management:

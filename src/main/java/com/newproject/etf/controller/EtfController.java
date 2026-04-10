@@ -4,6 +4,7 @@ import com.newproject.etf.dto.EtfDto;
 import com.newproject.etf.dto.EtfInfoView;
 import com.newproject.etf.entity.EtfEntity;
 import com.newproject.etf.service.BatchMetadataService;
+import com.newproject.etf.service.EtfRiskBadgeService;
 import com.newproject.etf.service.EtfService;
 import com.newproject.etf.service.NewsService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class EtfController {
     private final EtfService etfService;
     private final NewsService newsService;
     private final BatchMetadataService batchMetadataService;
+    private final EtfRiskBadgeService etfRiskBadgeService;
 
     @GetMapping("/recent")
     @ResponseBody
@@ -60,6 +62,7 @@ public class EtfController {
         model.addAttribute("news", newsService.getNewsByQuery(e.getBssIdxIdxNm()));
         model.addAttribute("latestBasDtLabel", batchMetadataService.getLatestBasDtLabel());
         model.addAttribute("lastSuccessfulBatchAtLabel", batchMetadataService.getLastSuccessfulBatchAtLabel());
+        model.addAttribute("riskBadges", etfRiskBadgeService.evaluate(etfDetails));
 
         return "etf-detail";
     }

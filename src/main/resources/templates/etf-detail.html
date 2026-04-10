@@ -41,6 +41,24 @@
         </span>
     </div>
 
+    <div class="card mb-4" th:if="${not #lists.isEmpty(riskBadges)}">
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="badge px-3 py-2"
+                      th:each="badge : ${riskBadges}"
+                      th:classappend="${badge.severity == 'danger'} ? ' text-bg-danger' :
+                                      (${badge.severity == 'warning'} ? ' text-bg-warning' : ' text-bg-secondary')"
+                      th:text="${badge.label}">주의</span>
+            </div>
+            <div class="alert alert-light border mb-0">
+                <div class="fw-semibold mb-2">초보자 주의사항</div>
+                <ul class="mb-0 ps-3">
+                    <li th:each="badge : ${riskBadges}" th:text="${badge.description}">설명</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-lg-3">
             <div class="card h-100">

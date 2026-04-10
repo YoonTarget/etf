@@ -32,6 +32,15 @@
         </div>
     </div>
 
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <span class="badge text-bg-light border px-3 py-2" th:if="${latestBasDtLabel != null}">
+            기준일자 <span class="ms-1 fw-semibold" th:text="${latestBasDtLabel}">2026.04.10</span>
+        </span>
+        <span class="badge text-bg-light border px-3 py-2" th:if="${lastSuccessfulBatchAtLabel != null}">
+            마지막 배치 성공 <span class="ms-1 fw-semibold" th:text="${lastSuccessfulBatchAtLabel}">2026-04-10 12:00:00</span>
+        </span>
+    </div>
+
     <div class="row g-4">
         <div class="col-lg-3">
             <div class="card h-100">

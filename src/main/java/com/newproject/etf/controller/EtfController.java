@@ -3,12 +3,16 @@ package com.newproject.etf.controller;
 import com.newproject.etf.dto.EtfDto;
 import com.newproject.etf.dto.EtfInfoView;
 import com.newproject.etf.entity.EtfEntity;
+import com.newproject.etf.service.BatchMetadataService;
 import com.newproject.etf.service.EtfService;
 import com.newproject.etf.service.NewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -24,6 +28,7 @@ import static com.newproject.etf.util.ViewFormatters.formatWon;
 public class EtfController {
     private final EtfService etfService;
     private final NewsService newsService;
+    private final BatchMetadataService batchMetadataService;
 
     @GetMapping("/recent")
     @ResponseBody
@@ -31,29 +36,30 @@ public class EtfController {
         return etfService.getRecentEtfData();
     }
 
-    // 상세 페이지 경로 변경: /{srtnCd} -> /detail/{srtnCd}
     @GetMapping("/detail/{srtnCd}")
     public String etfDetail(Model model, @PathVariable String srtnCd) throws UnsupportedEncodingException {
         List<EtfDto> etfDetails = etfService.getAllEtfDataOfSrtnCd(srtnCd);
 
         if (etfDetails.isEmpty()) {
-            return "error-page"; // 데이터 없을 때 처리
+            return "error-page";
         }
 
-        EtfDto e = etfDetails.get(etfDetails.size() - 1); // 최신 데이터 기준
+        EtfDto e = etfDetails.get(etfDetails.size() - 1);
         EtfInfoView etfInfo = new EtfInfoView(
-                e.getItmsNm(), // 종목명
-                e.getIsinCd(), // ISIN 코드
-                e.getBssIdxIdxNm(), // 기초지수명
-                e.getBssIdxClpr(), // 기초지수 종가
-                formatWon(Long.valueOf(e.getMrktTotAmt())), // 시가총액
-                formatWon(BigDecimal.valueOf(Double.parseDouble(e.getNav()))), // 순자산가치
-                formatBasDt(etfDetails.get(0).getBasDt()) // 상장일
+                e.getItmsNm(),
+                e.getIsinCd(),
+                e.getBssIdxIdxNm(),
+                e.getBssIdxClpr(),
+                formatWon(Long.valueOf(e.getMrktTotAmt())),
+                formatWon(BigDecimal.valueOf(Double.parseDouble(e.getNav()))),
+                formatBasDt(etfDetails.get(0).getBasDt())
         );
 
         model.addAttribute("etfInfo", etfInfo);
         model.addAttribute("etfDetails", etfDetails);
         model.addAttribute("news", newsService.getNewsByQuery(e.getBssIdxIdxNm()));
+        model.addAttribute("latestBasDtLabel", batchMetadataService.getLatestBasDtLabel());
+        model.addAttribute("lastSuccessfulBatchAtLabel", batchMetadataService.getLastSuccessfulBatchAtLabel());
 
         return "etf-detail";
     }

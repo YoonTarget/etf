@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOVE-LCR ETF 분석 리포트</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --finance-bg: #0a0e1a;
+            --finance-card: #111827;
+            --finance-border: #1f2937;
+            --finance-green: #00d09c;
+            --finance-muted: #6b7280;
+            --finance-text: #e5e7eb;
+            --warm-bg: #fdf8f0;
+            --warm-text: #3d2b1f;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--finance-bg);
+            color: var(--finance-text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ── PASSWORD SCREEN ── */
+        #pw-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.6s ease;
+        }
+
+        #pw-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .pw-inner {
+            text-align: center;
+            padding: 2rem;
+            max-width: 360px;
+            width: 100%;
+        }
+
+        .pw-lock {
+            font-size: 2.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .pw-title {
+            color: var(--finance-green);
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            letter-spacing: .12em;
+            margin-bottom: .4rem;
+        }
+
+        .pw-subtitle {
+            color: var(--finance-muted);
+            font-family: 'Courier New', monospace;
+            font-size: .75rem;
+            margin-bottom: 2rem;
+        }
+
+        .pw-hint {
+            color: #4b5563;
+            font-size: .8rem;
+            margin-bottom: 1.25rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .pw-dots {
+            display: flex;
+            justify-content: center;
+            gap: .9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pw-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid #374151;
+            transition: background .15s, border-color .15s;
+        }
+
+        .pw-dot.filled {
+            background: var(--finance-green);
+            border-color: var(--finance-green);
+        }
+
+        .pw-dot.error {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+
+        #pw-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 1px;
+            height: 1px;
+        }
+
+        .pw-error {
+            color: #ef4444;
+            font-size: .78rem;
+            font-family: 'Courier New', monospace;
+            min-height: 1.2rem;
+            animation: none;
+        }
+
+        .pw-error.shake {
+            animation: shake .4s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0)
+            }
+
+            20% {
+                transform: translateX(-8px)
+            }
+
+            40% {
+                transform: translateX(8px)
+            }
+
+            60% {
+                transform: translateX(-5px)
+            }
+
+            80% {
+                transform: translateX(5px)
+            }
+        }
+
+        /* ── LOADING ── */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
+        }
+
+        #loading-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-inner {
+            text-align: center;
+            max-width: 420px;
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .loading-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.1)
+            }
+        }
+
+        .loading-title {
+            color: var(--finance-green);
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            letter-spacing: .1em;
+            margin-bottom: .4rem;
+        }
+
+        .loading-subtitle {
+            color: var(--finance-muted);
+            font-family: 'Courier New', monospace;
+            font-size: .8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 4px;
+            background: #1f2937;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: .6rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--finance-green), #00f5c4);
+            border-radius: 2px;
+            transition: width .1s;
+        }
+
+        .progress-text {
+            color: var(--finance-green);
+            font-family: 'Courier New', monospace;
+            font-size: .8rem;
+        }
+
+        .loading-logs {
+            margin-top: 1.5rem;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            font-size: .72rem;
+            color: var(--finance-muted);
+            min-height: 90px;
+        }
+
+        .log-line {
+            opacity: 0;
+            animation: fadeInLine .3s forwards;
+        }
+
+        @keyframes fadeInLine {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* ── MAIN ── */
+        #main-content {
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        #main-content.visible {
+            opacity: 1;
+        }
+
+        /* ── ETF REPORT ── */
+        .etf-section {
+            background: var(--finance-bg);
+            padding: 4rem 0;
+        }
+
+        .etf-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .etf-header {
+            border-bottom: 1px solid var(--finance-border);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .etf-badge {
+            display: inline-block;
+            background: rgba(0, 208, 156, .12);
+            color: var(--finance-green);
+            border: 1px solid rgba(0, 208, 156, .3);
+            border-radius: 4px;
+            padding: .2rem .6rem;
+            font-size: .72rem;
+            font-family: 'Courier New', monospace;
+            letter-spacing: .05em;
+            margin-bottom: .75rem;
+        }
+
+        .etf-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: .25rem;
+        }
+
+        .etf-code {
+            color: var(--finance-muted);
+            font-family: 'Courier New', monospace;
+            font-size: .85rem;
+        }
+
+        .etf-price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .etf-price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .etf-return {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--finance-green);
+        }
+
+        /* chart */
+        .chart-wrapper {
+            background: var(--finance-card);
+            border: 1px solid var(--finance-border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-label {
+            color: var(--finance-muted);
+            font-size: .72rem;
+            margin-bottom: 1rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .etf-chart svg {
+            width: 100%;
+            height: 160px;
+        }
+
+        /* metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media(min-width:576px) {
+            .metrics-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .metric-card {
+            background: var(--finance-card);
+            border: 1px solid var(--finance-border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .metric-label {
+            color: var(--finance-muted);
+            font-size: .65rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: .4rem;
+        }
+
+        .metric-value {
+            color: #fff;
+            font-size: .95rem;
+            font-weight: 600;
+        }
+
+        .metric-value.green {
+            color: var(--finance-green);
+        }
+
+        .metric-value.muted {
+            color: var(--finance-muted);
+        }
+
+        /* holiday note */
+        .holiday-note {
+            background: rgba(255, 200, 0, .05);
+            border: 1px solid rgba(255, 200, 0, .2);
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .holiday-note-title {
+            color: #ffc800;
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            margin-bottom: .5rem;
+        }
+
+        .holiday-note-list {
+            list-style: none;
+            color: var(--finance-muted);
+            font-size: .875rem;
+        }
+
+        .holiday-note-list li {
+            padding: .2rem 0;
+        }
+
+        .holiday-note-list li span {
+            color: var(--finance-text);
+        }
+
+        .holiday-note-conclusion {
+            color: #ffc800;
+            font-size: .82rem;
+            margin-top: .5rem;
+        }
+
+        /* ── RISK ── */
+        .risk-section {
+            background: var(--finance-card);
+            border-top: 1px solid var(--finance-border);
+            padding: 4rem 0;
+        }
+
+        .section-title {
+            font-size: .75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            color: var(--finance-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .risk-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .risk-table tr {
+            border-bottom: 1px solid var(--finance-border);
+        }
+
+        .risk-table td {
+            padding: .85rem 0;
+            font-size: .88rem;
+        }
+
+        .risk-table td:first-child {
+            color: var(--finance-muted);
+            width: 55%;
+        }
+
+        .risk-table td:last-child {
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .risk-table .green {
+            color: var(--finance-green);
+        }
+
+        .risk-table .white {
+            color: #fff;
+        }
+
+        .badge-aaa {
+            display: inline-block;
+            padding: .15rem .5rem;
+            border-radius: 3px;
+            font-size: .78rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 208, 156, .12);
+            color: var(--finance-green);
+            border: 1px solid rgba(0, 208, 156, .3);
+        }
+
+        /* ── TRANSITION ── */
+        .transition-section {
+            background: #000;
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .transition-inner {
+            max-width: 600px;
+        }
+
+        .t-line1 {
+            font-size: 1.4rem;
+            color: var(--finance-muted);
+            font-family: 'Courier New', monospace;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+        }
+
+        .t-line2 {
+            font-size: 2rem;
+            color: #fff;
+            font-family: 'Nanum Myeongjo', serif;
+            font-weight: 700;
+            line-height: 1.5;
+            opacity: 0;
+        }
+
+        .transition-inner.animate .t-line1 {
+            animation: fadeInUp .8s forwards;
+        }
+
+        .transition-inner.animate .t-line2 {
+            animation: fadeInUp .8s .7s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* ── TIMELINE ── */
+        .timeline-section {
+            background: var(--warm-bg);
+            padding: 5rem 0;
+            font-family: 'Nanum Myeongjo', serif;
+        }
+
+        .timeline-container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .timeline-heading {
+            text-align: center;
+            color: var(--warm-text);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            opacity: 0;
+        }
+
+        .timeline-heading.visible {
+            animation: fadeInUp .8s forwards;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2.2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #c4a882, #e8d5b5);
+        }
+
+        .tl-item {
+            position: relative;
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity .6s ease, transform .6s ease;
+        }
+
+        .tl-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tl-dot {
+            position: absolute;
+            left: -2.52rem;
+            top: .55rem;
+            width: 12px;
+            height: 12px;
+            background: #c4a882;
+            border: 2px solid var(--warm-bg);
+            border-radius: 50%;
+        }
+
+        .tl-dot.special {
+            background: #e87878;
+            width: 16px;
+            height: 16px;
+            left: -2.68rem;
+            top: .4rem;
+        }
+
+        .tl-date {
+            font-size: .78rem;
+            color: #9c7c5a;
+            letter-spacing: .05em;
+            margin-bottom: .4rem;
+            font-family: -apple-system, sans-serif;
+        }
+
+        .tl-event {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--warm-text);
+            margin-bottom: 1rem;
+        }
+
+        .tl-photo {
+            width: 100%;
+            max-width: 480px;
+            aspect-ratio: 4/3;
+            background: #e8d5b5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
+            overflow: hidden;
+        }
+
+        .tl-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-ph {
+            text-align: center;
+            color: #b0926a;
+        }
+
+        .photo-ph .ph-icon {
+            font-size: 2rem;
+            margin-bottom: .4rem;
+        }
+
+        .photo-ph .ph-num {
+            font-family: -apple-system, sans-serif;
+            font-size: .72rem;
+            letter-spacing: .12em;
+            color: #c4a882;
+        }
+
+        .tl-caption {
+            font-size: .95rem;
+            color: #6b5040;
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        /* ── ENDING ── */
+        .ending-section {
+            background: #130808;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .ending-inner {
+            max-width: 560px;
+        }
+
+        .ending-heart {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: scale(.5);
+            transition: opacity .5s ease, transform .5s cubic-bezier(.34, 1.56, .64, 1);
+        }
+
+        .ending-heart.visible {
+            opacity: 1;
+            transform: scale(1);
+            animation: heartbeat 1.5s .5s infinite;
+        }
+
+        @keyframes heartbeat {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            14% {
+                transform: scale(1.15)
+            }
+
+            28% {
+                transform: scale(1)
+            }
+
+            42% {
+                transform: scale(1.08)
+            }
+
+            70% {
+                transform: scale(1)
+            }
+        }
+
+        .ending-main {
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+        }
+
+        .ending-sub {
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 1.05rem;
+            color: #c4a0a0;
+            line-height: 1.9;
+            margin-bottom: 3rem;
+            opacity: 0;
+        }
+
+        .ending-btn {
+            opacity: 0;
+        }
+
+        .ending-inner.animate .ending-main {
+            animation: fadeInUp .8s .2s forwards;
+        }
+
+        .ending-inner.animate .ending-sub {
+            animation: fadeInUp .8s .9s forwards;
+        }
+
+        .ending-inner.animate .ending-btn {
+            animation: fadeInUp .8s 1.6s forwards;
+        }
+
+        .ending-btn-el {
+            display: inline-block;
+            background: linear-gradient(135deg, #c4506a, #e87878);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 1rem 2.5rem;
+            font-size: 1.05rem;
+            font-family: 'Nanum Myeongjo', serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s;
+            box-shadow: 0 4px 20px rgba(196, 80, 106, .4);
+        }
+
+        .ending-btn-el:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(196, 80, 106, .6);
+        }
+
+        .after-msg {
+            margin-top: 2rem;
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 1.15rem;
+            color: #e87878;
+            opacity: 0;
+            transition: opacity .8s;
+        }
+
+        /* ── NOPE BUTTON ── */
+        .nope-btn {
+            display: inline-block;
+            background: transparent;
+            color: #9ca3af;
+            border: 1px solid #6b7280;
+            border-radius: 50px;
+            padding: 1rem 2rem;
+            font-size: 1.05rem;
+            font-family: 'Nanum Myeongjo', serif;
+            cursor: pointer;
+            margin-left: 1rem;
+            transition: color .2s, border-color .2s;
+            user-select: none;
+        }
+
+        .nope-btn:hover {
+            color: #d1d5db;
+            border-color: #9ca3af;
+        }
+
+        /* .nope-btn.running — position:fixed 방식 제거, transform으로 대체 */
+
+        /* ── QUIZ ── */
+        .quiz-section { background: var(--finance-bg); padding: 5rem 0; border-top: 1px solid var(--finance-border); }
+        .quiz-wrap    { max-width: 640px; margin: 0 auto; padding: 0 1.5rem; }
+
+        .quiz-header-label {
+            text-align: center; color: var(--finance-muted);
+            font-family: 'Courier New', monospace; font-size: .72rem;
+            text-transform: uppercase; letter-spacing: .15em; margin-bottom: .75rem;
+        }
+        .quiz-sub-label {
+            text-align: center; color: #f87171;
+            font-family: 'Courier New', monospace; font-size: .85rem; margin-bottom: 2.5rem;
+        }
+
+        .quiz-prog-wrap  { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; }
+        .quiz-prog-track { flex: 1; height: 4px; background: var(--finance-border); border-radius: 2px; overflow: hidden; }
+        .quiz-prog-fill  { height: 100%; width: 0%; background: var(--finance-green); border-radius: 2px; transition: width .4s ease; }
+        .quiz-prog-label { color: var(--finance-muted); font-family: 'Courier New', monospace; font-size: .78rem; white-space: nowrap; }
+        .quiz-score-badge{ color: var(--finance-green); font-family: 'Courier New', monospace; font-size: .85rem; font-weight: 700; white-space: nowrap; }
+
+        .quiz-qnum  { color: var(--finance-green); font-family: 'Courier New', monospace; font-size: .82rem; margin-bottom: .6rem; }
+        .quiz-qtext { color: #fff; font-size: 1.15rem; font-weight: 600; line-height: 1.5; margin-bottom: 1.75rem; }
+
+        .quiz-choices { display: flex; flex-direction: column; gap: .65rem; margin-bottom: 1.25rem; }
+        .quiz-choice  {
+            background: var(--finance-card); border: 1px solid var(--finance-border);
+            border-radius: 8px; padding: .8rem 1.1rem;
+            color: var(--finance-text); font-size: .92rem; cursor: pointer;
+            text-align: left; transition: border-color .12s, background .12s;
+            display: flex; align-items: center; gap: .7rem;
+        }
+        .quiz-choice:hover:not(.disabled) { border-color: var(--finance-green); }
+        .quiz-choice .choice-label { color: var(--finance-green); font-family: 'Courier New', monospace; font-size: .75rem; font-weight: 700; flex-shrink: 0; }
+        .quiz-choice.correct { border-color: var(--finance-green); background: rgba(0,208,156,.1); }
+        .quiz-choice.wrong   { border-color: #ef4444; background: rgba(239,68,68,.08); }
+        .quiz-choice.reveal  { border-color: var(--finance-green); background: rgba(0,208,156,.06); }
+        .quiz-choice.disabled{ pointer-events: none; }
+
+        .quiz-feedback      { font-family: 'Courier New', monospace; font-size: .82rem; min-height: 1.4rem; text-align: center; }
+        .quiz-feedback.ok   { color: var(--finance-green); }
+        .quiz-feedback.err  { color: #ef4444; }
+
+        /* Result */
+        .quiz-result      { text-align: center; padding: 1rem 0; }
+        .quiz-res-circle  {
+            width: 120px; height: 120px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem; font-size: 1.6rem; font-weight: 800;
+            font-family: 'Courier New', monospace;
+        }
+        .quiz-res-circle.pass { background: rgba(0,208,156,.12); border: 2px solid var(--finance-green); color: var(--finance-green); }
+        .quiz-res-circle.fail { background: rgba(239,68,68,.08); border: 2px solid #ef4444; color: #ef4444; }
+        .quiz-res-msg  { font-size: 1.05rem; color: #fff; font-family: 'Nanum Myeongjo', serif; line-height: 1.7; margin-bottom: .75rem; white-space: pre-line; }
+        .quiz-res-sub  { color: var(--finance-muted); font-family: 'Courier New', monospace; font-size: .78rem; margin-bottom: 2rem; }
+        .quiz-pass-btn {
+            background: var(--finance-green); color: #000; border: none;
+            border-radius: 50px; padding: .85rem 2rem; font-size: .95rem;
+            font-weight: 700; cursor: pointer; transition: opacity .2s;
+        }
+        .quiz-pass-btn:hover { opacity: .85; }
+        .quiz-retry-btn {
+            background: transparent; color: var(--finance-muted);
+            border: 1px solid var(--finance-border); border-radius: 50px;
+            padding: .7rem 1.75rem; font-size: .85rem; cursor: pointer;
+            margin-top: .75rem; font-family: 'Courier New', monospace;
+            transition: border-color .2s, color .2s; display: block; margin-left: auto; margin-right: auto;
+        }
+        .quiz-retry-btn:hover { border-color: var(--finance-muted); color: #fff; }
+
+        /* ── CONFIRM MODAL ── */
+        #confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .75);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9500;
+            opacity: 0;
+            transition: opacity .25s;
+        }
+
+        #confirm-overlay.visible {
+            opacity: 1;
+        }
+
+        .confirm-box {
+            background: #1a1a2e;
+            border: 1px solid #2d2d4e;
+            border-radius: 12px;
+            padding: 2rem 1.75rem;
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .confirm-title {
+            color: var(--finance-muted);
+            font-family: 'Courier New', monospace;
+            font-size: .7rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .confirm-msg {
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 1.15rem;
+            color: #fff;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .confirm-btns {
+            display: flex;
+            gap: .75rem;
+            justify-content: center;
+        }
+
+        .cbtn {
+            flex: 1;
+            padding: .65rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: .9rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            transition: opacity .15s;
+        }
+
+        .cbtn:hover {
+            opacity: .85;
+        }
+
+        .cbtn-yes {
+            background: var(--finance-green);
+            color: #000;
+        }
+
+        .cbtn-no {
+            background: #374151;
+            color: #e5e7eb;
+        }
+
+        .confirm-error {
+            color: #ef4444;
+            font-family: 'Courier New', monospace;
+            font-size: .8rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ────────────────── PASSWORD ────────────────── -->
+    <div id="pw-screen">
+        <div class="pw-inner">
+            <div class="pw-lock">🔐</div>
+            <div class="pw-title">LOVE-LCR ETF</div>
+            <div class="pw-subtitle">접근 권한을 확인합니다</div>
+            <div class="pw-hint">생년월일 6자리를 입력하세요</div>
+            <div class="pw-dots" id="pw-dots">
+                <span class="pw-dot"></span>
+                <span class="pw-dot"></span>
+                <span class="pw-dot"></span>
+                <span class="pw-dot"></span>
+                <span class="pw-dot"></span>
+                <span class="pw-dot"></span>
+            </div>
+            <input type="tel" id="pw-input" maxlength="6" autocomplete="off" inputmode="numeric">
+            <p class="pw-error" id="pw-error"></p>
+        </div>
+    </div>
+
+    <!-- ────────────────── LOADING ────────────────── -->
+    <div id="loading-screen">
+        <div class="loading-inner">
+            <div class="loading-logo">📈</div>
+            <div class="loading-title">LOVE-LCR ETF</div>
+            <div class="loading-subtitle">특별 분석 리포트 생성 중...</div>
+            <div class="progress-track">
+                <div class="progress-fill" id="prog-fill"></div>
+            </div>
+            <div class="progress-text" id="prog-text">0%</div>
+            <div class="loading-logs" id="loading-logs"></div>
+        </div>
+    </div>
+
+    <!-- ────────────────── MAIN ────────────────── -->
+    <div id="main-content">
+
+        <!-- ETF REPORT -->
+        <section class="etf-section">
+            <div class="etf-container">
+                <div class="etf-header">
+                    <div class="etf-badge">KRX · 국내주식형 · 특별종목</div>
+                    <h1 class="etf-name">LOVE 이채린 ETF</h1>
+                    <div class="etf-code">LOVE-LCR &nbsp;·&nbsp; 설정일 2022.06.06</div>
+                    <div class="etf-price-row">
+                        <div class="etf-price">∞원</div>
+                        <div class="etf-return">+∞% ▲</div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="chart-wrapper">
+                    <div class="chart-label">2022.06.06 ~ 현재 누적 수익률 추이</div>
+                    <div class="etf-chart">
+                        <svg viewBox="0 0 400 160" preserveAspectRatio="none">
+                            <line x1="0" y1="40" x2="400" y2="40" stroke="#1f2937" stroke-width="1" />
+                            <line x1="0" y1="80" x2="400" y2="80" stroke="#1f2937" stroke-width="1" />
+                            <line x1="0" y1="120" x2="400" y2="120" stroke="#1f2937" stroke-width="1" />
+                            <path
+                                d="M0,145 L40,135 L80,130 L110,122 L140,115 L165,118 L195,100 L220,90 L250,78 L275,68 L305,55 L335,42 L365,32 L400,22 L400,160 L0,160Z"
+                                fill="rgba(0,208,156,0.1)" />
+                            <path
+                                d="M0,145 L40,135 L80,130 L110,122 L140,115 L165,118 L195,100 L220,90 L250,78 L275,68 L305,55 L335,42 L365,32 L400,22"
+                                fill="none" stroke="#00d09c" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <circle cx="400" cy="22" r="4" fill="#00d09c" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">위험등급</div>
+                        <div class="metric-value green">1등급 (초저위험)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">변동성</div>
+                        <div class="metric-value">매우 낮음</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">운용사</div>
+                        <div class="metric-value">내 마음</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">총 수익률</div>
+                        <div class="metric-value green">+∞%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">주요 구성종목</div>
+                        <div class="metric-value">이채린 (100%)</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">보조개 출현 시</div>
+                        <div class="metric-value green">급등 가능</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">배당</div>
+                        <div class="metric-value">매일 지급</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">환매 가능 여부</div>
+                        <div class="metric-value muted">불가 (영구보유)</div>
+                    </div>
+                </div>
+
+                <!-- Holiday Note -->
+                <div class="holiday-note">
+                    <div class="holiday-note-title">⚠ 특이사항 — 국경일 연관성 분석</div>
+                    <ul class="holiday-note-list">
+                        <li>🗓 설정일 <span>2022년 6월 6일</span> — 현충일 (나라도 기억함)</li>
+                        <li>🗓 사귄 날 <span>2022년 6월 11일</span> — 그냥 평일 (긴장 좀 풀렸나)</li>
+                        <li>🗓 결혼 예정일 <span>2026년 8월 15일</span> — 광복절 (드디어 완전히 자유로워짐)</li>
+                    </ul>
+                    <div class="holiday-note-conclusion">→ 본 ETF는 국경일과 특별한 연관성을 보유한 희귀 종목입니다.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RISK -->
+        <section class="risk-section">
+            <div class="etf-container">
+                <div class="section-title">리스크 분석 리포트</div>
+                <table class="risk-table">
+                    <tr>
+                        <td>상대방이 No라고 할 리스크</td>
+                        <td class="green">0.000% (측정 불가)</td>
+                    </tr>
+                    <tr>
+                        <td>함께할 미래의 행복도</td>
+                        <td><span class="badge-aaa">AAA</span></td>
+                    </tr>
+                    <tr>
+                        <td>연간 예상 싸움 횟수</td>
+                        <td class="white">분석 거부 (투자설명서 참고 불가)</td>
+                    </tr>
+                    <tr>
+                        <td>상대방 잔소리 빈도</td>
+                        <td class="white">높음 (수익률에 무관)</td>
+                    </tr>
+                    <tr>
+                        <td>운용역 도주 가능성</td>
+                        <td class="green">0% (이미 혼인신고 예정)</td>
+                    </tr>
+                    <tr>
+                        <td>장기 보유 추천 여부</td>
+                        <td class="green">강력 매수 (평생)</td>
+                    </tr>
+                    <tr>
+                        <td>종합 투자의견</td>
+                        <td class="white">💍 BUY &nbsp;(목표가: 행복)</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- QUIZ -->
+        <section class="quiz-section" id="quiz-section">
+            <div class="quiz-wrap">
+                <div class="quiz-header-label">결혼 적합성 검사 — LOVE-LCR ETF</div>
+                <div class="quiz-sub-label">⚠ 60점 이상이어야 다음 단계로 진행할 수 있습니다</div>
+
+                <div class="quiz-prog-wrap">
+                    <div class="quiz-score-badge" id="qz-score">0점</div>
+                    <div class="quiz-prog-track"><div class="quiz-prog-fill" id="qz-prog"></div></div>
+                    <div class="quiz-prog-label" id="qz-label">1 / 10</div>
+                </div>
+
+                <div id="qz-q-area">
+                    <div class="quiz-qnum"  id="qz-qnum"></div>
+                    <div class="quiz-qtext" id="qz-qtext"></div>
+                    <div class="quiz-choices" id="qz-choices"></div>
+                    <div class="quiz-feedback" id="qz-feedback"></div>
+                </div>
+
+                <div id="qz-result" class="quiz-result" style="display:none">
+                    <div class="quiz-res-circle" id="qz-res-circle"></div>
+                    <div class="quiz-res-msg"    id="qz-res-msg"></div>
+                    <div class="quiz-res-sub"    id="qz-res-sub"></div>
+                    <button class="quiz-pass-btn"  id="qz-pass-btn"  style="display:none">다음으로 넘어가기 →</button>
+                    <button class="quiz-retry-btn" id="qz-retry-btn" style="display:none">다시 도전하기</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 퀴즈 통과 후 공개 -->
+        <div id="after-quiz" style="display:none">
+
+        <!-- TRANSITION -->
+        <section class="transition-section">
+            <div class="transition-inner" id="transition-inner">
+                <p class="t-line1">사실, 이건 장난이고요.</p>
+                <p class="t-line2">진짜 하고 싶은 말이 있어.</p>
+            </div>
+        </section>
+
+        <!-- TIMELINE -->
+        <section class="timeline-section">
+            <div class="timeline-container">
+                <h2 class="timeline-heading" id="tl-heading">우리가 함께한 시간들</h2>
+                <div class="timeline">
+
+                    <div class="tl-item" data-delay="0">
+                        <div class="tl-dot special"></div>
+                        <div class="tl-date">2022년 6월 6일 · 현충일</div>
+                        <div class="tl-event">처음 만난 날</div>
+                        <div class="tl-photo">
+                            <!-- 사진 교체 시: <img th:src="@{/images/proposal/photo_01.jpg}" alt=""> -->
+                            <div class="photo-ph">
+                                <div class="ph-icon">📸</div>
+                                <div class="ph-num">PHOTO 01</div>
+                            </div>
+                        </div>
+                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                    </div>
+
+                    <div class="tl-item" data-delay="100">
+                        <div class="tl-dot special"></div>
+                        <div class="tl-date">2022년 6월 11일</div>
+                        <div class="tl-event">사귄 날</div>
+                        <div class="tl-photo">
+                            <div class="photo-ph">
+                                <div class="ph-icon">📸</div>
+                                <div class="ph-num">PHOTO 02</div>
+                            </div>
+                        </div>
+                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                    </div>
+
+                    <div class="tl-item" data-delay="0">
+                        <div class="tl-dot"></div>
+                        <div class="tl-date">날짜를 입력해주세요</div>
+                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                        <div class="tl-photo">
+                            <div class="photo-ph">
+                                <div class="ph-icon">📸</div>
+                                <div class="ph-num">PHOTO 03</div>
+                            </div>
+                        </div>
+                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                    </div>
+
+                    <div class="tl-item" data-delay="0">
+                        <div class="tl-dot"></div>
+                        <div class="tl-date">날짜를 입력해주세요</div>
+                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                        <div class="tl-photo">
+                            <div class="photo-ph">
+                                <div class="ph-icon">📸</div>
+                                <div class="ph-num">PHOTO 04</div>
+                            </div>
+                        </div>
+                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                    </div>
+
+                    <div class="tl-item" data-delay="0">
+                        <div class="tl-dot"></div>
+                        <div class="tl-date">날짜를 입력해주세요</div>
+                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                        <div class="tl-photo">
+                            <div class="photo-ph">
+                                <div class="ph-icon">📸</div>
+                                <div class="ph-num">PHOTO 05</div>
+                            </div>
+                        </div>
+                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                    </div>
+
+                    <div class="tl-item" data-delay="0">
+                        <div class="tl-dot"></div>
+                        <div class="tl-date">날짜를 입력해주세요</div>
+                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                        <div class="tl-photo">
+                            <div class="photo-ph">
+                                <div class="ph-icon">📸</div>
+                                <div class="ph-num">PHOTO 06</div>
+                            </div>
+                        </div>
+                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                    </div>
+
+                    <div class="tl-item" data-delay="0">
+                        <div class="tl-dot"></div>
+                        <div class="tl-date">날짜를 입력해주세요</div>
+                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                        <div class="tl-photo">
+                            <div class="photo-ph">
+                                <div class="ph-icon">📸</div>
+                                <div class="ph-num">PHOTO 07</div>
+                            </div>
+                        </div>
+                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                    </div>
+
+                    <div class="tl-item" data-delay="0">
+                        <div class="tl-dot"></div>
+                        <div class="tl-date">날짜를 입력해주세요</div>
+                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                        <div class="tl-photo">
+                            <div class="photo-ph">
+                                <div class="ph-icon">📸</div>
+                                <div class="ph-num">PHOTO 08</div>
+                            </div>
+                        </div>
+                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                    </div>
+
+                    <div class="tl-item" data-delay="0">
+                        <div class="tl-dot"></div>
+                        <div class="tl-date">날짜를 입력해주세요</div>
+                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                        <div class="tl-photo">
+                            <div class="photo-ph">
+                                <div class="ph-icon">📸</div>
+                                <div class="ph-num">PHOTO 09</div>
+                            </div>
+                        </div>
+                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                    </div>
+
+                    <div class="tl-item" data-delay="0">
+                        <div class="tl-dot special"></div>
+                        <div class="tl-date">2026년 8월 15일 · 광복절</div>
+                        <div class="tl-event">결혼식 💍</div>
+                        <div class="tl-photo">
+                            <div class="photo-ph">
+                                <div class="ph-icon">📸</div>
+                                <div class="ph-num">PHOTO 10</div>
+                            </div>
+                        </div>
+                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ENDING -->
+        <section class="ending-section">
+            <div class="ending-inner" id="ending-inner">
+                <span class="ending-heart" id="ending-heart">❤️</span>
+                <h2 class="ending-main">결혼해줘서 고마워,<br>이채린.</h2>
+                <p class="ending-sub">
+                    현충일에 만나서, 광복절에 결혼하는 우리.<br>
+                    앞으로도 잘 부탁해.
+                </p>
+                <div class="ending-btn">
+                    <button class="ending-btn-el" id="ending-btn" onclick="celebrate()">나도 고마워 💍</button>
+                    <button class="nope-btn" id="nope-btn">싫어</button>
+                </div>
+                <p class="after-msg" id="after-msg">우리 행복하게 살자 🎊</p>
+            </div>
+        </section>
+
+        </div><!-- /after-quiz -->
+    </div><!-- /main-content -->
+
+    <!-- ── CONFIRM MODAL ── -->
+    <div id="confirm-overlay">
+        <div class="confirm-box">
+            <div class="confirm-title">⚠ 시스템 경고</div>
+            <div class="confirm-msg" id="confirm-msg"></div>
+            <div class="confirm-btns" id="confirm-btns">
+                <button class="cbtn" id="cbtn-a"></button>
+                <button class="cbtn" id="cbtn-b"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        /* ── LOADING ── */
+        const LOGS = [
+            '[INFO]    LOVE-LCR ETF 데이터 로드 중...',
+            '[INFO]    감정 데이터베이스 연결 완료',
+            '[INFO]    2022.06.06 초기 설정일 확인',
+            '[WARN]    수익률 측정 불가 (∞ overflow)',
+            '[INFO]    국경일 연관성 분석 완료',
+            '[INFO]    리스크 분석 완료 — 위험 없음',
+            '[SUCCESS] 특별 리포트 생성 완료 ✓',
+        ];
+
+        const progFill = document.getElementById('prog-fill');
+        const progText = document.getElementById('prog-text');
+        const logBox = document.getElementById('loading-logs');
+        const loadingScreen = document.getElementById('loading-screen');
+        const mainContent = document.getElementById('main-content');
+
+        let pct = 0, logIdx = 0, ticker;
+
+        function startLoading() {
+            loadingScreen.style.display = 'flex';
+            ticker = setInterval(tickProgress, 80);
+        }
+
+        function tickProgress() {
+            pct += Math.random() * 4 + 1;
+            if (pct >= 100) {
+                pct = 100;
+                clearInterval(ticker);
+                setTimeout(() => {
+                    loadingScreen.classList.add('fade-out');
+                    mainContent.classList.add('visible');
+                    setTimeout(() => loadingScreen.style.display = 'none', 900);
+                }, 600);
+            }
+            progFill.style.width = pct + '%';
+            progText.textContent = Math.floor(pct) + '%';
+
+            const threshold = (logIdx + 1) * (100 / LOGS.length);
+            if (logIdx < LOGS.length && pct >= threshold) {
+                const el = document.createElement('div');
+                el.className = 'log-line';
+                el.textContent = LOGS[logIdx++];
+                logBox.appendChild(el);
+            }
+        }
+
+        /* ── PASSWORD ── */
+        const CORRECT = '970505';
+        const pwScreen = document.getElementById('pw-screen');
+        const pwInput = document.getElementById('pw-input');
+        const pwDots = document.querySelectorAll('.pw-dot');
+        const pwError = document.getElementById('pw-error');
+
+        pwInput.focus();
+        pwScreen.addEventListener('click', () => pwInput.focus());
+
+        pwInput.addEventListener('input', () => {
+            const val = pwInput.value.replace(/\D/g, '').slice(0, 6);
+            pwInput.value = val;
+
+            pwDots.forEach((dot, i) => {
+                dot.classList.toggle('filled', i < val.length);
+                dot.classList.remove('error');
+            });
+            pwError.textContent = '';
+            pwError.classList.remove('shake');
+
+            if (val.length === 6) {
+                if (val === CORRECT) {
+                    pwScreen.classList.add('fade-out');
+                    setTimeout(() => {
+                        pwScreen.style.display = 'none';
+                        startLoading();
+                    }, 650);
+                } else {
+                    pwDots.forEach(dot => { dot.classList.add('error'); dot.classList.remove('filled'); });
+                    void pwError.offsetWidth;
+                    pwError.textContent = '[ERROR] 접근 권한 없음';
+                    pwError.classList.add('shake');
+                    setTimeout(() => {
+                        pwInput.value = '';
+                        pwDots.forEach(dot => dot.classList.remove('error', 'filled'));
+                        pwError.textContent = '';
+                        pwInput.focus();
+                    }, 800);
+                }
+            }
+        });
+
+        /* ── SCROLL ANIMATIONS ── */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                const el = entry.target;
+
+                if (el.id === 'transition-inner') {
+                    el.classList.add('animate');
+                } else if (el.id === 'tl-heading') {
+                    el.classList.add('visible');
+                } else if (el.classList.contains('tl-item')) {
+                    const delay = parseInt(el.dataset.delay) || 0;
+                    setTimeout(() => el.classList.add('visible'), delay);
+                } else if (el.id === 'ending-inner') {
+                    el.classList.add('animate');
+                    document.getElementById('ending-heart').classList.add('visible');
+                }
+
+                observer.unobserve(el);
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('#transition-inner, #tl-heading, .tl-item, #ending-inner')
+            .forEach(el => observer.observe(el));
+
+        /* ── QUIZ ── */
+        const QUESTIONS = [
+            { q: '우리가 처음 만난 날은?',
+              choices: ['2022년 6월 4일', '2022년 6월 6일', '2022년 6월 8일', '2022년 6월 11일'], answer: 1 },
+            { q: '우리가 사귀기 시작한 날은?',
+              choices: ['2022년 6월 8일', '2022년 6월 9일', '2022년 6월 11일', '2022년 6월 15일'], answer: 2 },
+            { q: '이채린의 생일은?',
+              choices: ['3월 5일', '4월 5일', '5월 5일', '6월 5일'], answer: 2 },
+            { q: '결혼 예정일은?',
+              choices: ['2026년 7월 17일', '2026년 8월 12일', '2026년 8월 15일', '2026년 9월 9일'], answer: 2 },
+            { q: '처음 만난 날은 무슨 공휴일이었나요?',
+              choices: ['어버이날', '어린이날', '현충일', '광복절'], answer: 2 },
+            { q: '이채린의 생일과 같은 공휴일은?',
+              choices: ['삼일절', '어린이날', '현충일', '한글날'], answer: 1 },
+            { q: 'LOVE-LCR ETF의 총 수익률은?',
+              choices: ['+100%', '+999%', '+9,999%', '+∞%'], answer: 3 },
+            { q: 'LOVE-LCR ETF의 위험등급은?',
+              choices: ['5등급 (고위험)', '3등급 (보통)', '2등급 (저위험)', '1등급 (초저위험)'], answer: 3 },
+            { q: '처음 만난 날부터 사귀기까지 걸린 날은?',
+              choices: ['3일', '5일', '7일', '10일'], answer: 1 },
+            { q: '결혼 예정일은 무슨 공휴일인가요?',
+              choices: ['어린이날', '현충일', '광복절', '개천절'], answer: 2 },
+        ];
+        const LABELS = ['A', 'B', 'C', 'D'];
+        let qzStep = 0, qzScore = 0;
+
+        const qzScoreEl = document.getElementById('qz-score');
+        const qzProg    = document.getElementById('qz-prog');
+        const qzLabel   = document.getElementById('qz-label');
+        const qzQArea   = document.getElementById('qz-q-area');
+        const qzResult  = document.getElementById('qz-result');
+        const qzPassBtn = document.getElementById('qz-pass-btn');
+        const qzRetryBtn= document.getElementById('qz-retry-btn');
+
+        function qzRender() {
+            const q = QUESTIONS[qzStep];
+            document.getElementById('qz-qnum').textContent  = `Q${qzStep + 1}.`;
+            document.getElementById('qz-qtext').textContent = q.q;
+            document.getElementById('qz-feedback').textContent = '';
+            document.getElementById('qz-feedback').className   = 'quiz-feedback';
+
+            const choicesEl = document.getElementById('qz-choices');
+            choicesEl.innerHTML = '';
+            q.choices.forEach((c, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-choice';
+                btn.innerHTML = `<span class="choice-label">${LABELS[i]}</span>${c}`;
+                btn.addEventListener('click', () => qzAnswer(i));
+                choicesEl.appendChild(btn);
+            });
+
+            qzProg.style.width  = (qzStep / QUESTIONS.length * 100) + '%';
+            qzLabel.textContent = `${qzStep + 1} / ${QUESTIONS.length}`;
+        }
+
+        function qzAnswer(chosen) {
+            const q    = QUESTIONS[qzStep];
+            const btns = document.querySelectorAll('.quiz-choice');
+            btns.forEach(b => b.classList.add('disabled'));
+
+            const fb = document.getElementById('qz-feedback');
+            if (chosen === q.answer) {
+                btns[chosen].classList.add('correct');
+                qzScore += 10;
+                qzScoreEl.textContent = qzScore + '점';
+                fb.textContent = '✓ 정답!';
+                fb.className   = 'quiz-feedback ok';
+            } else {
+                btns[chosen].classList.add('wrong');
+                btns[q.answer].classList.add('reveal');
+                fb.textContent = '✗ 오답';
+                fb.className   = 'quiz-feedback err';
+            }
+
+            setTimeout(() => {
+                qzStep++;
+                qzStep >= QUESTIONS.length ? qzShowResult() : qzRender();
+            }, 1200);
+        }
+
+        function qzShowResult() {
+            qzProg.style.width = '100%';
+            qzQArea.style.display  = 'none';
+            qzResult.style.display = 'block';
+
+            const passed = qzScore >= 60;
+            const circle = document.getElementById('qz-res-circle');
+            circle.textContent = qzScore + '점';
+            circle.className   = 'quiz-res-circle ' + (passed ? 'pass' : 'fail');
+
+            document.getElementById('qz-res-msg').textContent = passed
+                ? '통과! 결혼 적합성 검사를 통과했습니다 🎉'
+                : '60점을 넘어야 결혼할 수 있습니다 😢\n한 번 더 도전해보세요!';
+            document.getElementById('qz-res-sub').textContent = passed
+                ? `정답 ${qzScore / 10}개 / 10개`
+                : `정답 ${qzScore / 10}개 / 10개 — ${60 - qzScore}점 부족`;
+
+            if (passed)  qzPassBtn.style.display  = 'inline-block';
+            else         qzRetryBtn.style.display = 'block';
+        }
+
+        qzPassBtn.addEventListener('click', () => {
+            const afterQuiz = document.getElementById('after-quiz');
+            afterQuiz.style.display = 'block';
+            setTimeout(() => afterQuiz.scrollIntoView({ behavior: 'smooth' }), 50);
+        });
+
+        qzRetryBtn.addEventListener('click', () => {
+            qzStep = 0; qzScore = 0;
+            qzScoreEl.textContent = '0점';
+            qzProg.style.width     = '0%';
+            qzResult.style.display = 'none';
+            qzQArea.style.display  = 'block';
+            qzPassBtn.style.display  = 'none';
+            qzRetryBtn.style.display = 'none';
+            qzRender();
+        });
+
+        qzRender();
+
+        /* ── NOPE BUTTON (도망가는 버튼) ── */
+        const nopeBtn = document.getElementById('nope-btn');
+        const confirmOverlay = document.getElementById('confirm-overlay');
+        const confirmMsg = document.getElementById('confirm-msg');
+        const confirmBtns = document.getElementById('confirm-btns');
+        const cbtnA = document.getElementById('cbtn-a');
+        const cbtnB = document.getElementById('cbtn-b');
+
+        const THRESHOLD = 140;
+        const MARGIN    = 20;
+        let origLeft = null, origTop = null;
+        let curTransX = 0, curTransY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            const r = nopeBtn.getBoundingClientRect(); // transform 포함 실제 위치
+
+            // 버튼이 실제로 화면에 표시됐을 때 최초 한 번만 원점 기록
+            // r.width === 0 이면 display:none 상태이므로 무시
+            if (origLeft === null) {
+                if (r.width === 0 || r.top > window.innerHeight || r.bottom < 0) return;
+                origLeft = r.left;
+                origTop  = r.top;
+            }
+
+            const btnCX = r.left + r.width  / 2;
+            const btnCY = r.top  + r.height / 2;
+            const dx    = btnCX - e.clientX;
+            const dy    = btnCY - e.clientY;
+            const dist  = Math.hypot(dx, dy);
+
+            if (dist > THRESHOLD) return;
+
+            // 가까울수록 더 강하게 밀려남
+            const force = (1 - dist / THRESHOLD) * 85;
+            const len   = dist || 1;
+            const w = r.width, h = r.height;
+
+            let newCX = btnCX + (dx / len) * force;
+            let newCY = btnCY + (dy / len) * force;
+
+            // 모서리에 닿으면 벽을 따라 미끄러지게
+            const hitH = newCX - w / 2 < MARGIN || newCX + w / 2 > window.innerWidth  - MARGIN;
+            const hitV = newCY - h / 2 < MARGIN || newCY + h / 2 > window.innerHeight - MARGIN;
+            if (hitH) newCY += (Math.random() - 0.5) * 70;
+            if (hitV) newCX += (Math.random() - 0.5) * 70;
+
+            newCX = Math.max(MARGIN + w / 2, Math.min(window.innerWidth  - w / 2 - MARGIN, newCX));
+            newCY = Math.max(MARGIN + h / 2, Math.min(window.innerHeight - h / 2 - MARGIN, newCY));
+
+            curTransX = newCX - w / 2 - origLeft;
+            curTransY = newCY - h / 2 - origTop;
+
+            nopeBtn.style.transform = `translate(${curTransX}px, ${curTransY}px)`;
+        });
+
+        nopeBtn.addEventListener('touchstart', (e) => { e.preventDefault(); });
+
+        /* ── CONFIRM DIALOGS ── */
+        // aClass/bClass: 버튼 색상, aIsYes: 왼쪽 버튼이 YES 액션인지
+        const DIALOGS = [
+            { msg: '정말로 싫어요?', aLabel: 'YES', bLabel: 'NO',  aIsYes: true,  aClass: 'cbtn-yes', bClass: 'cbtn-no'  },
+            { msg: '정말로?!?!',     aLabel: 'NO',  bLabel: 'YES', aIsYes: false, aClass: 'cbtn-no',  bClass: 'cbtn-yes' },
+            { msg: '...진짜...?',    aLabel: 'YES', bLabel: 'NO',  aIsYes: true,  aClass: 'cbtn-no',  bClass: 'cbtn-yes' },
+        ];
+        let step = 0;
+
+        function openConfirm() {
+            step = 0;
+            renderDialog();
+            confirmOverlay.style.display = 'flex';
+            requestAnimationFrame(() => confirmOverlay.classList.add('visible'));
+        }
+
+        function closeConfirm() {
+            confirmOverlay.classList.remove('visible');
+            setTimeout(() => { confirmOverlay.style.display = 'none'; }, 280);
+        }
+
+        function renderDialog() {
+            const d = DIALOGS[step];
+            confirmMsg.innerHTML = d.msg;
+            confirmBtns.style.display = 'flex';
+
+            cbtnA.textContent = d.aLabel;
+            cbtnB.textContent = d.bLabel;
+
+            cbtnA.className = 'cbtn ' + d.aClass;
+            cbtnB.className = 'cbtn ' + d.bClass;
+        }
+
+        function handleYes() { closeConfirm(); }
+
+        function handleNo() {
+            step++;
+            if (step >= DIALOGS.length) {
+                confirmMsg.innerHTML =
+                    '<span class="confirm-error">' +
+                    '⚠ [CRITICAL ERROR]<br>' +
+                    'Unexpected response detected.<br>' +
+                    '<small>감정 처리 모듈이 응답을 거부했습니다.</small>' +
+                    '</span>';
+                confirmBtns.style.display = 'none';
+                setTimeout(() => closeConfirm(), 2200);
+            } else {
+                renderDialog();
+            }
+        }
+
+        // YES → 다음 단계로 진행, NO → 창 닫기
+        cbtnA.addEventListener('click', () => DIALOGS[step].aIsYes ? handleNo() : handleYes());
+        cbtnB.addEventListener('click', () => DIALOGS[step].aIsYes ? handleYes() : handleNo());
+
+        nopeBtn.addEventListener('click', openConfirm);
+
+        /* ── CONFETTI ── */
+        function celebrate() {
+            document.getElementById('ending-btn').textContent = '💕';
+
+            confetti({
+                particleCount: 150, spread: 80, origin: { y: 0.6 },
+                colors: ['#e87878', '#c4506a', '#ffb3c6', '#ff6b8a', '#fff']
+            });
+
+            setTimeout(() => {
+                confetti({ particleCount: 80, angle: 60, spread: 55, origin: { x: 0, y: 0.6 }, colors: ['#e87878', '#ffb3c6', '#ff6b8a'] });
+                confetti({ particleCount: 80, angle: 120, spread: 55, origin: { x: 1, y: 0.6 }, colors: ['#e87878', '#ffb3c6', '#ff6b8a'] });
+            }, 300);
+
+            document.getElementById('after-msg').style.opacity = '1';
+        }
+    </script>
+</body>
+
+</html>

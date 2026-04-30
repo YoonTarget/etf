@@ -1836,7 +1836,10 @@
             nopeBtn.style.transform = `translate(${curTransX}px, ${curTransY}px)`;
         });
 
-        nopeBtn.addEventListener('touchstart', (e) => { e.preventDefault(); });
+        nopeBtn.addEventListener('touchend', (e) => {
+            e.preventDefault(); // synthetic click 중복 방지
+            openConfirm();
+        });
 
         function startNopeMobileMove() {
             if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) return;

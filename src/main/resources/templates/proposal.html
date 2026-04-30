@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOVE-LCR ETF 분석 리포트</title>
+    <title>신규 상장 ETF 분석 리포트</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
@@ -814,73 +814,240 @@
         /* .nope-btn.running — position:fixed 방식 제거, transform으로 대체 */
 
         /* ── QUIZ ── */
-        .quiz-section { background: var(--finance-bg); padding: 5rem 0; border-top: 1px solid var(--finance-border); }
-        .quiz-wrap    { max-width: 640px; margin: 0 auto; padding: 0 1.5rem; }
+        .quiz-section {
+            background: var(--finance-bg);
+            padding: 5rem 0;
+            border-top: 1px solid var(--finance-border);
+        }
+
+        .quiz-wrap {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
 
         .quiz-header-label {
-            text-align: center; color: var(--finance-muted);
-            font-family: 'Courier New', monospace; font-size: .72rem;
-            text-transform: uppercase; letter-spacing: .15em; margin-bottom: .75rem;
+            text-align: center;
+            color: var(--finance-muted);
+            font-family: 'Courier New', monospace;
+            font-size: .72rem;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            margin-bottom: .75rem;
         }
+
         .quiz-sub-label {
-            text-align: center; color: #f87171;
-            font-family: 'Courier New', monospace; font-size: .85rem; margin-bottom: 2.5rem;
+            text-align: center;
+            color: #f87171;
+            font-family: 'Courier New', monospace;
+            font-size: .85rem;
+            margin-bottom: 2.5rem;
         }
 
-        .quiz-prog-wrap  { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; }
-        .quiz-prog-track { flex: 1; height: 4px; background: var(--finance-border); border-radius: 2px; overflow: hidden; }
-        .quiz-prog-fill  { height: 100%; width: 0%; background: var(--finance-green); border-radius: 2px; transition: width .4s ease; }
-        .quiz-prog-label { color: var(--finance-muted); font-family: 'Courier New', monospace; font-size: .78rem; white-space: nowrap; }
-        .quiz-score-badge{ color: var(--finance-green); font-family: 'Courier New', monospace; font-size: .85rem; font-weight: 700; white-space: nowrap; }
-
-        .quiz-qnum  { color: var(--finance-green); font-family: 'Courier New', monospace; font-size: .82rem; margin-bottom: .6rem; }
-        .quiz-qtext { color: #fff; font-size: 1.15rem; font-weight: 600; line-height: 1.5; margin-bottom: 1.75rem; }
-
-        .quiz-choices { display: flex; flex-direction: column; gap: .65rem; margin-bottom: 1.25rem; }
-        .quiz-choice  {
-            background: var(--finance-card); border: 1px solid var(--finance-border);
-            border-radius: 8px; padding: .8rem 1.1rem;
-            color: var(--finance-text); font-size: .92rem; cursor: pointer;
-            text-align: left; transition: border-color .12s, background .12s;
-            display: flex; align-items: center; gap: .7rem;
+        .quiz-prog-wrap {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
         }
-        .quiz-choice:hover:not(.disabled) { border-color: var(--finance-green); }
-        .quiz-choice .choice-label { color: var(--finance-green); font-family: 'Courier New', monospace; font-size: .75rem; font-weight: 700; flex-shrink: 0; }
-        .quiz-choice.correct { border-color: var(--finance-green); background: rgba(0,208,156,.1); }
-        .quiz-choice.wrong   { border-color: #ef4444; background: rgba(239,68,68,.08); }
-        .quiz-choice.reveal  { border-color: var(--finance-green); background: rgba(0,208,156,.06); }
-        .quiz-choice.disabled{ pointer-events: none; }
 
-        .quiz-feedback      { font-family: 'Courier New', monospace; font-size: .82rem; min-height: 1.4rem; text-align: center; }
-        .quiz-feedback.ok   { color: var(--finance-green); }
-        .quiz-feedback.err  { color: #ef4444; }
+        .quiz-prog-track {
+            flex: 1;
+            height: 4px;
+            background: var(--finance-border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .quiz-prog-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--finance-green);
+            border-radius: 2px;
+            transition: width .4s ease;
+        }
+
+        .quiz-prog-label {
+            color: var(--finance-muted);
+            font-family: 'Courier New', monospace;
+            font-size: .78rem;
+            white-space: nowrap;
+        }
+
+        .quiz-score-badge {
+            color: var(--finance-green);
+            font-family: 'Courier New', monospace;
+            font-size: .85rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .quiz-qnum {
+            color: var(--finance-green);
+            font-family: 'Courier New', monospace;
+            font-size: .82rem;
+            margin-bottom: .6rem;
+        }
+
+        .quiz-qtext {
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 1.75rem;
+        }
+
+        .quiz-choices {
+            display: flex;
+            flex-direction: column;
+            gap: .65rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .quiz-choice {
+            background: var(--finance-card);
+            border: 1px solid var(--finance-border);
+            border-radius: 8px;
+            padding: .8rem 1.1rem;
+            color: var(--finance-text);
+            font-size: .92rem;
+            cursor: pointer;
+            text-align: left;
+            transition: border-color .12s, background .12s;
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+        }
+
+        .quiz-choice:hover:not(.disabled) {
+            border-color: var(--finance-green);
+        }
+
+        .quiz-choice .choice-label {
+            color: var(--finance-green);
+            font-family: 'Courier New', monospace;
+            font-size: .75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .quiz-choice.correct {
+            border-color: var(--finance-green);
+            background: rgba(0, 208, 156, .1);
+        }
+
+        .quiz-choice.wrong {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, .08);
+        }
+
+        .quiz-choice.reveal {
+            border-color: var(--finance-green);
+            background: rgba(0, 208, 156, .06);
+        }
+
+        .quiz-choice.disabled {
+            pointer-events: none;
+        }
+
+        .quiz-feedback {
+            font-family: 'Courier New', monospace;
+            font-size: .82rem;
+            min-height: 1.4rem;
+            text-align: center;
+        }
+
+        .quiz-feedback.ok {
+            color: var(--finance-green);
+        }
+
+        .quiz-feedback.err {
+            color: #ef4444;
+        }
 
         /* Result */
-        .quiz-result      { text-align: center; padding: 1rem 0; }
-        .quiz-res-circle  {
-            width: 120px; height: 120px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 1.5rem; font-size: 1.6rem; font-weight: 800;
+        .quiz-result {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .quiz-res-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.6rem;
+            font-weight: 800;
             font-family: 'Courier New', monospace;
         }
-        .quiz-res-circle.pass { background: rgba(0,208,156,.12); border: 2px solid var(--finance-green); color: var(--finance-green); }
-        .quiz-res-circle.fail { background: rgba(239,68,68,.08); border: 2px solid #ef4444; color: #ef4444; }
-        .quiz-res-msg  { font-size: 1.05rem; color: #fff; font-family: 'Nanum Myeongjo', serif; line-height: 1.7; margin-bottom: .75rem; white-space: pre-line; }
-        .quiz-res-sub  { color: var(--finance-muted); font-family: 'Courier New', monospace; font-size: .78rem; margin-bottom: 2rem; }
+
+        .quiz-res-circle.pass {
+            background: rgba(0, 208, 156, .12);
+            border: 2px solid var(--finance-green);
+            color: var(--finance-green);
+        }
+
+        .quiz-res-circle.fail {
+            background: rgba(239, 68, 68, .08);
+            border: 2px solid #ef4444;
+            color: #ef4444;
+        }
+
+        .quiz-res-msg {
+            font-size: 1.05rem;
+            color: #fff;
+            font-family: 'Nanum Myeongjo', serif;
+            line-height: 1.7;
+            margin-bottom: .75rem;
+            white-space: pre-line;
+        }
+
+        .quiz-res-sub {
+            color: var(--finance-muted);
+            font-family: 'Courier New', monospace;
+            font-size: .78rem;
+            margin-bottom: 2rem;
+        }
+
         .quiz-pass-btn {
-            background: var(--finance-green); color: #000; border: none;
-            border-radius: 50px; padding: .85rem 2rem; font-size: .95rem;
-            font-weight: 700; cursor: pointer; transition: opacity .2s;
+            background: var(--finance-green);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            padding: .85rem 2rem;
+            font-size: .95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .2s;
         }
-        .quiz-pass-btn:hover { opacity: .85; }
+
+        .quiz-pass-btn:hover {
+            opacity: .85;
+        }
+
         .quiz-retry-btn {
-            background: transparent; color: var(--finance-muted);
-            border: 1px solid var(--finance-border); border-radius: 50px;
-            padding: .7rem 1.75rem; font-size: .85rem; cursor: pointer;
-            margin-top: .75rem; font-family: 'Courier New', monospace;
-            transition: border-color .2s, color .2s; display: block; margin-left: auto; margin-right: auto;
+            background: transparent;
+            color: var(--finance-muted);
+            border: 1px solid var(--finance-border);
+            border-radius: 50px;
+            padding: .7rem 1.75rem;
+            font-size: .85rem;
+            cursor: pointer;
+            margin-top: .75rem;
+            font-family: 'Courier New', monospace;
+            transition: border-color .2s, color .2s;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .quiz-retry-btn:hover { border-color: var(--finance-muted); color: #fff; }
+
+        .quiz-retry-btn:hover {
+            border-color: var(--finance-muted);
+            color: #fff;
+        }
 
         /* ── CONFIRM MODAL ── */
         #confirm-overlay {
@@ -973,7 +1140,7 @@
     <div id="pw-screen">
         <div class="pw-inner">
             <div class="pw-lock">🔐</div>
-            <div class="pw-title">LOVE-LCR ETF</div>
+            <div class="pw-title">신규 상장 ETF 분석 리포트</div>
             <div class="pw-subtitle">접근 권한을 확인합니다</div>
             <div class="pw-hint">생년월일 6자리를 입력하세요</div>
             <div class="pw-dots" id="pw-dots">
@@ -993,7 +1160,7 @@
     <div id="loading-screen">
         <div class="loading-inner">
             <div class="loading-logo">📈</div>
-            <div class="loading-title">LOVE-LCR ETF</div>
+            <div class="loading-title">백년해로 ETF</div>
             <div class="loading-subtitle">특별 분석 리포트 생성 중...</div>
             <div class="progress-track">
                 <div class="progress-fill" id="prog-fill"></div>
@@ -1011,8 +1178,8 @@
             <div class="etf-container">
                 <div class="etf-header">
                     <div class="etf-badge">KRX · 국내주식형 · 특별종목</div>
-                    <h1 class="etf-name">LOVE 이채린 ETF</h1>
-                    <div class="etf-code">LOVE-LCR &nbsp;·&nbsp; 설정일 2022.06.06</div>
+                    <h1 class="etf-name">백년해로 ETF</h1>
+                    <div class="etf-code">상장일 2022.06.06</div>
                     <div class="etf-price-row">
                         <div class="etf-price">∞원</div>
                         <div class="etf-return">+∞% ▲</div>
@@ -1059,10 +1226,10 @@
                     </div>
                     <div class="metric-card">
                         <div class="metric-label">주요 구성종목</div>
-                        <div class="metric-value">이채린 (100%)</div>
+                        <div class="metric-value">리니공주 (100%)</div>
                     </div>
                     <div class="metric-card">
-                        <div class="metric-label">보조개 출현 시</div>
+                        <div class="metric-label">인디언 보조개 출현 시</div>
                         <div class="metric-value green">급등 가능</div>
                     </div>
                     <div class="metric-card">
@@ -1079,9 +1246,9 @@
                 <div class="holiday-note">
                     <div class="holiday-note-title">⚠ 특이사항 — 국경일 연관성 분석</div>
                     <ul class="holiday-note-list">
-                        <li>🗓 설정일 <span>2022년 6월 6일</span> — 현충일 (나라도 기억함)</li>
-                        <li>🗓 사귄 날 <span>2022년 6월 11일</span> — 그냥 평일 (긴장 좀 풀렸나)</li>
-                        <li>🗓 결혼 예정일 <span>2026년 8월 15일</span> — 광복절 (드디어 완전히 자유로워짐)</li>
+                        <li>🗓 첫 만남 <span>2022년 6월 6일</span> — 현충일 (전생에 나라를 구했나봄)</li>
+                        <li>🗓 연애 시작 <span>2022년 6월 11일</span> — 그냥 평일 (초고속 진행 ㄷㄷ)</li>
+                        <li>🗓 결혼 예정일 <span>2026년 8월 15일</span> — 광복절 (드디어 결실을 맺다!!)</li>
                     </ul>
                     <div class="holiday-note-conclusion">→ 본 ETF는 국경일과 특별한 연관성을 보유한 희귀 종목입니다.</div>
                 </div>
@@ -1107,7 +1274,7 @@
                     </tr>
                     <tr>
                         <td>상대방 잔소리 빈도</td>
-                        <td class="white">높음 (수익률에 무관)</td>
+                        <td class="white">낮음 (수익률에 무관)</td>
                     </tr>
                     <tr>
                         <td>운용역 도주 가능성</td>
@@ -1128,17 +1295,19 @@
         <!-- QUIZ -->
         <section class="quiz-section" id="quiz-section">
             <div class="quiz-wrap">
-                <div class="quiz-header-label">결혼 적합성 검사 — LOVE-LCR ETF</div>
+                <div class="quiz-header-label">결혼 적합성 검사 — 백년해로 ETF</div>
                 <div class="quiz-sub-label">⚠ 60점 이상이어야 다음 단계로 진행할 수 있습니다</div>
 
                 <div class="quiz-prog-wrap">
                     <div class="quiz-score-badge" id="qz-score">0점</div>
-                    <div class="quiz-prog-track"><div class="quiz-prog-fill" id="qz-prog"></div></div>
+                    <div class="quiz-prog-track">
+                        <div class="quiz-prog-fill" id="qz-prog"></div>
+                    </div>
                     <div class="quiz-prog-label" id="qz-label">1 / 10</div>
                 </div>
 
                 <div id="qz-q-area">
-                    <div class="quiz-qnum"  id="qz-qnum"></div>
+                    <div class="quiz-qnum" id="qz-qnum"></div>
                     <div class="quiz-qtext" id="qz-qtext"></div>
                     <div class="quiz-choices" id="qz-choices"></div>
                     <div class="quiz-feedback" id="qz-feedback"></div>
@@ -1146,9 +1315,9 @@
 
                 <div id="qz-result" class="quiz-result" style="display:none">
                     <div class="quiz-res-circle" id="qz-res-circle"></div>
-                    <div class="quiz-res-msg"    id="qz-res-msg"></div>
-                    <div class="quiz-res-sub"    id="qz-res-sub"></div>
-                    <button class="quiz-pass-btn"  id="qz-pass-btn"  style="display:none">다음으로 넘어가기 →</button>
+                    <div class="quiz-res-msg" id="qz-res-msg"></div>
+                    <div class="quiz-res-sub" id="qz-res-sub"></div>
+                    <button class="quiz-pass-btn" id="qz-pass-btn" style="display:none">다음으로 넘어가기 →</button>
                     <button class="quiz-retry-btn" id="qz-retry-btn" style="display:none">다시 도전하기</button>
                 </div>
             </div>
@@ -1157,171 +1326,184 @@
         <!-- 퀴즈 통과 후 공개 -->
         <div id="after-quiz" style="display:none">
 
-        <!-- TRANSITION -->
-        <section class="transition-section">
-            <div class="transition-inner" id="transition-inner">
-                <p class="t-line1">사실, 이건 장난이고요.</p>
-                <p class="t-line2">진짜 하고 싶은 말이 있어.</p>
-            </div>
-        </section>
-
-        <!-- TIMELINE -->
-        <section class="timeline-section">
-            <div class="timeline-container">
-                <h2 class="timeline-heading" id="tl-heading">우리가 함께한 시간들</h2>
-                <div class="timeline">
-
-                    <div class="tl-item" data-delay="0">
-                        <div class="tl-dot special"></div>
-                        <div class="tl-date">2022년 6월 6일 · 현충일</div>
-                        <div class="tl-event">처음 만난 날</div>
-                        <div class="tl-photo">
-                            <!-- 사진 교체 시: <img th:src="@{/images/proposal/photo_01.jpg}" alt=""> -->
-                            <div class="photo-ph">
-                                <div class="ph-icon">📸</div>
-                                <div class="ph-num">PHOTO 01</div>
-                            </div>
-                        </div>
-                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                    </div>
-
-                    <div class="tl-item" data-delay="100">
-                        <div class="tl-dot special"></div>
-                        <div class="tl-date">2022년 6월 11일</div>
-                        <div class="tl-event">사귄 날</div>
-                        <div class="tl-photo">
-                            <div class="photo-ph">
-                                <div class="ph-icon">📸</div>
-                                <div class="ph-num">PHOTO 02</div>
-                            </div>
-                        </div>
-                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                    </div>
-
-                    <div class="tl-item" data-delay="0">
-                        <div class="tl-dot"></div>
-                        <div class="tl-date">날짜를 입력해주세요</div>
-                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                        <div class="tl-photo">
-                            <div class="photo-ph">
-                                <div class="ph-icon">📸</div>
-                                <div class="ph-num">PHOTO 03</div>
-                            </div>
-                        </div>
-                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                    </div>
-
-                    <div class="tl-item" data-delay="0">
-                        <div class="tl-dot"></div>
-                        <div class="tl-date">날짜를 입력해주세요</div>
-                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                        <div class="tl-photo">
-                            <div class="photo-ph">
-                                <div class="ph-icon">📸</div>
-                                <div class="ph-num">PHOTO 04</div>
-                            </div>
-                        </div>
-                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                    </div>
-
-                    <div class="tl-item" data-delay="0">
-                        <div class="tl-dot"></div>
-                        <div class="tl-date">날짜를 입력해주세요</div>
-                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                        <div class="tl-photo">
-                            <div class="photo-ph">
-                                <div class="ph-icon">📸</div>
-                                <div class="ph-num">PHOTO 05</div>
-                            </div>
-                        </div>
-                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                    </div>
-
-                    <div class="tl-item" data-delay="0">
-                        <div class="tl-dot"></div>
-                        <div class="tl-date">날짜를 입력해주세요</div>
-                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                        <div class="tl-photo">
-                            <div class="photo-ph">
-                                <div class="ph-icon">📸</div>
-                                <div class="ph-num">PHOTO 06</div>
-                            </div>
-                        </div>
-                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                    </div>
-
-                    <div class="tl-item" data-delay="0">
-                        <div class="tl-dot"></div>
-                        <div class="tl-date">날짜를 입력해주세요</div>
-                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                        <div class="tl-photo">
-                            <div class="photo-ph">
-                                <div class="ph-icon">📸</div>
-                                <div class="ph-num">PHOTO 07</div>
-                            </div>
-                        </div>
-                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                    </div>
-
-                    <div class="tl-item" data-delay="0">
-                        <div class="tl-dot"></div>
-                        <div class="tl-date">날짜를 입력해주세요</div>
-                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                        <div class="tl-photo">
-                            <div class="photo-ph">
-                                <div class="ph-icon">📸</div>
-                                <div class="ph-num">PHOTO 08</div>
-                            </div>
-                        </div>
-                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                    </div>
-
-                    <div class="tl-item" data-delay="0">
-                        <div class="tl-dot"></div>
-                        <div class="tl-date">날짜를 입력해주세요</div>
-                        <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                        <div class="tl-photo">
-                            <div class="photo-ph">
-                                <div class="ph-icon">📸</div>
-                                <div class="ph-num">PHOTO 09</div>
-                            </div>
-                        </div>
-                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                    </div>
-
-                    <div class="tl-item" data-delay="0">
-                        <div class="tl-dot special"></div>
-                        <div class="tl-date">2026년 8월 15일 · 광복절</div>
-                        <div class="tl-event">결혼식 💍</div>
-                        <div class="tl-photo">
-                            <div class="photo-ph">
-                                <div class="ph-icon">📸</div>
-                                <div class="ph-num">PHOTO 10</div>
-                            </div>
-                        </div>
-                        <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                    </div>
-
+            <!-- TRANSITION -->
+            <section class="transition-section">
+                <div class="transition-inner" id="transition-inner">
+                    <p class="t-line1">이제 농담은 끝이야!!</p>
+                    <p class="t-line2">진짜 하고 싶은 말이 있어.</p>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- ENDING -->
-        <section class="ending-section">
-            <div class="ending-inner" id="ending-inner">
-                <span class="ending-heart" id="ending-heart">❤️</span>
-                <h2 class="ending-main">결혼해줘서 고마워,<br>이채린.</h2>
-                <p class="ending-sub">
-                    현충일에 만나서, 광복절에 결혼하는 우리.<br>
-                    앞으로도 잘 부탁해.
-                </p>
-                <div class="ending-btn">
-                    <button class="ending-btn-el" id="ending-btn" onclick="celebrate()">나도 고마워 💍</button>
-                    <button class="nope-btn" id="nope-btn">싫어</button>
+            <!-- TIMELINE -->
+            <section class="timeline-section">
+                <div class="timeline-container">
+                    <h2 class="timeline-heading" id="tl-heading">우리가 함께한 시간들</h2>
+                    <div class="timeline">
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot special"></div>
+                            <div class="tl-date">2022년 6월 6일 · 현충일</div>
+                            <div class="tl-event">처음 만난 날</div>
+                            <div class="tl-photo">
+                                <!-- 사진 교체 시: <img th:src="@{/images/proposal/photo_01.jpg}" alt=""> -->
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 01</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="100">
+                            <div class="tl-dot special"></div>
+                            <div class="tl-date">2022년 6월 11일</div>
+                            <div class="tl-event">사귄 날</div>
+                            <div class="tl-photo">
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 02</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <div class="tl-date">날짜를 입력해주세요</div>
+                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                            <div class="tl-photo">
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 03</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <div class="tl-date">날짜를 입력해주세요</div>
+                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                            <div class="tl-photo">
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 04</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <div class="tl-date">날짜를 입력해주세요</div>
+                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                            <div class="tl-photo">
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 05</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <div class="tl-date">날짜를 입력해주세요</div>
+                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                            <div class="tl-photo">
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 06</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <div class="tl-date">날짜를 입력해주세요</div>
+                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                            <div class="tl-photo">
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 07</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <div class="tl-date">날짜를 입력해주세요</div>
+                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                            <div class="tl-photo">
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 08</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <div class="tl-date">날짜를 입력해주세요</div>
+                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                            <div class="tl-photo">
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 09</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot special"></div>
+                            <div class="tl-date">2026년 8월 15일 · 광복절</div>
+                            <div class="tl-event">결혼식 💍</div>
+                            <div class="tl-photo">
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 10</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <div class="tl-date">날짜를 입력해주세요</div>
+                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
+                            <div class="tl-photo">
+                                <div class="photo-ph">
+                                    <div class="ph-icon">📸</div>
+                                    <div class="ph-num">PHOTO 09</div>
+                                </div>
+                            </div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                        </div>
+
+                    </div>
                 </div>
-                <p class="after-msg" id="after-msg">우리 행복하게 살자 🎊</p>
-            </div>
-        </section>
+            </section>
+
+            <!-- ENDING -->
+            <section class="ending-section">
+                <div class="ending-inner" id="ending-inner">
+                    <span class="ending-heart" id="ending-heart">❤️</span>
+                    <h2 class="ending-main">결혼해줘서 고마워,<br>리니야</h2>
+                    <p class="ending-sub">
+                        현충일에 만나서, 광복절에 결혼하는 우리.<br>
+                        앞으로도 잘 부탁해.
+                    </p>
+                    <div class="ending-btn">
+                        <button class="ending-btn-el" id="ending-btn" onclick="celebrate()">나도 고마워 💍</button>
+                        <button class="nope-btn" id="nope-btn">싫어!!</button>
+                    </div>
+                    <p class="after-msg" id="after-msg">우리 행복하게 살자 🎊</p>
+                </div>
+            </section>
 
         </div><!-- /after-quiz -->
     </div><!-- /main-content -->
@@ -1342,7 +1524,7 @@
     <script>
         /* ── LOADING ── */
         const LOGS = [
-            '[INFO]    LOVE-LCR ETF 데이터 로드 중...',
+            '[INFO]    백년해로 ETF 데이터 로드 중...',
             '[INFO]    감정 데이터베이스 연결 완료',
             '[INFO]    2022.06.06 초기 설정일 확인',
             '[WARN]    수익률 측정 불가 (∞ overflow)',
@@ -1457,44 +1639,64 @@
 
         /* ── QUIZ ── */
         const QUESTIONS = [
-            { q: '우리가 처음 만난 날은?',
-              choices: ['2022년 6월 4일', '2022년 6월 6일', '2022년 6월 8일', '2022년 6월 11일'], answer: 1 },
-            { q: '우리가 사귀기 시작한 날은?',
-              choices: ['2022년 6월 8일', '2022년 6월 9일', '2022년 6월 11일', '2022년 6월 15일'], answer: 2 },
-            { q: '이채린의 생일은?',
-              choices: ['3월 5일', '4월 5일', '5월 5일', '6월 5일'], answer: 2 },
-            { q: '결혼 예정일은?',
-              choices: ['2026년 7월 17일', '2026년 8월 12일', '2026년 8월 15일', '2026년 9월 9일'], answer: 2 },
-            { q: '처음 만난 날은 무슨 공휴일이었나요?',
-              choices: ['어버이날', '어린이날', '현충일', '광복절'], answer: 2 },
-            { q: '이채린의 생일과 같은 공휴일은?',
-              choices: ['삼일절', '어린이날', '현충일', '한글날'], answer: 1 },
-            { q: 'LOVE-LCR ETF의 총 수익률은?',
-              choices: ['+100%', '+999%', '+9,999%', '+∞%'], answer: 3 },
-            { q: 'LOVE-LCR ETF의 위험등급은?',
-              choices: ['5등급 (고위험)', '3등급 (보통)', '2등급 (저위험)', '1등급 (초저위험)'], answer: 3 },
-            { q: '처음 만난 날부터 사귀기까지 걸린 날은?',
-              choices: ['3일', '5일', '7일', '10일'], answer: 1 },
-            { q: '결혼 예정일은 무슨 공휴일인가요?',
-              choices: ['어린이날', '현충일', '광복절', '개천절'], answer: 2 },
+            {
+                q: '우리가 처음 만난 날은?',
+                choices: ['2022년 6월 4일', '2022년 6월 6일', '2022년 6월 8일', '2022년 6월 11일'], answer: 1
+            },
+            {
+                q: '우리가 사귀기 시작한 날은?',
+                choices: ['2022년 6월 8일', '2022년 6월 9일', '2022년 6월 11일', '2022년 6월 15일'], answer: 2
+            },
+            {
+                q: '리니공주의 생일은?',
+                choices: ['3월 5일', '4월 5일', '5월 5일', '6월 5일'], answer: 2
+            },
+            {
+                q: '결혼 예정일은?',
+                choices: ['2026년 7월 17일', '2026년 8월 12일', '2026년 8월 15일', '2026년 9월 9일'], answer: 2
+            },
+            {
+                q: '처음 만난 날은 무슨 공휴일이었나요?',
+                choices: ['어버이날', '어린이날', '현충일', '광복절'], answer: 2
+            },
+            {
+                q: '리니공주의 생일과 같은 공휴일은?',
+                choices: ['삼일절', '어린이날', '현충일', '한글날'], answer: 1
+            },
+            {
+                q: '백년해로 ETF의 총 수익률은?',
+                choices: ['+100%', '+999%', '+9,999%', '+∞%'], answer: 3
+            },
+            {
+                q: '백년해로 ETF의 위험등급은?',
+                choices: ['5등급 (고위험)', '3등급 (보통)', '2등급 (저위험)', '1등급 (초저위험)'], answer: 3
+            },
+            {
+                q: '처음 만난 날부터 사귀기까지 걸린 날은?',
+                choices: ['3일', '5일', '7일', '10일'], answer: 1
+            },
+            {
+                q: '결혼 예정일은 무슨 공휴일인가요?',
+                choices: ['어린이날', '현충일', '광복절', '개천절'], answer: 2
+            },
         ];
         const LABELS = ['A', 'B', 'C', 'D'];
         let qzStep = 0, qzScore = 0;
 
         const qzScoreEl = document.getElementById('qz-score');
-        const qzProg    = document.getElementById('qz-prog');
-        const qzLabel   = document.getElementById('qz-label');
-        const qzQArea   = document.getElementById('qz-q-area');
-        const qzResult  = document.getElementById('qz-result');
+        const qzProg = document.getElementById('qz-prog');
+        const qzLabel = document.getElementById('qz-label');
+        const qzQArea = document.getElementById('qz-q-area');
+        const qzResult = document.getElementById('qz-result');
         const qzPassBtn = document.getElementById('qz-pass-btn');
-        const qzRetryBtn= document.getElementById('qz-retry-btn');
+        const qzRetryBtn = document.getElementById('qz-retry-btn');
 
         function qzRender() {
             const q = QUESTIONS[qzStep];
-            document.getElementById('qz-qnum').textContent  = `Q${qzStep + 1}.`;
+            document.getElementById('qz-qnum').textContent = `Q${qzStep + 1}.`;
             document.getElementById('qz-qtext').textContent = q.q;
             document.getElementById('qz-feedback').textContent = '';
-            document.getElementById('qz-feedback').className   = 'quiz-feedback';
+            document.getElementById('qz-feedback').className = 'quiz-feedback';
 
             const choicesEl = document.getElementById('qz-choices');
             choicesEl.innerHTML = '';
@@ -1506,12 +1708,12 @@
                 choicesEl.appendChild(btn);
             });
 
-            qzProg.style.width  = (qzStep / QUESTIONS.length * 100) + '%';
+            qzProg.style.width = (qzStep / QUESTIONS.length * 100) + '%';
             qzLabel.textContent = `${qzStep + 1} / ${QUESTIONS.length}`;
         }
 
         function qzAnswer(chosen) {
-            const q    = QUESTIONS[qzStep];
+            const q = QUESTIONS[qzStep];
             const btns = document.querySelectorAll('.quiz-choice');
             btns.forEach(b => b.classList.add('disabled'));
 
@@ -1521,12 +1723,12 @@
                 qzScore += 10;
                 qzScoreEl.textContent = qzScore + '점';
                 fb.textContent = '✓ 정답!';
-                fb.className   = 'quiz-feedback ok';
+                fb.className = 'quiz-feedback ok';
             } else {
                 btns[chosen].classList.add('wrong');
                 btns[q.answer].classList.add('reveal');
                 fb.textContent = '✗ 오답';
-                fb.className   = 'quiz-feedback err';
+                fb.className = 'quiz-feedback err';
             }
 
             setTimeout(() => {
@@ -1537,13 +1739,13 @@
 
         function qzShowResult() {
             qzProg.style.width = '100%';
-            qzQArea.style.display  = 'none';
+            qzQArea.style.display = 'none';
             qzResult.style.display = 'block';
 
             const passed = qzScore >= 60;
             const circle = document.getElementById('qz-res-circle');
             circle.textContent = qzScore + '점';
-            circle.className   = 'quiz-res-circle ' + (passed ? 'pass' : 'fail');
+            circle.className = 'quiz-res-circle ' + (passed ? 'pass' : 'fail');
 
             document.getElementById('qz-res-msg').textContent = passed
                 ? '통과! 결혼 적합성 검사를 통과했습니다 🎉'
@@ -1552,23 +1754,24 @@
                 ? `정답 ${qzScore / 10}개 / 10개`
                 : `정답 ${qzScore / 10}개 / 10개 — ${60 - qzScore}점 부족`;
 
-            if (passed)  qzPassBtn.style.display  = 'inline-block';
-            else         qzRetryBtn.style.display = 'block';
+            if (passed) qzPassBtn.style.display = 'inline-block';
+            else qzRetryBtn.style.display = 'block';
         }
 
         qzPassBtn.addEventListener('click', () => {
             const afterQuiz = document.getElementById('after-quiz');
             afterQuiz.style.display = 'block';
             setTimeout(() => afterQuiz.scrollIntoView({ behavior: 'smooth' }), 50);
+            setTimeout(startNopeMobileMove, 200);
         });
 
         qzRetryBtn.addEventListener('click', () => {
             qzStep = 0; qzScore = 0;
             qzScoreEl.textContent = '0점';
-            qzProg.style.width     = '0%';
+            qzProg.style.width = '0%';
             qzResult.style.display = 'none';
-            qzQArea.style.display  = 'block';
-            qzPassBtn.style.display  = 'none';
+            qzQArea.style.display = 'block';
+            qzPassBtn.style.display = 'none';
             qzRetryBtn.style.display = 'none';
             qzRender();
         });
@@ -1584,9 +1787,10 @@
         const cbtnB = document.getElementById('cbtn-b');
 
         const THRESHOLD = 140;
-        const MARGIN    = 20;
+        const MARGIN = 20;
         let origLeft = null, origTop = null;
         let curTransX = 0, curTransY = 0;
+        let nopeMoveTimer = null;
 
         document.addEventListener('mousemove', (e) => {
             const r = nopeBtn.getBoundingClientRect(); // transform 포함 실제 위치
@@ -1596,32 +1800,32 @@
             if (origLeft === null) {
                 if (r.width === 0 || r.top > window.innerHeight || r.bottom < 0) return;
                 origLeft = r.left;
-                origTop  = r.top;
+                origTop = r.top;
             }
 
-            const btnCX = r.left + r.width  / 2;
-            const btnCY = r.top  + r.height / 2;
-            const dx    = btnCX - e.clientX;
-            const dy    = btnCY - e.clientY;
-            const dist  = Math.hypot(dx, dy);
+            const btnCX = r.left + r.width / 2;
+            const btnCY = r.top + r.height / 2;
+            const dx = btnCX - e.clientX;
+            const dy = btnCY - e.clientY;
+            const dist = Math.hypot(dx, dy);
 
             if (dist > THRESHOLD) return;
 
             // 가까울수록 더 강하게 밀려남
             const force = (1 - dist / THRESHOLD) * 85;
-            const len   = dist || 1;
+            const len = dist || 1;
             const w = r.width, h = r.height;
 
             let newCX = btnCX + (dx / len) * force;
             let newCY = btnCY + (dy / len) * force;
 
             // 모서리에 닿으면 벽을 따라 미끄러지게
-            const hitH = newCX - w / 2 < MARGIN || newCX + w / 2 > window.innerWidth  - MARGIN;
+            const hitH = newCX - w / 2 < MARGIN || newCX + w / 2 > window.innerWidth - MARGIN;
             const hitV = newCY - h / 2 < MARGIN || newCY + h / 2 > window.innerHeight - MARGIN;
             if (hitH) newCY += (Math.random() - 0.5) * 70;
             if (hitV) newCX += (Math.random() - 0.5) * 70;
 
-            newCX = Math.max(MARGIN + w / 2, Math.min(window.innerWidth  - w / 2 - MARGIN, newCX));
+            newCX = Math.max(MARGIN + w / 2, Math.min(window.innerWidth - w / 2 - MARGIN, newCX));
             newCY = Math.max(MARGIN + h / 2, Math.min(window.innerHeight - h / 2 - MARGIN, newCY));
 
             curTransX = newCX - w / 2 - origLeft;
@@ -1632,12 +1836,38 @@
 
         nopeBtn.addEventListener('touchstart', (e) => { e.preventDefault(); });
 
+        function startNopeMobileMove() {
+            if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) return;
+            if (nopeMoveTimer) return;
+
+            nopeBtn.style.transition = 'transform 0.5s ease';
+
+            function moveRandom() {
+                if (origLeft === null) {
+                    const r = nopeBtn.getBoundingClientRect();
+                    if (r.width === 0) return;
+                    origLeft = r.left;
+                    origTop = r.top;
+                }
+                const w = nopeBtn.offsetWidth || 100;
+                const h = nopeBtn.offsetHeight || 50;
+                const newX = MARGIN + Math.random() * Math.max(0, window.innerWidth - w - MARGIN * 2);
+                const newY = MARGIN + Math.random() * Math.max(0, window.innerHeight - h - MARGIN * 2);
+                curTransX = newX - origLeft;
+                curTransY = newY - origTop;
+                nopeBtn.style.transform = `translate(${curTransX}px, ${curTransY}px)`;
+            }
+
+            moveRandom();
+            nopeMoveTimer = setInterval(moveRandom, 900);
+        }
+
         /* ── CONFIRM DIALOGS ── */
         // aClass/bClass: 버튼 색상, aIsYes: 왼쪽 버튼이 YES 액션인지
         const DIALOGS = [
-            { msg: '정말로 싫어요?', aLabel: 'YES', bLabel: 'NO',  aIsYes: true,  aClass: 'cbtn-yes', bClass: 'cbtn-no'  },
-            { msg: '정말로?!?!',     aLabel: 'NO',  bLabel: 'YES', aIsYes: false, aClass: 'cbtn-no',  bClass: 'cbtn-yes' },
-            { msg: '...진짜...?',    aLabel: 'YES', bLabel: 'NO',  aIsYes: true,  aClass: 'cbtn-no',  bClass: 'cbtn-yes' },
+            { msg: '정말로 싫어요?', aLabel: 'YES', bLabel: 'NO', aIsYes: true, aClass: 'cbtn-yes', bClass: 'cbtn-no' },
+            { msg: '정말로?!?!', aLabel: 'NO', bLabel: 'YES', aIsYes: false, aClass: 'cbtn-no', bClass: 'cbtn-yes' },
+            { msg: '...진짜...?', aLabel: 'YES', bLabel: 'NO', aIsYes: true, aClass: 'cbtn-no', bClass: 'cbtn-yes' },
         ];
         let step = 0;
 

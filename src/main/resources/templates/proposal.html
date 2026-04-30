@@ -1492,16 +1492,18 @@
             <section class="ending-section">
                 <div class="ending-inner" id="ending-inner">
                     <span class="ending-heart" id="ending-heart">❤️</span>
-                    <h2 class="ending-main">결혼해줘서 고마워,<br>리니야</h2>
+                    <h2 class="ending-main">너무 늦었지만...<br>나랑 결혼해줄래?</h2>
                     <p class="ending-sub">
-                        현충일에 만나서, 광복절에 결혼하는 우리.<br>
-                        앞으로도 잘 부탁해.
+                        늘 내옆에 있어줘서 고마워.<br>
+                        앞으로도 지금처럼 서로 아껴주면서<br>
+                        오래오래 행복하게 잘살자.<br>
+                        사랑해!!!
                     </p>
                     <div class="ending-btn">
-                        <button class="ending-btn-el" id="ending-btn" onclick="celebrate()">나도 고마워 💍</button>
-                        <button class="nope-btn" id="nope-btn">싫어!!</button>
+                        <button class="ending-btn-el" id="ending-btn" onclick="celebrate()">좋아!! 💍</button>
+                        <button class="nope-btn" id="nope-btn">싫어.. 🙅</button>
                     </div>
-                    <p class="after-msg" id="after-msg">우리 행복하게 살자 🎊</p>
+                    <p class="after-msg" id="after-msg">우리 행복하게 살자!! 🎊</p>
                 </div>
             </section>
 
@@ -1843,18 +1845,26 @@
             nopeBtn.style.transition = 'transform 0.5s ease';
 
             function moveRandom() {
-                if (origLeft === null) {
-                    const r = nopeBtn.getBoundingClientRect();
-                    if (r.width === 0) return;
-                    origLeft = r.left;
-                    origTop = r.top;
-                }
+                const section = document.querySelector('.ending-section');
+                const sRect = section.getBoundingClientRect();
                 const w = nopeBtn.offsetWidth || 100;
                 const h = nopeBtn.offsetHeight || 50;
-                const newX = MARGIN + Math.random() * Math.max(0, window.innerWidth - w - MARGIN * 2);
-                const newY = MARGIN + Math.random() * Math.max(0, window.innerHeight - h - MARGIN * 2);
-                curTransX = newX - origLeft;
-                curTransY = newY - origTop;
+
+                const minX = sRect.left + MARGIN;
+                const maxX = sRect.right - w - MARGIN;
+                const minY = sRect.top + MARGIN;
+                const maxY = sRect.bottom - h - MARGIN;
+                if (maxX < minX || maxY < minY) return;
+
+                const newX = minX + Math.random() * (maxX - minX);
+                const newY = minY + Math.random() * (maxY - minY);
+
+                // 스크롤 변화를 반영해 현재 자연 위치를 역산
+                const r = nopeBtn.getBoundingClientRect();
+                const naturalLeft = r.left - curTransX;
+                const naturalTop = r.top - curTransY;
+                curTransX = newX - naturalLeft;
+                curTransY = newY - naturalTop;
                 nopeBtn.style.transform = `translate(${curTransX}px, ${curTransY}px)`;
             }
 

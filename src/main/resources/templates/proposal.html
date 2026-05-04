@@ -672,6 +672,17 @@
             font-style: italic;
         }
 
+        .tl-future-text {
+            text-align: center;
+            font-size: 1rem;
+            color: #a08060;
+            font-style: italic;
+            margin-top: 2rem;
+            padding: 1rem 1.5rem;
+            letter-spacing: 0.03em;
+            line-height: 1.8;
+        }
+
         /* ── ENDING ── */
         .ending-section {
             background: #130808;
@@ -1343,147 +1354,224 @@
 
                         <div class="tl-item" data-delay="0">
                             <div class="tl-dot special"></div>
-                            <div class="tl-date">2022년 6월 6일 · 현충일</div>
-                            <div class="tl-event">처음 만난 날</div>
+                            <!-- <div class="tl-date">2022년 6월 19일</div> -->
+                            <div class="tl-event">우리의 첫 사진</div>
                             <div class="tl-photo">
-                                <!-- 사진 교체 시: <img th:src="@{/images/proposal/photo_01.jpg}" alt=""> -->
+                                <img th:src="@{/images/proposal/photo_01.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"리니 친구들도 처음 만난 날!!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="100">
+                            <div class="tl-dot special"></div>
+                            <!-- <div class="tl-date">2022년 6월 11일</div> -->
+                            <div class="tl-event">첫 여행</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_02.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"이 날은 너무너무 설렜던 우리의 첫 여행!!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">강릉 여행</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_03.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"체대 오빠와 유교과 언니!!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">제주도 여행</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_04.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"비행기 타고 제주도도 갔지용가리~!~!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">생일 파티</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_05.jpg}" alt="">
+                            </div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_06.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"서로의 생일도 축하해주공!!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">1주년</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_07.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"1주년 때는 라탄 바구니도 만들었지요~~!!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">글램핑</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_08.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"처음으로 글램핑도 갔었지ㅎㅎ"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">크리스마스</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_09.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"커플 잠옷 입고 크리스마스 파티도 했었지!!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">2주년</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_10.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"드디어 커플링 맞춘 날!!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">담양 여행</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_11.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"리니 더위 먹어서 메가커피로 대피한 날ㅋㅋㅋㅋㅋ"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">평창 여행</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_12.jpg}" alt="">
+                            </div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_13.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"썰매도 타고 커피도 엎지르고..^^;;"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">1000일</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_14.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"겸 엉아 생일 추카포카~!~!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">두번쨰 제주 여행</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_15.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"폭싹 속았수다?!?!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">3주년</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_16.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"자동차 극장도 재밌었지!!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">테르메덴</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_17.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"워터파크도 너무 재밌었는뎅~!~!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">경주 여행</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_18.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"첨성대 앞에서 찰칵!! 📸"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">누나네</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_19.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"덤벼랏!!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">두번째 글램핑</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_20.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"불멍의 추억ㅎㅎ"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
+                            <div class="tl-event">웨딩 촬영</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_21.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"우리 너무 예쁘자나아아아"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot special"></div>
+                            <!-- <div class="tl-date">2026년 8월 15일 · 광복절</div> -->
+                            <div class="tl-event">결혼식 💍</div>
+                            <div class="tl-photo">
+                                <img th:src="@{/images/proposal/photo_22.jpg}" alt="">
+                            </div>
+                            <div class="tl-caption">"저희 결혼해요~!~!"</div>
+                        </div>
+
+                        <div class="tl-item" data-delay="0">
+                            <div class="tl-dot"></div>
+                            <div class="tl-date">날짜를 입력해주세요.</div>
+                            <div class="tl-event">이벤트 제목을 입력해주세요.</div>
+                            <div class="tl-photo">
                                 <div class="photo-ph">
                                     <div class="ph-icon">📸</div>
                                     <div class="ph-num">PHOTO 01</div>
                                 </div>
                             </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
+                            <div class="tl-caption">"멘트를 여기에 입력해주세요."</div>
                         </div>
 
-                        <div class="tl-item" data-delay="100">
-                            <div class="tl-dot special"></div>
-                            <div class="tl-date">2022년 6월 11일</div>
-                            <div class="tl-event">사귄 날</div>
-                            <div class="tl-photo">
-                                <div class="photo-ph">
-                                    <div class="ph-icon">📸</div>
-                                    <div class="ph-num">PHOTO 02</div>
-                                </div>
-                            </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                        </div>
-
-                        <div class="tl-item" data-delay="0">
-                            <div class="tl-dot"></div>
-                            <div class="tl-date">날짜를 입력해주세요</div>
-                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                            <div class="tl-photo">
-                                <div class="photo-ph">
-                                    <div class="ph-icon">📸</div>
-                                    <div class="ph-num">PHOTO 03</div>
-                                </div>
-                            </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                        </div>
-
-                        <div class="tl-item" data-delay="0">
-                            <div class="tl-dot"></div>
-                            <div class="tl-date">날짜를 입력해주세요</div>
-                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                            <div class="tl-photo">
-                                <div class="photo-ph">
-                                    <div class="ph-icon">📸</div>
-                                    <div class="ph-num">PHOTO 04</div>
-                                </div>
-                            </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                        </div>
-
-                        <div class="tl-item" data-delay="0">
-                            <div class="tl-dot"></div>
-                            <div class="tl-date">날짜를 입력해주세요</div>
-                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                            <div class="tl-photo">
-                                <div class="photo-ph">
-                                    <div class="ph-icon">📸</div>
-                                    <div class="ph-num">PHOTO 05</div>
-                                </div>
-                            </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                        </div>
-
-                        <div class="tl-item" data-delay="0">
-                            <div class="tl-dot"></div>
-                            <div class="tl-date">날짜를 입력해주세요</div>
-                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                            <div class="tl-photo">
-                                <div class="photo-ph">
-                                    <div class="ph-icon">📸</div>
-                                    <div class="ph-num">PHOTO 06</div>
-                                </div>
-                            </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                        </div>
-
-                        <div class="tl-item" data-delay="0">
-                            <div class="tl-dot"></div>
-                            <div class="tl-date">날짜를 입력해주세요</div>
-                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                            <div class="tl-photo">
-                                <div class="photo-ph">
-                                    <div class="ph-icon">📸</div>
-                                    <div class="ph-num">PHOTO 07</div>
-                                </div>
-                            </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                        </div>
-
-                        <div class="tl-item" data-delay="0">
-                            <div class="tl-dot"></div>
-                            <div class="tl-date">날짜를 입력해주세요</div>
-                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                            <div class="tl-photo">
-                                <div class="photo-ph">
-                                    <div class="ph-icon">📸</div>
-                                    <div class="ph-num">PHOTO 08</div>
-                                </div>
-                            </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                        </div>
-
-                        <div class="tl-item" data-delay="0">
-                            <div class="tl-dot"></div>
-                            <div class="tl-date">날짜를 입력해주세요</div>
-                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                            <div class="tl-photo">
-                                <div class="photo-ph">
-                                    <div class="ph-icon">📸</div>
-                                    <div class="ph-num">PHOTO 09</div>
-                                </div>
-                            </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                        </div>
-
-                        <div class="tl-item" data-delay="0">
-                            <div class="tl-dot special"></div>
-                            <div class="tl-date">2026년 8월 15일 · 광복절</div>
-                            <div class="tl-event">결혼식 💍</div>
-                            <div class="tl-photo">
-                                <div class="photo-ph">
-                                    <div class="ph-icon">📸</div>
-                                    <div class="ph-num">PHOTO 10</div>
-                                </div>
-                            </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                        </div>
-
-                        <div class="tl-item" data-delay="0">
-                            <div class="tl-dot"></div>
-                            <div class="tl-date">날짜를 입력해주세요</div>
-                            <div class="tl-event">이벤트 제목을 입력해주세요</div>
-                            <div class="tl-photo">
-                                <div class="photo-ph">
-                                    <div class="ph-icon">📸</div>
-                                    <div class="ph-num">PHOTO 09</div>
-                                </div>
-                            </div>
-                            <div class="tl-caption">"멘트를 여기에 입력해주세요"</div>
-                        </div>
+                        <div class="tl-future-text">이렇게 보니까 우리의 추억들이 정말 많네. 앞으로 펼쳐질 둘만의 소중한 순간들도 한 장씩 여기에 붙여넣자.</div>
 
                     </div>
                 </div>

@@ -511,7 +511,7 @@
         }
 
         .t-line2 {
-            font-size: 2rem;
+            font-size: 1.5rem;
             color: #fff;
             font-family: 'Nanum Myeongjo', serif;
             font-weight: 700;
@@ -629,8 +629,8 @@
 
         .tl-photo {
             width: 100%;
-            max-width: 480px;
-            aspect-ratio: 4/3;
+            max-width: 560px;
+            min-height: 360px;
             background: #e8d5b5;
             border-radius: 8px;
             display: flex;
@@ -644,8 +644,8 @@
 
         .tl-photo img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
+            display: block;
         }
 
         .photo-ph {
@@ -1143,10 +1143,41 @@
             font-size: .8rem;
             line-height: 1.6;
         }
+
+        /* ── BGM ── */
+        #bgm-btn {
+            position: fixed;
+            bottom: 1.25rem;
+            right: 1.25rem;
+            z-index: 8000;
+            background: rgba(17, 24, 39, 0.85);
+            border: 1px solid var(--finance-border);
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            backdrop-filter: blur(4px);
+            transition: background .2s;
+        }
+
+        #bgm-btn:hover {
+            background: rgba(31, 41, 55, 0.95);
+        }
+
+        #bgm-btn.visible {
+            display: flex;
+        }
     </style>
 </head>
 
 <body>
+
+    <audio id="bgm" loop th:src="@{/audio/bgm.mp3}"></audio>
+    <button id="bgm-btn" title="BGM 켜기/끄기">🎵</button>
 
     <!-- ────────────────── PASSWORD ────────────────── -->
     <div id="pw-screen">
@@ -1274,7 +1305,7 @@
                 <table class="risk-table">
                     <tr>
                         <td>상대방이 No라고 할 리스크</td>
-                        <td class="green">0.000% (측정 불가)</td>
+                        <td class="green">0.000% (제발ㅠㅠ)</td>
                     </tr>
                     <tr>
                         <td>함께할 미래의 행복도</td>
@@ -1282,23 +1313,23 @@
                     </tr>
                     <tr>
                         <td>연간 예상 싸움 횟수</td>
-                        <td class="white">분석 거부 (투자설명서 참고 불가)</td>
+                        <td class="white">분석 거부</td>
                     </tr>
                     <tr>
                         <td>상대방 잔소리 빈도</td>
-                        <td class="white">낮음 (수익률에 무관)</td>
+                        <td class="white">낮음</td>
                     </tr>
                     <tr>
                         <td>운용역 도주 가능성</td>
-                        <td class="green">0% (이미 혼인신고 예정)</td>
+                        <td class="green">0%</td>
                     </tr>
                     <tr>
                         <td>장기 보유 추천 여부</td>
-                        <td class="green">강력 매수 (평생)</td>
+                        <td class="green">강력 추천</td>
                     </tr>
                     <tr>
                         <td>종합 투자의견</td>
-                        <td class="white">💍 BUY &nbsp;(목표가: 행복)</td>
+                        <td class="white">💍 무조건 매수</td>
                     </tr>
                 </table>
             </div>
@@ -1475,13 +1506,13 @@
                             <div class="tl-photo">
                                 <img th:src="@{/images/proposal/photo_14.jpg}" alt="">
                             </div>
-                            <div class="tl-caption">"겸 엉아 생일 추카포카~!~!"</div>
+                            <div class="tl-caption">"겸 내 생일 추카포카~!~!"</div>
                         </div>
 
                         <div class="tl-item" data-delay="0">
                             <div class="tl-dot"></div>
                             <!-- <div class="tl-date">날짜를 입력해주세요</div> -->
-                            <div class="tl-event">두번쨰 제주 여행</div>
+                            <div class="tl-event">두번째 제주도 여행</div>
                             <div class="tl-photo">
                                 <img th:src="@{/images/proposal/photo_15.jpg}" alt="">
                             </div>
@@ -1571,7 +1602,7 @@
                             <div class="tl-caption">"멘트를 여기에 입력해주세요."</div>
                         </div>
 
-                        <div class="tl-future-text">이렇게 보니까 우리의 추억들이 정말 많네. 앞으로 펼쳐질 둘만의 소중한 순간들도 한 장씩 여기에 붙여넣자.</div>
+                        <div class="tl-future-text">이렇게 보니까 우리의 추억들이 정말 많네.<br>앞으로 펼쳐질 둘만의 소중한 순간들도 한 장씩 여기에 붙여넣자.</div>
 
                     </div>
                 </div>
@@ -1583,7 +1614,7 @@
                     <span class="ending-heart" id="ending-heart">❤️</span>
                     <h2 class="ending-main">너무 늦었지만...<br>나랑 결혼해줄래?</h2>
                     <p class="ending-sub">
-                        늘 내옆에 있어줘서 고마워.<br>
+                        늘 내 옆에 있어줘서 고마워.<br>
                         앞으로도 지금처럼 서로 아껴주면서<br>
                         오래오래 행복하게 잘살자.<br>
                         사랑해!!!
@@ -1660,6 +1691,26 @@
             }
         }
 
+        /* ── BGM ── */
+        const bgm = document.getElementById('bgm');
+        const bgmBtn = document.getElementById('bgm-btn');
+        bgm.volume = 0.35;
+
+        function playBgm() {
+            bgm.play().catch(() => {});
+            bgmBtn.classList.add('visible');
+        }
+
+        bgmBtn.addEventListener('click', () => {
+            if (bgm.paused) {
+                bgm.play();
+                bgmBtn.textContent = '🎵';
+            } else {
+                bgm.pause();
+                bgmBtn.textContent = '🔇';
+            }
+        });
+
         /* ── PASSWORD ── */
         const CORRECT = '970505';
         const pwScreen = document.getElementById('pw-screen');
@@ -1686,6 +1737,7 @@
                     pwScreen.classList.add('fade-out');
                     setTimeout(() => {
                         pwScreen.style.display = 'none';
+                        playBgm();
                         startLoading();
                     }, 650);
                 } else {
@@ -1931,7 +1983,6 @@
         });
 
         function startNopeMobileMove() {
-            if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) return;
             if (nopeMoveTimer) return;
 
             nopeBtn.style.transition = 'transform 0.5s ease';
@@ -2006,7 +2057,7 @@
                     '<span class="confirm-error">' +
                     '⚠ [CRITICAL ERROR]<br>' +
                     'Unexpected response detected.<br>' +
-                    '<small>감정 처리 모듈이 응답을 거부했습니다.</small>' +
+                    '<small>잘못된 선택입니다. 다시 시도해주세요.</small>' +
                     '</span>';
                 confirmBtns.style.display = 'none';
                 setTimeout(() => closeConfirm(), 2200);
